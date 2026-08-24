@@ -2,21 +2,18 @@
 
 ## Next
 
-- Define the first target user and event type.
-- Write the first version of the core user journey.
-- Choose the app stack.
-- Create a minimal project scaffold.
+- Create the Flutter Android app shell with the four fixed navigation destinations.
+- Set up Firebase Authentication and hosted event data with treasurer/chairperson access.
+- Port the cashbook data model and write tests for target calculation, refunds, cancellations, replacements, sponsor edits, and audit entries.
+- Run usability testing with 2–3 community treasurers aged 50+ using the mobile shell.
 
 ## Questions
 
-- Is the first version for personal events, business events, weddings, conferences, or all-purpose planning?
-- Should the agent create plans only, or also take actions such as sending emails, creating calendar events, and updating shared docs?
-- Should users collaborate with guests, vendors, or teammates inside the app?
-- What is the first deliverable: prototype, MVP, landing page, or full app?
+- [x] Agree on the named portfolio/e-transcript report and low-privacy WhatsApp wording, with account numbers and credentials excluded.
+- [Proposed] Choose Flutter + Firebase as the first production direction.
 
 ## Later
 
-- Add integration requirements.
-- Define data model.
-- Define agent workflows.
-- Add deployment notes.
+- [x] Add local persistence and report handoff generation to the prototype.
+- [x] Add static deployment/run notes in `prototype/README.md`.
+- Prepare Play Store assets, privacy policy, Data safety declaration, signed AAB, internal test, and closed-test release after the mobile MVP is functional.
