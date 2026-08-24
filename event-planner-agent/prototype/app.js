@@ -19,6 +19,12 @@ const DEFAULT_STATE = {
     { id: 't-hotel', type: 'expense', label: 'Uang muka penginapan', amount: 1000000, category: 'Akomodasi' },
     { id: 't-banner', type: 'expense', label: 'Spanduk acara', amount: 50000, category: 'Lainnya' }
   ],
+  reminders: [
+    { id: 'r-bus-dp', title: 'Bayar DP bus', dueAt: '2026-08-28', note: 'Pastikan bukti pembayaran disimpan.', status: 'open' },
+    { id: 'r-collection-2', title: 'Tagih pembayaran peserta tahap 2', dueAt: '2026-09-05', note: 'Hubungi peserta yang masih sebagian atau belum bayar.', status: 'open' },
+    { id: 'r-headcount', title: 'Konfirmasi jumlah peserta', dueAt: '2026-09-10', note: 'Kapasitas acara tetap 18 orang.', status: 'done' }
+  ],
+  syncQueue: [],
   reportNote: 'Pak Budi batal dan digantikan Pak Roni. Kontribusi tambahan akan dibahas saat pertemuan berikutnya.'
 };
 
@@ -38,7 +44,11 @@ const currentBalance = () => state.event.openingBalance + state.event.sponsorCon
 function loadState() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    if (saved && saved.event && Array.isArray(saved.participants)) return saved;
+    if (saved && saved.event && Array.isArray(saved.participants)) {
+      saved.reminders = Array.isArray(saved.reminders) ? saved.reminders : structuredClone(DEFAULT_STATE.reminders);
+      saved.syncQueue = Array.isArray(saved.syncQueue) ? saved.syncQueue : [];
+      return saved;
+    }
   } catch (error) {
     console.warn('Data lokal tidak dapat dibaca, gunakan contoh data.', error);
   }
@@ -48,6 +58,54 @@ function loadState() {
 function saveState() {
   state.updatedAt = new Date().toISOString();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function queueLocalChange(entityType, entityId, payload) {
+  state.syncQueue = Array.isArray(state.syncQueue) ? state.syncQueue : [];
+  state.syncQueue.push({ id: 'q-' + Date.now(), entityType, entityId: entityId || null, payload, createdAt: new Date().toISOString(), syncStatus: 'queued' });
+}
+
+function renderConnectionStatus() {
+  const status = $('[data-connection-status]');
+  if (!status) return;
+  const offline = !navigator.onLine;
+  const queued = state.syncQueue?.length || 0;
+  status.classList.toggle('offline', offline);
+  status.querySelector('strong').textContent = offline
+    ? 'Offline · perubahan disimpan di perangkat ini'
+    : queued
+      ? 'Online · ' + queued + ' perubahan menunggu sinkronisasi'
+      : 'Online · tersimpan di perangkat ini';
+  status.querySelector('small').textContent = offline
+    ? 'Tetap catat pembayaran, pengeluaran, dan pengingat. Sinkronisasi dilakukan saat sinyal kembali.'
+    : queued
+      ? 'Prototype ini belum tersambung ke server; antrean ditampilkan agar alur offline mudah divalidasi.'
+      : 'Prototype ini menyimpan data lokal; aplikasi HP akan menyinkronkan ke server.';
+}
+
+function formatReminderDate(dateString) {
+  return new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(dateString + 'T09:00:00'));
+}
+
+function reminderTiming(dateString) {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const due = new Date(dateString + 'T09:00:00');
+  const days = Math.round((due - today) / 86400000);
+  if (days < 0) return Math.abs(days) + ' hari lalu';
+  if (days === 0) return 'hari ini';
+  if (days === 1) return 'besok';
+  return days + ' hari lagi';
+}
+
+function renderReminders() {
+  const list = $('[data-reminder-list]');
+  if (!list) return;
+  const reminders = (state.reminders || []).slice().sort((a, b) => a.dueAt.localeCompare(b.dueAt));
+  list.innerHTML = reminders.length ? reminders.map((reminder) => {
+    const done = reminder.status === 'done';
+    return '<div class="reminder-row' + (done ? ' done' : '') + '"><span class="reminder-icon">' + (done ? '✓' : '!') + '</span><div><strong>' + escapeHTML(reminder.title) + '</strong><small>' + formatReminderDate(reminder.dueAt) + ' · ' + reminderTiming(reminder.dueAt) + (reminder.note ? ' · ' + escapeHTML(reminder.note) : '') + '</small></div><button class="tag ' + (done ? 'green' : 'yellow') + ' reminder-action" data-toggle-reminder data-id="' + escapeHTML(reminder.id) + '">' + (done ? 'Buka lagi' : 'Tandai selesai') + '</button></div>';
+  }).join('') : '<div class="empty-state"><strong>Belum ada pengingat.</strong><p>Tambahkan tenggat pembayaran atau persiapan agar tidak perlu mengingat semuanya sendiri.</p></div>';
 }
 
 function showToast(message) {
@@ -80,15 +138,18 @@ function openModal(mode, participantId = null) {
     payment: ['Catat pembayaran', 'Catat nominal yang diterima. Status sebagian atau lunas terlihat dari jumlah dibanding target per orang.', 'Nama peserta', 'Contoh: Pak Darto'],
     additional: ['Kontribusi tambahan', 'Catat kebutuhan tambahan dengan catatan yang dapat dijelaskan di laporan.', 'Alasan kontribusi', 'Contoh: Tambahan konsumsi'],
     sponsor: ['Edit kontribusi sponsor', 'Perubahan sponsor mengubah target per orang. Perubahan akan dicatat di audit.', 'Catatan sponsor', 'Contoh: Sponsor yang sama menambah dukungan'],
-    opening: ['Edit saldo awal / carry-over', 'Perubahan saldo awal mengubah target per orang. Perubahan akan dicatat di audit.', 'Alasan perubahan', 'Contoh: Sisa kas kegiatan sebelumnya']
+    opening: ['Edit saldo awal / carry-over', 'Perubahan saldo awal mengubah target per orang. Perubahan akan dicatat di audit.', 'Alasan perubahan', 'Contoh: Sisa kas kegiatan sebelumnya'],
+    reminder: ['Tambah pengingat', 'Catat tenggat sederhana untuk pembayaran atau persiapan acara.', 'Judul pengingat', 'Contoh: Bayar DP bus']
   };
   const values = config[mode];
   $('#modal-title').textContent = values[0];
   $('#modal-copy').textContent = values[1];
-  $('#modal-input').previousElementSibling.textContent = values[2];
+  $('#modal-input-label').childNodes[0].textContent = values[2] + ' ';
   $('#modal-input').placeholder = values[3];
   $('#modal-input').value = '';
   $('#modal-amount').value = '';
+  $('#modal-date').value = '';
+  $('#modal-note').value = '';
   const participant = participantId ? state.participants.find((item) => item.id === participantId) : null;
   if (participant) {
     $('#modal-input').value = participant.name;
@@ -96,11 +157,17 @@ function openModal(mode, participantId = null) {
   }
   $('#modal-status').value = participant?.status || 'active';
   $('#modal-refund').value = participant?.refundPolicy || 'undecided';
-  $('#modal-refund').closest('label').style.display = mode === 'participant' || mode === 'editParticipant' ? 'block' : 'none';
-  $('#modal-status').closest('label').style.display = mode === 'participant' || mode === 'editParticipant' ? 'block' : 'none';
+  const participantMode = mode === 'participant' || mode === 'editParticipant';
+  const reminderMode = mode === 'reminder';
+  const amountMode = ['participant', 'editParticipant', 'expense', 'payment', 'additional', 'budget', 'sponsor', 'opening'].includes(mode);
+  $('#modal-refund-field').style.display = participantMode ? 'block' : 'none';
+  $('#modal-status-field').style.display = participantMode ? 'block' : 'none';
+  $('#modal-amount-label').style.display = amountMode ? 'block' : 'none';
+  $('#modal-date-field').style.display = reminderMode ? 'block' : 'none';
+  $('#modal-note-field').style.display = reminderMode ? 'block' : 'none';
   $('#modal-hint').textContent = ['budget', 'sponsor', 'opening'].includes(mode)
     ? 'Per orang saat ini: Rp ' + formatIDR(targetPerPerson()) + '. Rumus: (anggaran − sponsor − saldo awal) ÷ peserta aktif.'
-    : mode === 'editParticipant' ? 'Refund penuh atau sebagian akan membuat transaksi pengembalian dana yang terlihat di buku kas.' : 'Nominal dan status akan disimpan sebagai bagian dari riwayat acara.';
+    : mode === 'editParticipant' ? 'Refund penuh atau sebagian akan membuat transaksi pengembalian dana yang terlihat di buku kas.' : reminderMode ? 'Pengingat tersimpan lokal dan masuk antrean sinkronisasi.' : 'Nominal dan status akan disimpan sebagai bagian dari riwayat acara.';
   $('#modal').hidden = false;
   $('#modal-input').focus();
 }
@@ -141,6 +208,8 @@ function renderDerivedValues() {
     budgetLines[1].textContent = 'Rp ' + formatIDR(state.event.sponsorContribution);
     budgetLines[2].textContent = 'Rp ' + formatIDR(state.event.openingBalance);
   }
+  renderConnectionStatus();
+  renderReminders();
 }
 
 function saveModal() {
@@ -154,6 +223,11 @@ function saveModal() {
   if (['expense', 'payment', 'additional', 'budget', 'sponsor'].includes(modalMode) && amount <= 0) {
     showToast('Masukkan nominal lebih dari Rp 0.');
     $('#modal-amount').focus();
+    return;
+  }
+  if (modalMode === 'reminder' && !$('#modal-date').value) {
+    showToast('Pilih tanggal pengingat terlebih dahulu.');
+    $('#modal-date').focus();
     return;
   }
   if (modalMode === 'event') state.event.name = name;
@@ -215,6 +289,14 @@ function saveModal() {
     state.transactions.push({ id: 't-' + Date.now(), type: 'additional_contribution', label: name, amount });
     renderDerivedValues();
   }
+  if (modalMode === 'reminder') {
+    state.reminders = state.reminders || [];
+    const reminder = { id: 'r-' + Date.now(), title: name, dueAt: $('#modal-date').value, note: $('#modal-note').value.trim(), status: 'open' };
+    state.reminders.push(reminder);
+    queueLocalChange('reminder', reminder.id, reminder);
+    renderDerivedValues();
+  }
+  if (modalMode !== 'reminder') queueLocalChange(modalMode, modalParticipantId, { name, amount });
   saveState();
   closeModal();
   showToast('Tersimpan. Riwayat transaksi tetap aman.');
@@ -271,6 +353,16 @@ function resetDemo() {
   showToast('Contoh data Wisata Dieng dikembalikan.');
 }
 
+function toggleReminder(id) {
+  const reminder = (state.reminders || []).find((item) => item.id === id);
+  if (!reminder) return;
+  reminder.status = reminder.status === 'done' ? 'open' : 'done';
+  queueLocalChange('reminder', id, { status: reminder.status });
+  saveState();
+  renderDerivedValues();
+  showToast(reminder.status === 'done' ? 'Pengingat ditandai selesai.' : 'Pengingat dibuka kembali.');
+}
+
 document.addEventListener('click', (event) => {
   const screen = event.target.closest('[data-screen]')?.dataset.screen;
   if (screen) go(screen);
@@ -283,6 +375,8 @@ document.addEventListener('click', (event) => {
   if (event.target.closest('[data-add-transaction], [data-add-expense]')) openModal('expense');
   if (event.target.closest('[data-record-payment]')) openModal('payment');
   if (event.target.closest('[data-additional]')) openModal('additional');
+  if (event.target.closest('[data-add-reminder]')) openModal('reminder');
+  if (event.target.closest('[data-toggle-reminder]')) toggleReminder(event.target.closest('[data-toggle-reminder]').dataset.id);
   if (event.target.closest('[data-pdf]')) handlePDF();
   if (event.target.closest('[data-whatsapp]')) handleWhatsApp();
   if (event.target.closest('[data-help]')) showToast('Mulai dari Peserta, lalu catat pembayaran dan pengeluaran. Saldo diperbarui otomatis.');
@@ -294,6 +388,9 @@ document.addEventListener('click', (event) => {
 document.addEventListener('change', (event) => {
   if (event.target.matches('[data-report-role]')) renderDerivedValues();
 });
+
+window.addEventListener('online', renderConnectionStatus);
+window.addEventListener('offline', renderConnectionStatus);
 
 renderParticipants();
 renderDerivedValues();

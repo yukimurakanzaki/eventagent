@@ -80,6 +80,24 @@ Proposal: Use Flutter for the Android-first mobile app and Firebase for Authenti
 
 Reasoning: This provides a practical Play Store path, simple shared access for treasurer and chairperson, and room for a future iOS build without changing the product model. Security rules and audit writes must be designed before real financial data is used.
 
+### 2026-08-24: Make the production app offline-first
+
+Decision: The mobile app must keep the current event, participant, transaction, and reminder data usable without a network connection. Changes are saved locally and queued for synchronization when signal returns.
+
+Reasoning: The treasurer may travel through areas with weak signal. A network outage must not prevent recording a payment, expense, cancellation, or reminder.
+
+### 2026-08-24: Add local deadline reminders
+
+Decision: Add manual reminders for collection and planning deadlines, shown contextually in Ringkasan and delivered as device notifications. Examples include bus or accommodation down-payment deadlines, participant collection dates, final headcount confirmation, and report deadlines.
+
+Reasoning: These reminders are useful even without signal because the device can schedule them locally. They do not require booking integrations or an itinerary service.
+
+### 2026-08-24: Keep reminder scope simple
+
+Decision: Reminders are event tasks with title, due date/time, optional note, status, and creator. Shared updates sync when online; local notifications remain the primary guarantee for the device that created the reminder.
+
+Reasoning: This supports the validated use case without adding complex collaboration, calendar integrations, or automated planning.
+
 ## Pending
 
 - Validate the PDF/WhatsApp handoff wording and cancellation refund policy with treasurers.

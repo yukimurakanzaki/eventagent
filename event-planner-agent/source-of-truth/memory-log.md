@@ -45,3 +45,10 @@ Add future dated notes below this line.
 
 - Recommended next direction: Flutter Android-first app with Firebase Authentication and hosted data; final stack confirmation is still pending.
 - Next implementation should begin with the mobile shell, hosted event model, authentication, role-aware shared access, and accounting-rule tests before Play Store submission work.
+
+## 2026-08-24 Treasurer validation feedback
+
+- Treasurer liked the core prototype flow.
+- New validated production requirement: the app must remain usable without reliable internet signal while traveling.
+- New validated production requirement: the treasurer needs deadline reminders for down-payments, collection rounds, headcount confirmation, and report preparation.
+- Keep the fixed navigation unchanged; add reminders contextually under Ringkasan rather than introducing itinerary booking or calendar integrations.

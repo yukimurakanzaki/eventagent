@@ -24,12 +24,15 @@ GitHub repository: https://github.com/yukimurakanzaki/eventagent.git
 - Primary user: community treasurer, especially users aged 50+
 - Chairperson: provides the final budget and handles planning/accommodation.
 - Treasurer: manages participant payments, expenses, balance, and reporting.
+- Validated need: the treasurer must be able to work with weak or unavailable signal and receive reminders for collection and planning deadlines.
 
 ## MVP Scope: Community-trip cashbook
 
 Navigation is fixed as `Acara Saya → Ringkasan | Peserta | Uang | Laporan`.
 
 The prototype at `event-planner-agent/prototype` covers creating an event, adding/editing participants, final budget, sponsor contribution, opening balance/carry-over, visible automatic contribution calculation, participant payments (lunas, sebagian, belum bayar), expenses, current balance, cancellation/replacement without deleting history, additional contributions, report preview, and PDF/WhatsApp handoff states. It also includes contextual onboarding, tooltips, empty guidance, validation-oriented forms, and confirmation messages.
+
+The production mobile app must extend this with offline-first local storage, queued sync when signal returns, and local deadline reminders for collection and planning tasks. The fixed navigation remains `Acara Saya → Ringkasan | Peserta | Uang | Laporan`; reminders appear contextually in Ringkasan and the event detail rather than replacing the fixed navigation.
 
 It explicitly excludes AI, booking/accommodation integrations, maps, OCR, payment gateways, complex collaboration/permissions, and other unvalidated features.
 
@@ -38,3 +41,4 @@ It explicitly excludes AI, booking/accommodation integrations, maps, OCR, paymen
 - The exact PDF template and WhatsApp message wording still need validation with a treasurer.
 - The future production mobile stack and hosting provider are not selected yet.
 - The prototype uses representative data and local browser persistence only; production requires login, hosted storage, shared access, backups, and audit history.
+- The sync-conflict policy, reminder ownership, quiet hours, and notification wording still need validation.

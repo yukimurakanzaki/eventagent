@@ -28,6 +28,18 @@ Cancellation never deletes the participant or their transactions. A replacement 
 
 Sponsor and opening-balance edits create audit entries. A production audit entry should identify the treasurer who made the change and preserve the before/after values.
 
+## Reminder
+
+`id`, `eventId`, `title`, `dueAt`, `note`, `status` (`open`, `completed`, `snoozed`), `createdBy`, `assignedTo`, `linkedParticipantId`, `localNotificationId`, `syncStatus`, `createdAt`, `updatedAt`.
+
+Examples: `Bayar DP bus`, `Tagih pembayaran tahap 2`, `Konfirmasi jumlah peserta`, and `Bagikan laporan kas`.
+
+## Offline change queue
+
+`id`, `eventId`, `entityType`, `entityId`, `operation`, `payload`, `createdAt`, `retryCount`, `syncStatus`.
+
+The queue allows the app to save first and synchronize later. Payment and expense records should never be silently overwritten; conflicting edits require an audit entry and a visible review state.
+
 ## Prototype persistence
 
 The current static prototype stores the active event state in browser `localStorage` under `eventagent.cashbook.v1`. This is intentionally local-only and is not authentication, multi-user collaboration, or production storage.

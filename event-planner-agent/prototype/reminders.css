@@ -1,0 +1,148 @@
+.offline-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 14px;
+  margin: -12px 0 20px;
+  background: #eef7f4;
+  border: 1px solid #c9e3dc;
+  border-radius: 10px;
+  color: #255e5b;
+}
+
+.offline-status.offline {
+  background: #fff5dc;
+  border-color: #edd79b;
+  color: #765317;
+}
+
+.offline-status strong,
+.offline-status small {
+  display: block;
+}
+
+.offline-status small {
+  margin-top: 2px;
+  font-size: 12px;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: var(--green);
+  flex: none;
+}
+
+.offline .status-dot {
+  background: var(--yellow);
+}
+
+.reminders-card {
+  margin-bottom: 18px;
+}
+
+.reminder-list {
+  display: grid;
+  gap: 0;
+  margin-top: 10px;
+}
+
+.reminder-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid #edf0ef;
+}
+
+.reminder-row > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.reminder-row strong,
+.reminder-row small {
+  display: block;
+}
+
+.reminder-row small {
+  margin-top: 3px;
+  font-size: 13px;
+}
+
+.reminder-row.done strong {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.reminder-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--yellow-bg);
+  color: var(--yellow);
+  font-weight: 800;
+  flex: none;
+}
+
+.reminder-row.done .reminder-icon {
+  background: var(--green-bg);
+  color: var(--green);
+}
+
+.reminder-action {
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.reminder-note {
+  margin-top: 14px;
+}
+
+.empty-state {
+  padding: 14px 0 4px;
+  color: var(--muted);
+}
+
+.empty-state p {
+  margin: 3px 0 0;
+}
+
+.modal textarea {
+  display: block;
+  width: 100%;
+  resize: vertical;
+  font: inherit;
+  border: 1px solid #b9cbca;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 6px;
+}
+
+@media (max-width: 680px) {
+  .offline-status {
+    margin: -8px 0 18px;
+  }
+
+  .reminders-card .card-heading {
+    display: block;
+  }
+
+  .reminders-card .button {
+    margin-top: 12px;
+  }
+
+  .reminder-row {
+    align-items: flex-start;
+  }
+
+  .reminder-action {
+    font-size: 11px;
+  }
+}
