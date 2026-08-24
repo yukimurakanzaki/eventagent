@@ -39,3 +39,29 @@ test('fixed capacity remains 18 even when a participant is cancelled', () => {
   assert.equal(model.participantTarget({ ...event, participantCapacity: 18 }), 750000);
   assert.equal(model.participantTarget({ ...event, participantCapacity: 18, activeParticipantCount: 17 }), 750000);
 });
+
+test('supports per-participant no, partial, and full refund choices', () => {
+  assert.equal(model.refundAmount('none', 300000, 300000), 0);
+  assert.equal(model.refundAmount('partial', 300000, 100000), 100000);
+  assert.equal(model.refundAmount('full', 300000, 100000), 300000);
+  assert.equal(model.refundAmount('undecided', 300000, 100000), 0);
+});
+
+test('refund history can be corrected without deleting the original transaction', () => {
+  const transactions = [
+    { type: 'refund', participantId: 'p-budi', amount: 300000 },
+    { type: 'refund_reversal', participantId: 'p-budi', amount: 200000 }
+  ];
+  assert.equal(model.refundTotalForParticipant(transactions, 'p-budi'), 100000);
+  assert.equal(model.expenseTotal(transactions), 100000);
+  assert.equal(transactions.length, 2);
+});
+
+test('cancelled and replacement participant payments remain separate income records', () => {
+  const transactions = [
+    { type: 'participant_payment', participantId: 'p-budi', amount: 300000 },
+    { type: 'participant_payment', participantId: 'p-roni', amount: 750000 }
+  ];
+  assert.equal(model.incomeTotal(transactions), 1050000);
+  assert.notEqual(transactions[0].participantId, transactions[1].participantId);
+});

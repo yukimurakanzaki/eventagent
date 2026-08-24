@@ -203,7 +203,9 @@ function renderParticipants() {
     const status = participant.status === 'cancelled' ? ['gray', 'Dibatalkan'] : ['green', 'Aktif'];
     const paymentLabel = participant.payment >= targetPerPerson() ? 'Lunas' : participant.payment > 0 ? 'Sebagian' : 'Belum bayar';
     const paymentClass = paymentLabel === 'Lunas' ? 'positive' : paymentLabel === 'Belum bayar' ? 'negative' : 'yellow-text';
-    return '<tr><td><strong>' + escapeHTML(participant.name) + '</strong><small>' + escapeHTML(participant.role || '—') + '</small></td><td><span class=\"tag ' + status[0] + '\">' + status[1] + '</span></td><td><strong>Rp ' + formatIDR(participant.payment) + '</strong><small class=\"' + paymentClass + '\">' + paymentLabel + (participant.status === 'cancelled' ? ' · riwayat tersimpan' : '') + '</small></td><td>' + (participant.payment ? '24 Agu 2026' : '—') + '</td><td><button class=\"icon-button\" data-edit-participant data-id=\"' + participant.id + '\" aria-label=\"Edit ' + escapeHTML(participant.name) + '\">✎</button></td></tr>';
+    const refundTotal = participant.status === 'cancelled' ? CashbookModel.refundTotalForParticipant(state.transactions, participant.id) : 0;
+    const refundNote = participant.status === 'cancelled' && refundTotal > 0 ? ' · refund Rp ' + formatIDR(refundTotal) : '';
+    return '<tr><td><strong>' + escapeHTML(participant.name) + '</strong><small>' + escapeHTML(participant.role || '—') + '</small></td><td><span class=\"tag ' + status[0] + '\">' + status[1] + '</span></td><td><strong>Rp ' + formatIDR(participant.payment) + '</strong><small class=\"' + paymentClass + '\">' + paymentLabel + (participant.status === 'cancelled' ? ' · riwayat tersimpan' : '') + refundNote + '</small></td><td>' + (participant.payment ? '24 Agu 2026' : '—') + '</td><td><button class=\"icon-button\" data-edit-participant data-id=\"' + participant.id + '\" aria-label=\"Edit ' + escapeHTML(participant.name) + '\">✎</button></td></tr>';
   }).join('');
 }
 
@@ -265,11 +267,16 @@ function saveModal() {
         $('#modal-amount').focus();
         return;
       }
-      if (participant.status === 'cancelled' && ['partial', 'full'].includes(participant.refundPolicy) && amount > 0) {
-        state.transactions.push({ id: 't-' + Date.now(), type: 'refund', participantId: participant.id, label: 'Pengembalian dana ' + participant.name, amount });
+      if (participant.status === 'cancelled') {
+        const requestedRefund = CashbookModel.refundAmount(participant.refundPolicy, participant.payment, amount);
+        const existingRefund = CashbookModel.refundTotalForParticipant(state.transactions, participant.id);
+        const adjustment = requestedRefund - existingRefund;
+        if (adjustment > 0) state.transactions.push({ id: 't-' + Date.now(), type: 'refund', participantId: participant.id, label: 'Pengembalian dana ' + participant.name, amount: adjustment });
+        if (adjustment < 0) state.transactions.push({ id: 't-' + Date.now(), type: 'refund_reversal', participantId: participant.id, label: 'Koreksi pengembalian dana ' + participant.name, amount: Math.abs(adjustment) });
       }
     }
     renderParticipants();
+    renderDerivedValues();
   }
   if (modalMode === 'budget') {
     if (!window.confirm('Simpan anggaran final baru dan hitung ulang target per orang?')) return;

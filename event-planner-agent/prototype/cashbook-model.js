@@ -3,7 +3,7 @@
   else root.CashbookModel = factory();
 }(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   const incomeTypes = ['participant_payment', 'sponsor', 'additional_contribution'];
-  const expenseTypes = ['expense', 'refund'];
+  const expenseTypes = ['expense', 'refund', 'refund_reversal'];
 
   function participantTarget(event) {
     const capacity = Math.max(1, Number(event.participantCapacity || event.participantTarget || 18));
@@ -19,7 +19,7 @@
   }
 
   function expenseTotal(transactions) {
-    return transactionTotal(transactions, expenseTypes);
+    return (transactions || []).filter((item) => expenseTypes.includes(item.type)).reduce((sum, item) => sum + (item.type === 'refund_reversal' ? -Number(item.amount || 0) : Number(item.amount || 0)), 0);
   }
 
   function currentBalance(event, transactions) {
@@ -36,5 +36,15 @@
     return !(transactions || []).some((item) => item.type === 'participant_payment');
   }
 
-  return { participantTarget, incomeTotal, expenseTotal, currentBalance, paymentStatus, canAddSponsor };
+  function refundAmount(policy, paidAmount, requestedAmount) {
+    if (policy === 'full') return Number(paidAmount || 0);
+    if (policy === 'partial') return Math.max(0, Number(requestedAmount || 0));
+    return 0;
+  }
+
+  function refundTotalForParticipant(transactions, participantId) {
+    return (transactions || []).filter((item) => item.participantId === participantId && ['refund', 'refund_reversal'].includes(item.type)).reduce((sum, item) => sum + (item.type === 'refund' ? Number(item.amount || 0) : -Number(item.amount || 0)), 0);
+  }
+
+  return { participantTarget, incomeTotal, expenseTotal, currentBalance, paymentStatus, canAddSponsor, refundAmount, refundTotalForParticipant };
 }));
