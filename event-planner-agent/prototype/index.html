@@ -4,6 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="Buku kas perjalanan Wisata Dieng" />
+    <meta name="theme-color" content="#17324d" />
+    <link rel="manifest" href="manifest.webmanifest" />
     <title>Buku Kas — Wisata Dieng</title>
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="reminders.css" />
@@ -63,6 +65,9 @@
     </div>
     <div class="modal-backdrop" id="modal" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><button class="modal-close" data-close>×</button><h2 id="modal-title">Tambah peserta</h2><p class="muted" id="modal-copy">Isi nama peserta. Data bisa diedit kapan saja tanpa menghapus riwayat transaksi.</p><label id="modal-input-label">Nama / judul<input id="modal-input" placeholder="Contoh: Ibu Rina" /></label><label id="modal-amount-label">Nominal (Rp)<input id="modal-amount" type="number" min="0" step="50000" placeholder="Contoh: 750000" /></label><label id="modal-date-field">Tanggal pengingat<input id="modal-date" type="date" /></label><label id="modal-note-field">Catatan tambahan<textarea id="modal-note" rows="3" placeholder="Contoh: Hubungi vendor setelah rapat"></textarea></label><label id="modal-status-field">Status keikutsertaan<select id="modal-status"><option value="active">Aktif</option><option value="cancelled">Dibatalkan</option><option value="replaced">Digantikan peserta lain</option></select></label><label id="modal-refund-field">Kebijakan pengembalian dana<select id="modal-refund"><option value="undecided">Belum diputuskan</option><option value="none">Tidak ada refund</option><option value="partial">Refund sebagian</option><option value="full">Refund penuh</option></select></label><p class="form-hint" id="modal-hint">Nominal dan status akan disimpan sebagai bagian dari riwayat acara.</p><div class="modal-actions"><button class="button secondary" data-close>Batal</button><button class="button primary" data-save>Simpan</button></div></div></div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script>
+      if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+    </script>
     <script src="app.js"></script>
   </body>
 </html>

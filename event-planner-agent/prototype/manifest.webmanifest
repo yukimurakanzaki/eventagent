@@ -1,0 +1,10 @@
+{
+  "name": "WargaKas — Buku Kas Perjalanan",
+  "short_name": "WargaKas",
+  "description": "Buku kas offline untuk perjalanan komunitas.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f7f5ef",
+  "theme_color": "#17324d",
+  "lang": "id"
+}
