@@ -15,6 +15,10 @@ const DEFAULT_STATE = {
   transactions: [
     { id: 't-opening', type: 'opening_balance', label: 'Saldo awal / carry-over', amount: 500000 },
     { id: 't-participant-total', type: 'participant_payment', label: 'Pembayaran peserta lain', amount: 9000000 },
+    { id: 't-sari', type: 'participant_payment', participantId: 'p-sari', label: 'Bu Sari', amount: 750000 },
+    { id: 't-lina', type: 'participant_payment', participantId: 'p-lina', label: 'Ibu Lina', amount: 750000 },
+    { id: 't-budi', type: 'participant_payment', participantId: 'p-budi', label: 'Pak Budi', amount: 300000 },
+    { id: 't-roni', type: 'participant_payment', participantId: 'p-roni', label: 'Pak Roni', amount: 300000 },
     { id: 't-bus', type: 'expense', label: 'Sewa bus pariwisata', amount: 4000000, category: 'Transportasi' },
     { id: 't-hotel', type: 'expense', label: 'Uang muka penginapan', amount: 1000000, category: 'Akomodasi' },
     { id: 't-banner', type: 'expense', label: 'Spanduk acara', amount: 50000, category: 'Lainnya' }
@@ -25,6 +29,7 @@ const DEFAULT_STATE = {
     { id: 'r-headcount', title: 'Konfirmasi jumlah peserta', dueAt: '2026-09-10', note: 'Kapasitas acara tetap 18 orang.', status: 'done' }
   ],
   syncQueue: [],
+  paymentModelVersion: 2,
   reportNote: 'Pak Budi batal dan digantikan Pak Roni. Kontribusi tambahan akan dibahas saat pertemuan berikutnya.'
 };
 
@@ -36,10 +41,10 @@ const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 const formatIDR = (value) => new Intl.NumberFormat('id-ID').format(Math.max(0, Number(value) || 0));
 const activeCount = () => Math.max(1, state.event.participantCapacity || state.event.participantTarget || 18);
 const participantNeed = () => state.event.finalBudget - state.event.sponsorContribution - state.event.openingBalance;
-const targetPerPerson = () => Math.round(participantNeed() / activeCount());
-const expensesTotal = () => state.transactions.filter((item) => ['expense', 'refund'].includes(item.type)).reduce((sum, item) => sum + Number(item.amount || 0), 0);
-const paymentsTotal = () => state.transactions.filter((item) => ['participant_payment', 'sponsor', 'additional_contribution'].includes(item.type)).reduce((sum, item) => sum + Number(item.amount || 0), 0) + state.participants.reduce((sum, item) => sum + Number(item.payment || 0), 0);
-const currentBalance = () => state.event.openingBalance + state.event.sponsorContribution + paymentsTotal() - expensesTotal();
+const targetPerPerson = () => CashbookModel.participantTarget(state.event);
+const expensesTotal = () => CashbookModel.expenseTotal(state.transactions);
+const paymentsTotal = () => CashbookModel.incomeTotal(state.transactions);
+const currentBalance = () => CashbookModel.currentBalance(state.event, state.transactions);
 
 function loadState() {
   try {
@@ -47,12 +52,24 @@ function loadState() {
     if (saved && saved.event && Array.isArray(saved.participants)) {
       saved.reminders = Array.isArray(saved.reminders) ? saved.reminders : structuredClone(DEFAULT_STATE.reminders);
       saved.syncQueue = Array.isArray(saved.syncQueue) ? saved.syncQueue : [];
+      migratePaymentTransactions(saved);
       return saved;
     }
   } catch (error) {
     console.warn('Data lokal tidak dapat dibaca, gunakan contoh data.', error);
   }
   return structuredClone(DEFAULT_STATE);
+}
+
+function migratePaymentTransactions(saved) {
+  if (saved.paymentModelVersion >= 2) return;
+  saved.transactions = Array.isArray(saved.transactions) ? saved.transactions : [];
+  saved.participants.forEach((participant) => {
+    const recorded = saved.transactions.filter((item) => item.type === 'participant_payment' && (item.participantId === participant.id || String(item.label || '').toLowerCase() === participant.name.toLowerCase())).reduce((sum, item) => sum + Number(item.amount || 0), 0);
+    const difference = Number(participant.payment || 0) - recorded;
+    if (difference > 0) saved.transactions.push({ id: 't-migrate-' + participant.id, type: 'participant_payment', participantId: participant.id, label: participant.name, amount: difference });
+  });
+  saved.paymentModelVersion = 2;
 }
 
 function saveState() {
@@ -232,7 +249,9 @@ function saveModal() {
   }
   if (modalMode === 'event') state.event.name = name;
   if (modalMode === 'participant') {
-    state.participants.push({ id: 'p-' + Date.now(), name, status: $('#modal-status').value, role: 'Peserta baru', payment: amount, refundPolicy: $('#modal-refund').value });
+    const participantId = 'p-' + Date.now();
+    state.participants.push({ id: participantId, name, status: $('#modal-status').value, role: 'Peserta baru', payment: amount, refundPolicy: $('#modal-refund').value });
+    if (amount > 0) state.transactions.push({ id: 't-' + Date.now(), type: 'participant_payment', participantId, label: name, amount });
     renderParticipants();
   }
   if (modalMode === 'editParticipant') {
@@ -280,9 +299,10 @@ function saveModal() {
     renderDerivedValues();
   }
   if (modalMode === 'payment') {
-    state.transactions.push({ id: 't-' + Date.now(), type: 'participant_payment', label: name, amount });
     const participant = state.participants.find((item) => item.name.toLowerCase() === name.toLowerCase());
+    state.transactions.push({ id: 't-' + Date.now(), type: 'participant_payment', participantId: participant?.id, label: name, amount });
     if (participant) participant.payment = Number(participant.payment || 0) + amount;
+    renderParticipants();
     renderDerivedValues();
   }
   if (modalMode === 'additional') {

@@ -4,7 +4,7 @@
 
 - Create the Flutter Android app shell with the four fixed navigation destinations.
 - Set up Firebase Authentication and hosted event data with treasurer/chairperson access.
-- Port the cashbook data model and write tests for target calculation, refunds, cancellations, replacements, sponsor edits, and audit entries.
+- [Prototype] Extract and test target, cash-balance, payment-state, fixed-capacity, and sponsor-lock rules in `cashbook-model.js`. Production mobile port still required.
 - Design the production offline-first sync queue and conflict handling for payments, expenses, participants, and reminders. The prototype now shows a local queued-change model.
 - [Prototype] Add a contextual Pengingat card under Ringkasan with local reminder state. Production device notifications remain part of the mobile shell.
 - Validate reminder wording and timing with the treasurer using real planning dates.

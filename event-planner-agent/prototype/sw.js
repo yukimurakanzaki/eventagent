@@ -1,10 +1,11 @@
-const CACHE_NAME = 'wargakas-prototype-v1';
+const CACHE_NAME = 'wargakas-prototype-v3';
 const APP_SHELL = [
   './',
   './index.html',
   './styles.css',
   './reminders.css',
-  './app.js',
+  './cashbook-model.js?v=4',
+  './app.js?v=4',
   './manifest.webmanifest'
 ];
 
