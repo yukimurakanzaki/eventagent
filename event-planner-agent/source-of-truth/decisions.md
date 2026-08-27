@@ -80,6 +80,24 @@ Proposal: Use Flutter for the Android-first mobile app and Firebase for Authenti
 
 Reasoning: This provides a practical Play Store path, simple shared access for treasurer and chairperson, and room for a future iOS build without changing the product model. Security rules and audit writes must be designed before real financial data is used.
 
+### 2026-08-25: Select Supabase for the first hosted mobile slice
+
+Decision: Use Supabase for the first hosted implementation because the user already has a Supabase project. Keep Flutter as the Android-first client. Supabase Auth provides email/password login; Postgres stores workspace membership, events, versioned cashbook state, and audit entries; Row Level Security enforces authenticated workspace membership.
+
+Reasoning: This uses an existing user-owned service and supports the required hosted database, shared access, and audit history without putting a service-role secret in the app. The first implementation keeps local JSON and the queue as the offline fallback. The treasurer grants chairperson access to an already registered email; live project verification remains follow-up work.
+
+### 2026-08-25: Keep shared access simple
+
+Decision: The treasurer can grant the `chairperson` role to an existing Supabase account by email from the mobile account controls. The server function checks that the caller is a treasurer in the same workspace; no invitation email service or complex permissions are added.
+
+Reasoning: This meets the validated shared-access need while keeping the first mobile MVP understandable for a 50+ treasurer and avoiding an unvalidated collaboration system.
+
+### 2026-08-25: Return email confirmation to the mobile app
+
+Decision: Use the explicit `io.wargakas.mobile://auth-callback/` redirect for email confirmation and register the same callback in the Android app and Supabase Auth allow-list. Keep the Supabase Site URL unchanged for now because the mobile signup call supplies `emailRedirectTo` directly.
+
+Reasoning: The previous default Site URL was `http://localhost:3000`, which sent confirmation links to a dead web endpoint. A native callback returns the user to Wargakas without adding a web authentication surface.
+
 ### 2026-08-24: Make the production app offline-first
 
 Decision: The mobile app must keep the current event, participant, transaction, and reminder data usable without a network connection. Changes are saved locally and queued for synchronization when signal returns.
@@ -97,6 +115,24 @@ Reasoning: These reminders are useful even without signal because the device can
 Decision: Reminders are event tasks with title, due date/time, optional note, status, and creator. Shared updates sync when online; local notifications remain the primary guarantee for the device that created the reminder.
 
 Reasoning: This supports the validated use case without adding complex collaboration, calendar integrations, or automated planning.
+
+### 2026-08-25: Start the mobile shell without locking the backend
+
+Decision: Create the first Android-first Flutter shell in `event-planner-agent/mobile` with the fixed Indonesian navigation and a static Wisata Dieng content slice. Keep the hosted-data and authentication implementation separate until the pending production stack decision is confirmed.
+
+Reasoning: The mobile direction is accepted, but the repository still records Firebase as a proposal while the user has also mentioned Supabase. A working shell lets us validate navigation and readability without silently making the backend decision.
+
+### 2026-08-25: Keep the first mobile slice local-first
+
+Decision: Store the current mobile snapshot as JSON in device-local preferences and append every participant, transaction, or reminder change to a pending sync queue. The queue can be acknowledged locally, but it does not claim to sync to a hosted backend yet.
+
+Reasoning: This makes weak-signal use real and testable now while avoiding a permanent Firebase or Supabase decision. Before production financial data is used, the local store should be replaced or backed by a structured database with encrypted storage, authenticated sync, retries, conflict rules, and server-side audit history.
+
+### 2026-08-25: Schedule deadline reminders on the device
+
+Decision: The mobile slice schedules future reminders as Android local notifications, restores pending reminders after app startup and device reboot, and cancels them when the treasurer marks them complete. The scenario uses Asia/Jakarta and inexact scheduling to avoid requiring exact-alarm access in the prototype.
+
+Reasoning: The treasurer needs deadlines to remain useful without signal. The exact production timezone behavior, quiet hours, and battery-optimization guidance remain open until tested on target phones.
 
 ## Pending
 

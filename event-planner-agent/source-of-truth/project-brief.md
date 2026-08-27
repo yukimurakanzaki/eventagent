@@ -39,6 +39,6 @@ It explicitly excludes AI, booking/accommodation integrations, maps, OCR, paymen
 ## Open Questions
 
 - The exact PDF template and WhatsApp message wording still need validation with a treasurer.
-- The future production mobile stack and hosting provider are not selected yet.
-- The prototype uses representative data and local browser persistence only; production requires login, hosted storage, shared access, backups, and audit history.
+- The first production mobile stack is Flutter Android-first with Supabase Auth and hosted Postgres. Project `yytzncyxyulwqsanejcg` is linked and the first migration is deployed; publishable credentials remain build-time configuration and are not committed.
+- The prototype remains representative-data/local-browser based; the mobile slice now has local storage, queued sync, and a deployed Supabase migration/client path. Production still requires backups, authenticated multi-device smoke tests, and release hardening.
 - The sync-conflict policy, reminder ownership, quiet hours, and notification wording still need validation.

@@ -44,7 +44,11 @@ The queue allows the app to save first and synchronize later. Payment and expens
 
 The current static prototype stores the active event state in browser `localStorage` under `eventagent.cashbook.v1`. This is intentionally local-only and is not authentication, multi-user collaboration, or production storage.
 
-If the treasurer changes phones, clears app/browser data, or loses the device before production sync exists, local-only data can be lost and the chairperson cannot see the latest copy. Production hosted storage, login, backups, and audit history are therefore required rather than optional conveniences.
+The Flutter mobile slice stores the same snapshot as device-local JSON and records mutations in the pending queue. When configured, Supabase Auth identifies the user and the hosted slice stores the snapshot in `cashbook_states`, links it to `events` and `workspace_members`, and records server-triggered changes in `audit_entries`. The `version` column and `sync_cashbook_state` RPC reject stale writes instead of silently overwriting another device's changes.
+
+The first hosted schema is intentionally a versioned state envelope so the offline mobile flow can be shared quickly. It does not replace the structured domain model above; normalized participant/transaction/reminder tables remain a production-hardening follow-up if reporting queries need them.
+
+If the treasurer changes phones, clears app/browser data, or loses the device before the hosted project is linked and synced, local-only data can still be lost. Supabase hosting, login, backups, and audit history are therefore required rather than optional conveniences.
 
 ## Provisional cancellation behavior
 
