@@ -10,6 +10,8 @@ The migration in `migrations/202608260001_cashbook_shared_state.sql` adds the fi
 - database-triggered audit entries for every cashbook-state write
 - treasurer-approved chairperson access for an existing Supabase account
 
+Migration `202609060001_mvp_pilot_sync.sql` hardens the pilot sync RPC. It validates configurable event fields, mirrors event data from the versioned snapshot into the relational event row, enforces the sponsor lock after participant payments begin, and returns the remote actor/time needed by explicit conflict resolution.
+
 This repository is linked to project `yytzncyxyulwqsanejcg` and the migration has been applied there. For a fresh checkout or another environment:
 
 ```bash

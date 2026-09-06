@@ -227,6 +227,10 @@ class SupabaseCashbookSyncAdapter implements CashbookSyncAdapter {
     if (data['status'] == 'conflict') {
       return SyncResult.conflict(
         version: version,
+        remoteUpdatedBy: data['updated_by'] as String?,
+        remoteUpdatedAt: data['updated_at'] == null
+            ? null
+            : DateTime.parse(data['updated_at'] as String),
         remoteSnapshot: CashbookSnapshot.fromJson(
           Map<String, dynamic>.from(data['snapshot'] as Map),
         ).copyWith(syncVersion: version),

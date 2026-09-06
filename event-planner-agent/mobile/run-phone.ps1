@@ -1,6 +1,7 @@
 param(
   [string]$DeviceId = '',
-  [switch]$BuildApk
+  [switch]$BuildApk,
+  [switch]$BuildPilotApk
 )
 
 $ErrorActionPreference = 'Stop'
@@ -20,14 +21,26 @@ foreach ($name in @('SUPABASE_URL', 'SUPABASE_PUBLISHABLE_KEY')) {
 if ($config.SUPABASE_PUBLISHABLE_KEY.StartsWith('sb_secret_')) {
   throw 'Use a publishable app key, never a Supabase secret key.'
 }
-$flutterArgs = if ($BuildApk) { @('build', 'apk', '--debug') } else { @('run') }
+if ($BuildApk -and $BuildPilotApk) {
+  throw 'Choose either -BuildApk or -BuildPilotApk.'
+}
+if ($BuildPilotApk -and -not (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'android/key.properties'))) {
+  throw 'Pilot signing is not configured. Run .\setup-pilot-signing.ps1 first.'
+}
+$flutterArgs = if ($BuildPilotApk) {
+  @('build', 'apk', '--release')
+} elseif ($BuildApk) {
+  @('build', 'apk', '--debug')
+} else {
+  @('run')
+}
 $flutterArgs += @(
   '--dart-define=WARGAKAS_APP_MODE=hosted',
   "--dart-define=SUPABASE_URL=$($config.SUPABASE_URL)",
   "--dart-define=SUPABASE_PUBLISHABLE_KEY=$($config.SUPABASE_PUBLISHABLE_KEY)"
 )
 
-if (-not $BuildApk -and -not [string]::IsNullOrWhiteSpace($DeviceId)) {
+if (-not $BuildApk -and -not $BuildPilotApk -and -not [string]::IsNullOrWhiteSpace($DeviceId)) {
   $flutterArgs += @('-d', $DeviceId)
 }
 

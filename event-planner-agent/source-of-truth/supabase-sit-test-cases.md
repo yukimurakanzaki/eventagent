@@ -9,8 +9,8 @@ This is a test document, not a replacement for the product brief. The product sc
 ## Scope
 
 - Flutter Android app using Supabase Auth and hosted Postgres.
-- Fixed scenario: Wisata Dieng, 12–14 September 2026, capacity 18.
-- Roles: treasurer and chairperson.
+- Prefilled rehearsal scenario: Wisata Dieng, 12–14 September 2026, capacity 18; the single event is configurable.
+- Roles: treasurer and chairperson; both edit cashbook content, while only the treasurer manages membership.
 - Shared event data, local-first changes, queued sync, conflict preservation, and audit history.
 - Email confirmation and the Android `io.wargakas.mobile://auth-callback/` return path.
 
@@ -274,6 +274,17 @@ Implementation plan: preserve Supabase's account privacy behavior, make every fo
 
 ## Shared data and accounting behavior
 
+#### SIT-DATA-000 — Both roles edit the single configurable event
+
+**Priority:** P0
+**Actors:** T1, C1
+
+1. As T1, edit the event name, dates, capacity, final budget, and opening balance; confirm the before/after summary.
+2. Verify the changes from C1, then make a second allowed correction as C1.
+3. After a participant payment exists, attempt to change sponsor name or contribution.
+
+**Expected result:** Both roles can synchronize allowed event edits, capacity cannot fall below active participants, sponsor fields are locked after payments begin, and each accepted correction has an audit entry and matching relational event values.
+
 #### SIT-DATA-001 — Treasurer records a payment and chairperson receives it
 
 **Priority:** P0  
@@ -348,6 +359,18 @@ Implementation plan: preserve Supabase's account privacy behavior, make every fo
 
 ## Offline, sync, and recovery
 
+#### SIT-REPORT-001 — PDF and WhatsApp handoff work offline
+
+**Priority:** P0
+**Actors:** T1, C1
+
+1. Disable the network after the event is loaded.
+2. Generate and share the PDF from T1; share the WhatsApp-ready text from C1.
+3. Compare event dates, participant/refund status, transaction detail, opening balance, income, expenses, ending balance, creator role, and generation time with the app preview.
+4. Enter an email, phone/account-like number, and credential-like value in a rehearsal transaction description and regenerate both outputs.
+
+**Expected result:** Both outputs work without network access, totals match the preview, Android's share sheet opens, PDF pages are readable and numbered, and sensitive patterns are redacted.
+
 #### SIT-SYNC-001 — Treasurer records data without signal
 
 **Priority:** P0  
@@ -401,11 +424,12 @@ Implementation plan: preserve Supabase's account privacy behavior, make every fo
 **Expected result**
 
 - The second sync does not silently overwrite the first device’s server state.
-- The app shows a clear conflict message.
-- The local conflicting change remains available for review or retry.
-- The conflict is logged as evidence for the unresolved conflict policy.
+- The app blocks further editing and shows summaries for the complete local and online versions.
+- Choosing online replaces local state only after confirmation; choosing local rebases it against the latest remote version and creates a new audit operation.
+- If another remote update lands during resolution, the app presents the newer conflict instead of overwriting it.
+- The resolution is logged with the actor, timestamp, and chosen operation.
 
-**Note:** The winning-change policy and user-facing resolution flow are intentionally still open questions. This case passes only if data loss is prevented and the conflict is visible.
+**Note:** This case passes only when both explicit choices preserve the selected version and no silent merge or overwrite occurs.
 
 #### SIT-SYNC-004 — New device recovers hosted data
 
@@ -491,6 +515,8 @@ The hosted two-account SIT is ready for sign-off when:
 
 | Case | Result | Evidence / issue ID | Tester | Date |
 |---|---|---|---|---|
+| SIT-DATA-000 | | | | |
+| SIT-REPORT-001 | | | | |
 | SIT-AUTH-001 | | | | |
 | SIT-AUTH-002 | | | | |
 | SIT-AUTH-003 | | | | |

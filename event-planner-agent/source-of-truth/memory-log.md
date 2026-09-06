@@ -130,3 +130,12 @@ Add future dated notes below this line.
 - Fixed recovery forms closing on token refresh/user update, the post-password-update loading loop, transient stream errors removing valid sessions, session-expiry guidance, duplicate workspace reloads, stale account-load responses, workspace timeout/retry, and the retry callback's asynchronous `setState` assertion.
 - Restricted deep-link parsing to `io.wargakas.mobile://auth-callback/`; real-SDK tests verify signup/resend/recovery pass the callback and independent PKCE challenges.
 - `flutter analyze` passed; all 66 tests passed; small-phone/large-text auth renders were inspected; the configured APK rebuilt, upgraded in MuMu, restored `merdekaid789@gmail.com`, and opened the hosted Wisata Dieng workspace. Live email delivery and link-driven confirmation/recovery remain manual; configure custom SMTP before external testing.
+
+## 2026-09-06 Controlled MVP pilot implementation
+
+- Secured the existing hosted authentication and SIT work in separate baseline commits before starting the pilot increment.
+- Added one-event editing with validation, before/after confirmation, sponsor locking after participant payments, offline queueing, and server audit payloads.
+- Added persisted whole-snapshot conflict resolution. Mutations stop until the user explicitly keeps the online version or submits the local version against the current server version.
+- Added local PDF generation and WhatsApp-ready native sharing from a shared report model, including participant/refund status, detailed transactions, page numbers, and privacy redaction.
+- Adopted `io.wargakas.mobile`, added ignored stable pilot signing configuration, a configured release APK workflow, and GitHub CI for analysis, tests, prototype checks, and a demo APK build.
+- Automated checks and release packaging can be completed locally, but real email delivery, two-account RLS/data sharing, two-device offline conflict behavior, and audit evidence remain gated by the manual P0 SIT.

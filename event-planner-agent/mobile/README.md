@@ -1,10 +1,12 @@
 # Wargakas mobile shell
 
-This is the Android-first Flutter app slice for the community-trip cashbook. It provides a large-touch-target Dieng flow for validating the fixed information architecture and stores the current event locally on the device:
+This is the Android-first Flutter app for the controlled community-trip cashbook pilot. It starts with the Dieng rehearsal data and supports one configurable event per workspace with the fixed information architecture:
 
 `Acara Saya → Ringkasan | Peserta | Uang | Laporan`
 
 Changes are written to a local JSON snapshot and recorded in a pending sync queue. Future reminders are scheduled as local Android notifications and restored after app startup or device reboot. When Supabase configuration is supplied, the app adds email/password login, shared event state, optimistic queue replay, and server-side audit writes. Hosted mode is the default; the offline demo must be enabled explicitly with `WARGAKAS_APP_MODE=demo` so a release/test build cannot silently bypass authentication.
+
+Both treasurer and chairperson can edit event and cashbook content. Only the treasurer can grant workspace access. If two devices submit different offline snapshots, editing stops until the user explicitly chooses the online snapshot or the device snapshot. Reports are generated locally as PDF or WhatsApp-ready text and shared through Android's native share sheet.
 
 The notification slice currently uses the fixed Indonesian timezone and inexact Android scheduling for this scenario. Production should derive the device timezone and validate battery-optimization behavior on target phones. The hosted slice still needs a linked Supabase project and live RLS/conflict testing; the treasurer-controlled chairperson access flow is implemented for an existing Supabase account.
 
@@ -80,3 +82,14 @@ The current debug APK is produced at `build/app/outputs/flutter-apk/app-debug.ap
 ```
 
 Always use the configured build command above for a hosted APK. A plain `flutter build apk --debug` omits the Supabase values and displays “Aplikasi belum dikonfigurasi untuk login.” Replace that APK with the configured build; hot reload cannot add missing compile-time settings to an installed APK.
+
+## Build the signed pilot APK
+
+Create the stable pilot key once. The keystore is stored under local application data and `android/key.properties` is ignored by Git:
+
+```powershell
+.\setup-pilot-signing.ps1
+.\run-phone.ps1 -BuildPilotApk
+```
+
+The configured release APK is written to `build/app/outputs/flutter-apk/app-release.apk`. Back up both the external keystore and ignored key properties securely; losing them prevents future in-place upgrades. The permanent application ID is `io.wargakas.mobile`. Existing builds using the old example ID require one intentional reinstall, then future pilot APKs can use `adb install -r`.

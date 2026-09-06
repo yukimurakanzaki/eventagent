@@ -1,9 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wargakas_mobile/cashbook_controller.dart';
+import 'package:wargakas_mobile/cashbook_models.dart';
+import 'package:wargakas_mobile/cashbook_sync.dart';
 import 'package:wargakas_mobile/main.dart';
+import 'package:wargakas_mobile/report_service.dart';
 import 'package:wargakas_mobile/supabase_app.dart';
 import 'package:wargakas_mobile/supabase_backend.dart';
+
+class RecordingReportGateway implements ReportShareGateway {
+  bool pdfCalled = false;
+  bool messageCalled = false;
+  bool shouldFail = false;
+
+  @override
+  Future<void> sharePdf(CashbookReport report) async {
+    pdfCalled = true;
+    if (shouldFail) throw StateError('share failed');
+  }
+
+  @override
+  Future<void> shareWhatsAppText(CashbookReport report) async {
+    messageCalled = true;
+    if (shouldFail) throw StateError('share failed');
+  }
+}
+
+class WidgetConflictAdapter implements CashbookSyncAdapter {
+  @override
+  Future<CashbookSnapshot?> load() async => null;
+
+  @override
+  Future<SyncResult> push({
+    required CashbookSnapshot snapshot,
+    required SyncOperation operation,
+  }) async {
+    return SyncResult.conflict(
+      version: 2,
+      remoteSnapshot: CashbookSnapshot.demo().copyWith(syncVersion: 2),
+    );
+  }
+}
 
 void main() {
   testWidgets('shows the fixed event navigation', (tester) async {
@@ -147,5 +184,73 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Perubahan belum tersinkron'), findsNothing);
     expect(signOutCalled, isFalse);
+  });
+
+  testWidgets('edits configurable event after showing before and after values', (
+    tester,
+  ) async {
+    final controller = CashbookController.forTesting();
+    await tester.pumpWidget(WargakasApp(controller: controller));
+
+    await tester.tap(find.byTooltip('Edit acara'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Nama acara'),
+      'Wisata Bandung',
+    );
+    await tester.tap(find.text('Tinjau perubahan'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Simpan perubahan acara?'), findsOneWidget);
+    expect(find.textContaining('Wisata Dieng -> Wisata Bandung'), findsOneWidget);
+    await tester.tap(find.text('Simpan'));
+    await tester.pumpAndSettle();
+
+    expect(controller.event.name, 'Wisata Bandung');
+    expect(find.text('Wisata Bandung'), findsOneWidget);
+  });
+
+  testWidgets('blocks edits and offers both conflict choices', (tester) async {
+    final controller = CashbookController.forTesting(
+      syncAdapter: WidgetConflictAdapter(),
+    );
+    await controller.addParticipant('Perubahan lokal');
+    await tester.pumpWidget(WargakasApp(controller: controller));
+
+    expect(find.text('Pilih versi data sebelum melanjutkan'), findsOneWidget);
+    expect(find.byTooltip('Selesaikan konflik sebelum mengedit acara'), findsOneWidget);
+    await tester.tap(find.text('Bandingkan'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Perangkat ini'), findsOneWidget);
+    expect(find.text('Data online'), findsOneWidget);
+    expect(find.text('Gunakan data online'), findsOneWidget);
+    expect(find.text('Gunakan perangkat ini'), findsOneWidget);
+  });
+
+  testWidgets('shares report through injected gateway and shows failures', (
+    tester,
+  ) async {
+    final gateway = RecordingReportGateway();
+    await tester.pumpWidget(
+      WargakasApp(
+        controller: CashbookController.forTesting(),
+        reportShareGateway: gateway,
+      ),
+    );
+
+    await tester.tap(find.text('Laporan'));
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(ListView), const Offset(0, -700));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Buat dan bagikan PDF'));
+    await tester.pumpAndSettle();
+    expect(gateway.pdfCalled, isTrue);
+
+    gateway.shouldFail = true;
+    await tester.tap(find.text('Bagikan pesan WhatsApp'));
+    await tester.pumpAndSettle();
+    expect(gateway.messageCalled, isTrue);
+    expect(find.text('Pesan belum dapat dibagikan. Coba lagi.'), findsOneWidget);
   });
 }

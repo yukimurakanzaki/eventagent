@@ -47,6 +47,33 @@ class RecordingSyncAdapter implements CashbookSyncAdapter {
   }
 }
 
+class ConflictThenSyncAdapter implements CashbookSyncAdapter {
+  ConflictThenSyncAdapter(this.remote);
+
+  final CashbookSnapshot remote;
+  var pushes = 0;
+
+  @override
+  Future<CashbookSnapshot?> load() async => null;
+
+  @override
+  Future<SyncResult> push({
+    required CashbookSnapshot snapshot,
+    required SyncOperation operation,
+  }) async {
+    pushes += 1;
+    if (pushes == 1) {
+      return SyncResult.conflict(
+        version: 4,
+        remoteSnapshot: remote.copyWith(syncVersion: 4),
+        remoteUpdatedBy: 'account-remote',
+        remoteUpdatedAt: DateTime(2026, 9, 6, 10),
+      );
+    }
+    return SyncResult.synced(version: 5);
+  }
+}
+
 void main() {
   test('keeps the Dieng contribution rule visible and fixed to capacity', () {
     final event = CashbookSnapshot.demo().event;
@@ -166,4 +193,84 @@ void main() {
       expect(controller.snapshot.syncVersion, 1);
     },
   );
+
+  test('validates configurable event fields and sponsor lock', () async {
+    final controller = CashbookController.forTesting();
+    final changedSponsor = controller.event.copyWith(
+      sponsorContribution: controller.event.sponsorContribution + 1,
+    );
+
+    expect(
+      controller.validateEventUpdate(changedSponsor),
+      'Sponsor dikunci setelah pembayaran peserta dimulai.',
+    );
+    expect(
+      controller.validateEventUpdate(
+        controller.event.copyWith(participantCapacity: 1),
+      ),
+      contains('peserta aktif'),
+    );
+
+    final updated = controller.event.copyWith(
+      name: 'Wisata Bandung',
+      finalBudget: 41000000,
+      openingBalance: 2500000,
+    );
+    expect(await controller.updateEvent(updated), isNull);
+    expect(controller.event.name, 'Wisata Bandung');
+    expect(controller.pendingOperations.single.entity, 'event');
+    expect(controller.pendingOperations.single.payload, contains('before'));
+    expect(controller.pendingOperations.single.payload, contains('after'));
+  });
+
+  test('persists conflict and can choose the online version', () async {
+    final remote = CashbookSnapshot.demo().copyWith(
+      event: CashbookSnapshot.demo().event.copyWith(name: 'Versi Online'),
+      syncVersion: 4,
+    );
+    final adapter = ConflictThenSyncAdapter(remote);
+    final controller = CashbookController.forTesting(syncAdapter: adapter);
+
+    await controller.addParticipant('Perubahan Lokal');
+
+    expect(controller.isReadOnly, isTrue);
+    expect(controller.syncConflict?.remoteUpdatedBy, 'account-remote');
+    final restored = CashbookSnapshot.fromJson(
+      jsonDecode(jsonEncode(controller.snapshot.toJson()))
+          as Map<String, dynamic>,
+    );
+    expect(restored.syncConflict, isNotNull);
+
+    final beforeBlockedEdit = controller.participants.length;
+    await controller.addParticipant('Tidak boleh masuk');
+    expect(controller.participants, hasLength(beforeBlockedEdit));
+
+    await controller.resolveConflictWithRemote();
+    expect(controller.isReadOnly, isFalse);
+    expect(controller.event.name, 'Versi Online');
+    expect(
+      controller.participants.any((item) => item.name == 'Perubahan Lokal'),
+      isFalse,
+    );
+  });
+
+  test('rebases an explicit local conflict choice and synchronizes it', () async {
+    final remote = CashbookSnapshot.demo().copyWith(syncVersion: 4);
+    final adapter = ConflictThenSyncAdapter(remote);
+    final controller = CashbookController.forTesting(syncAdapter: adapter);
+
+    await controller.addParticipant('Tetap Lokal');
+    expect(controller.isReadOnly, isTrue);
+
+    await controller.resolveConflictWithLocal();
+
+    expect(controller.isReadOnly, isFalse);
+    expect(adapter.pushes, 2);
+    expect(controller.snapshot.syncVersion, 5);
+    expect(controller.pendingOperations, isEmpty);
+    expect(
+      controller.participants.any((item) => item.name == 'Tetap Lokal'),
+      isTrue,
+    );
+  });
 }

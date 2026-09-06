@@ -148,7 +148,21 @@ Decision: Treasurer remains responsible for payments, expenses, refunds, partici
 
 Reasoning: The MuMu test exposed that a build without Dart-defined Supabase credentials silently opened the local shell, making it look as if authentication was missing. Explicit modes and a complete session gate make test results trustworthy and protect local financial data during account changes.
 
+### 2026-09-06: Define the controlled Android MVP pilot
+
+Decision: The pilot supports exactly one configurable event per workspace. Both the treasurer and chairperson may edit all event and cashbook content, while workspace membership management remains treasurer-only. This supersedes the 2026-08-27 content-permission split.
+
+Decision: Event corrections show before/after values and create an audit operation. Sponsor name and contribution remain locked after the first participant payment; capacity cannot be lower than the active participant count.
+
+Decision: Offline conflicts never merge silently. Editing stops until the user explicitly keeps the complete online version or rebases and submits the complete local version as a new audited operation.
+
+Decision: PDF and WhatsApp-ready reports are generated from the same local snapshot and use Android's native share sheet. Free-text report content redacts email addresses, phone/account-like numbers, and credential-like values.
+
+Decision: Distribute a release-signed APK outside the Play Store for the controlled pilot. Use realistic rehearsal data first; real trip data is allowed only after all P0 two-account SIT cases pass.
+
+Reasoning: This keeps the pilot narrow enough for one engineer while making financial edits explainable, conflict handling non-destructive, and handoff useful without a network connection.
+
 ## Pending
 
 - Validate the PDF/WhatsApp handoff wording and cancellation refund policy with treasurers.
-- Choose a production app platform, persistence model, and authentication approach after prototype review.
+- Validate reminder ownership, quiet hours, device timezone behavior, and notification wording with treasurers.

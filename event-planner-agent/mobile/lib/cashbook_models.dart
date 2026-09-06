@@ -287,6 +287,52 @@ class SyncOperation {
   }
 }
 
+class SyncConflict {
+  const SyncConflict({
+    required this.localSnapshot,
+    required this.remoteSnapshot,
+    required this.operation,
+    required this.remoteVersion,
+    required this.createdAt,
+    this.remoteUpdatedBy,
+    this.remoteUpdatedAt,
+  });
+
+  final Map<String, dynamic> localSnapshot;
+  final Map<String, dynamic> remoteSnapshot;
+  final SyncOperation operation;
+  final int remoteVersion;
+  final DateTime createdAt;
+  final String? remoteUpdatedBy;
+  final DateTime? remoteUpdatedAt;
+
+  Map<String, dynamic> toJson() => {
+    'localSnapshot': localSnapshot,
+    'remoteSnapshot': remoteSnapshot,
+    'operation': operation.toJson(),
+    'remoteVersion': remoteVersion,
+    'createdAt': createdAt.toIso8601String(),
+    'remoteUpdatedBy': remoteUpdatedBy,
+    'remoteUpdatedAt': remoteUpdatedAt?.toIso8601String(),
+  };
+
+  factory SyncConflict.fromJson(Map<String, dynamic> json) {
+    return SyncConflict(
+      localSnapshot: Map<String, dynamic>.from(json['localSnapshot'] as Map),
+      remoteSnapshot: Map<String, dynamic>.from(json['remoteSnapshot'] as Map),
+      operation: SyncOperation.fromJson(
+        Map<String, dynamic>.from(json['operation'] as Map),
+      ),
+      remoteVersion: (json['remoteVersion'] as num).toInt(),
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      remoteUpdatedBy: json['remoteUpdatedBy'] as String?,
+      remoteUpdatedAt: json['remoteUpdatedAt'] == null
+          ? null
+          : DateTime.parse(json['remoteUpdatedAt'] as String),
+    );
+  }
+}
+
 class CashbookSnapshot {
   const CashbookSnapshot({
     required this.event,
@@ -295,6 +341,7 @@ class CashbookSnapshot {
     required this.reminders,
     required this.pendingOperations,
     this.syncVersion = 0,
+    this.syncConflict,
   });
 
   final EventRecord event;
@@ -303,6 +350,7 @@ class CashbookSnapshot {
   final List<ReminderRecord> reminders;
   final List<SyncOperation> pendingOperations;
   final int syncVersion;
+  final SyncConflict? syncConflict;
 
   CashbookSnapshot copyWith({
     EventRecord? event,
@@ -311,6 +359,8 @@ class CashbookSnapshot {
     List<ReminderRecord>? reminders,
     List<SyncOperation>? pendingOperations,
     int? syncVersion,
+    SyncConflict? syncConflict,
+    bool clearSyncConflict = false,
   }) {
     return CashbookSnapshot(
       event: event ?? this.event,
@@ -319,6 +369,9 @@ class CashbookSnapshot {
       reminders: reminders ?? this.reminders,
       pendingOperations: pendingOperations ?? this.pendingOperations,
       syncVersion: syncVersion ?? this.syncVersion,
+      syncConflict: clearSyncConflict
+          ? null
+          : syncConflict ?? this.syncConflict,
     );
   }
 
@@ -331,6 +384,7 @@ class CashbookSnapshot {
         .map((item) => item.toJson())
         .toList(),
     'syncVersion': syncVersion,
+    if (syncConflict != null) 'syncConflict': syncConflict!.toJson(),
   };
 
   factory CashbookSnapshot.fromJson(Map<String, dynamic> json) {
@@ -365,6 +419,11 @@ class CashbookSnapshot {
           )
           .toList(),
       syncVersion: (json['syncVersion'] as num?)?.toInt() ?? 0,
+      syncConflict: json['syncConflict'] == null
+          ? null
+          : SyncConflict.fromJson(
+              Map<String, dynamic>.from(json['syncConflict'] as Map),
+            ),
     );
   }
 

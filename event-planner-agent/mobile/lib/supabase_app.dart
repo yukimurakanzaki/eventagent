@@ -206,7 +206,7 @@ class _SupabaseAppState extends State<SupabaseApp> {
           key: ValueKey(_session!.user.id),
           controller: snapshot.data!,
           onSignOut: widget.backend.signOut,
-          onInviteChairperson: _inviteChairperson,
+          onInviteChairperson: _role == 'treasurer' ? _inviteChairperson : null,
           accountEmail: widget.backend.user?.email,
           accountRole: _role,
         );
