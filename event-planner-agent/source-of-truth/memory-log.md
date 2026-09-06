@@ -69,7 +69,7 @@ Add future dated notes below this line.
 
 - Selected Supabase for the hosted implementation because the user already has a Supabase project; Flutter remains the Android-first client.
 - Added a migration with workspaces, treasurer/chairperson memberships, events, versioned cashbook state, RLS policies, an optimistic sync RPC, and a database-triggered audit table.
-- Added Flutter email/password auth, environment-based Supabase configuration, first-user Dieng workspace bootstrap, hosted state pull/push, conflict preservation, and local fallback when credentials are absent.
+- Added Flutter email/password auth, environment-based Supabase configuration, first-user Dieng workspace bootstrap, hosted state pull/push, and conflict preservation. Hosted mode is now the default; local demo mode requires an explicit build flag.
 - Project `yytzncyxyulwqsanejcg` is now linked through the authenticated Supabase CLI and migration `202608260001_cashbook_shared_state.sql` is deployed. `supabase migration list` matches local and remote history; linked schema lint passes. Authenticated multi-device/RLS smoke tests still need a test account flow.
 
 ## 2026-08-25 Chairperson access
@@ -101,3 +101,32 @@ Add future dated notes below this line.
 - Reproduced the Flutter `_dependents.isEmpty` assertion risk in the participant action flow: a bottom-sheet `BuildContext` was reused after the sheet had been popped.
 - Reworked the action sheet to return `edit` or `cancel`, then opened the next dialog from the still-active page context. Also removed nested `MaterialApp` replacement from the Supabase auth/loading shell so inherited widgets remain under one root app during state changes.
 - Added widget coverage for participant edit and cancellation, and verified the full Flutter suite, APK build, emulator install, and startup log.
+
+## 2026-08-27 Complete mobile auth journey
+
+- Implemented the explicit hosted auth gate, account creation, confirmation-pending/resend state, password recovery, expired-link messaging, session loading, session-error handling, visible account area, logout confirmation, and unsynced-change warning.
+- Scoped local snapshots and pending sync queues by authenticated user and workspace so a second account on the same device does not inherit the previous account's local data.
+- Localized the account role labels to `Bendahara` and `Ketua acara` while keeping the internal Supabase roles unchanged.
+- Added widget coverage for the hosted configuration boundary, expired-link guidance, account/logout flow, and unsynced logout warning. `flutter analyze`, 15 Flutter tests, hosted-path APK build, explicit demo APK build, and final debug APK build pass. Real email/Supabase two-account SIT on MuMu remains a manual follow-up.
+
+## 2026-09-05 Physical phone iteration workflow
+
+- Added `mobile/run-phone.ps1`, which reads the hosted Supabase values from the current PowerShell session and starts `flutter run` for a selected Android device.
+- The intended development loop is one initial debug install followed by Flutter hot reload (`r`) or hot restart (`R`) for Dart changes. A standalone APK can be upgraded in place with `adb install -r` without uninstalling and losing local test data.
+- The current machine has no authorized physical phone connected; ADB only reports an offline emulator, so physical-device auth and deep-link validation remain pending.
+
+## 2026-09-05 Missing hosted build configuration fixed
+
+- The reported configuration screen came from an APK without compile-time Supabase settings. Retrieved the linked project's publishable app key using the authenticated CLI and saved it in Git-ignored `mobile/supabase.local.json`; no secret/service-role key was embedded.
+- Extended `run-phone.ps1` to load local settings, allow environment overrides, force hosted mode, support `-BuildApk`, and run from the mobile directory regardless of the caller's location. Corrected the README's unconfigured APK command.
+- Verified Supabase Auth health returned HTTP 200, PowerShell syntax passed, Git ignores the local configuration, `git diff --check` passed, and the configured debug APK built successfully.
+- Reconnected the running MuMu instance at `127.0.0.1:7555`, upgraded the app with `adb install -r`, and launched it. Logs confirm Supabase initialization; Android UI hierarchy confirms `Masuk ke Wargakas`, login, recovery, and signup controls instead of the configuration screen. Screenshot capture was black, so visual rendering and actual account sign-in remain unverified. Physical-phone and two-account SIT remain pending.
+
+## 2026-09-06 Hosted authentication hardening
+
+- Audited login, registration, confirmation resend, forgot-password, new-password, session refresh/expiry, workspace loading, and account-switch behavior against current Supabase semantics.
+- Supabase deliberately obscures some duplicate-signup responses to prevent account enumeration. Wargakas now uses conditional wording instead of claiming that an account was created or an email was delivered, and directs existing users to login or recovery.
+- Added centralized email/new-password validation, password confirmation and visibility controls, safe code-based Indonesian errors, 30-second request timeouts, one-request guards, disabled inputs while pending, and a shared 60-second email cooldown.
+- Fixed recovery forms closing on token refresh/user update, the post-password-update loading loop, transient stream errors removing valid sessions, session-expiry guidance, duplicate workspace reloads, stale account-load responses, workspace timeout/retry, and the retry callback's asynchronous `setState` assertion.
+- Restricted deep-link parsing to `io.wargakas.mobile://auth-callback/`; real-SDK tests verify signup/resend/recovery pass the callback and independent PKCE challenges.
+- `flutter analyze` passed; all 66 tests passed; small-phone/large-text auth renders were inspected; the configured APK rebuilt, upgraded in MuMu, restored `merdekaid789@gmail.com`, and opened the hosted Wisata Dieng workspace. Live email delivery and link-driven confirmation/recovery remain manual; configure custom SMTP before external testing.

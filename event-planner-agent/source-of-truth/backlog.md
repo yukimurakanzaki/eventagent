@@ -6,6 +6,9 @@
 - [x] Set up Supabase Authentication and hosted event data with treasurer/chairperson access. Project `yytzncyxyulwqsanejcg` is linked and the migration is deployed; authenticated account/RLS smoke tests remain.
 - [x] Port the target, cash-balance, payment-state, fixed-capacity, sponsor-lock, refund, and replacement rules into the mobile model with tests.
 - Implement hosted sync transport, retry/conflict handling, and server-side audit writes for payments, expenses, participants, and reminders. Client optimistic replay, conflict preservation, migration, and audit trigger are added; authenticated multi-device verification remains.
+- [ ] Execute the two-account Supabase SIT in `source-of-truth/supabase-sit-test-cases.md`, including an optional non-member RLS check.
+- [ ] Finish live hosted authentication SIT on real inboxes/devices. Login/session restore and account area are verified on MuMu; registration, delivery, confirmation callback, recovery callback, and logout still require deliberate live execution without exposing passwords.
+- [ ] Configure and verify custom SMTP before inviting external testers. The app handles restricted delivery and rate limits safely, but Supabase's built-in test sender is not a production email service.
 - [x] Add a contextual Pengingat card under Ringkasan with local reminder state and Android local notification scheduling. Production timezone and battery-optimization behavior still need validation.
 - Validate reminder wording and timing with the treasurer using real planning dates.
 - Run usability testing with 2–3 community treasurers aged 50+ using the mobile shell.
