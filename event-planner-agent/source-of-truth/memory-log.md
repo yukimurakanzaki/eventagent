@@ -139,3 +139,8 @@ Add future dated notes below this line.
 - Added local PDF generation and WhatsApp-ready native sharing from a shared report model, including participant/refund status, detailed transactions, page numbers, and privacy redaction.
 - Adopted `io.wargakas.mobile`, added ignored stable pilot signing configuration, a configured release APK workflow, and GitHub CI for analysis, tests, prototype checks, and a demo APK build.
 - Automated checks and release packaging can be completed locally, but real email delivery, two-account RLS/data sharing, two-device offline conflict behavior, and audit evidence remain gated by the manual P0 SIT.
+
+## 2026-09-06 Participant-payment entry safety
+
+- MuMu testing exposed that the money-entry dialog silently defaulted to `Pengeluaran`. A user who entered an amount and note without deliberately changing the type would not increase the participant-payment total.
+- The dialog now requires an explicit transaction type, explains that `Pembayaran peserta` requires a selected participant, and the controller rejects participant payments/refunds that have no valid participant. Unit and widget tests cover the calculation and the missing-type guard.

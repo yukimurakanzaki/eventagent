@@ -992,7 +992,7 @@ Future<void> showTransactionDialog(
   BuildContext context,
   CashbookController controller,
 ) async {
-  var type = TransactionType.expense;
+  TransactionType? type;
   String? participantId;
   final amountController = TextEditingController();
   final descriptionController = TextEditingController();
@@ -1007,6 +1007,8 @@ Future<void> showTransactionDialog(
             children: [
               DropdownButtonFormField<TransactionType>(
                 initialValue: type,
+                hint: const Text('Pilih jenis transaksi'),
+                decoration: const InputDecoration(labelText: 'Jenis transaksi'),
                 items: const [
                   DropdownMenuItem(
                     value: TransactionType.expense,
@@ -1042,6 +1044,13 @@ Future<void> showTransactionDialog(
                       .toList(),
                   onChanged: (value) => setState(() => participantId = value),
                 ),
+              if (type == TransactionType.participantPayment)
+                const Padding(
+                  padding: EdgeInsets.only(top: 8),
+                  child: Text(
+                    'Pilih nama peserta agar nominal ini menambah total bayar peserta.',
+                  ),
+                ),
               TextField(
                 controller: amountController,
                 keyboardType: TextInputType.number,
@@ -1061,6 +1070,15 @@ Future<void> showTransactionDialog(
           ),
           FilledButton(
             onPressed: () async {
+              final selectedType = type;
+              if (selectedType == null) {
+                await showInfo(
+                  context,
+                  'Jenis transaksi belum dipilih',
+                  'Pilih Pembayaran peserta untuk menambah total bayar peserta, atau pilih jenis transaksi lain.',
+                );
+                return;
+              }
               final amount =
                   int.tryParse(
                     amountController.text
@@ -1076,8 +1094,8 @@ Future<void> showTransactionDialog(
                 );
                 return;
               }
-              if ((type == TransactionType.participantPayment ||
-                      type == TransactionType.refund) &&
+              if ((selectedType == TransactionType.participantPayment ||
+                      selectedType == TransactionType.refund) &&
                   participantId == null) {
                 await showInfo(
                   context,
@@ -1087,7 +1105,7 @@ Future<void> showTransactionDialog(
                 return;
               }
               await controller.recordTransaction(
-                type: type,
+                type: selectedType,
                 amount: amount,
                 description: descriptionController.text,
                 participantId: participantId,
@@ -1116,7 +1134,9 @@ Future<void> showEventDialog(
   final budgetController = TextEditingController(
     text: current.finalBudget.toString(),
   );
-  final sponsorNameController = TextEditingController(text: current.sponsorName);
+  final sponsorNameController = TextEditingController(
+    text: current.sponsorName,
+  );
   final sponsorAmountController = TextEditingController(
     text: current.sponsorContribution.toString(),
   );
@@ -1157,7 +1177,9 @@ Future<void> showEventDialog(
                             lastDate: DateTime(2100),
                             initialDate: startDate,
                           );
-                          if (picked != null) setState(() => startDate = picked);
+                          if (picked != null) {
+                            setState(() => startDate = picked);
+                          }
                         },
                         icon: const Icon(Icons.event_outlined),
                         label: Text('Mulai ${formatDate(startDate)}'),
@@ -1336,7 +1358,8 @@ Future<void> showConflictDialog(
               _ConflictVersionCard(
                 title: 'Perangkat ini',
                 snapshot: local,
-                detail: 'Perubahan lokal ${formatDateTime(conflict.operation.createdAt)}',
+                detail:
+                    'Perubahan lokal ${formatDateTime(conflict.operation.createdAt)}',
               ),
               _ConflictVersionCard(
                 title: 'Data online',
@@ -1417,7 +1440,9 @@ class _ConflictVersionCard extends StatelessWidget {
         )
         .fold(0, (sum, item) => sum + item.amount);
     final expenses = expenseTotal(snapshot.transactions);
-    final openReminders = snapshot.reminders.where((item) => !item.isDone).length;
+    final openReminders = snapshot.reminders
+        .where((item) => !item.isDone)
+        .length;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -1430,7 +1455,9 @@ class _ConflictVersionCard extends StatelessWidget {
             Text('$active peserta aktif'),
             Text('Pemasukan tercatat ${rupiah(income)}'),
             Text('Refund dan pengeluaran ${rupiah(expenses)}'),
-            Text('Saldo ${rupiah(currentBalance(snapshot.event, snapshot.transactions))}'),
+            Text(
+              'Saldo ${rupiah(currentBalance(snapshot.event, snapshot.transactions))}',
+            ),
             Text('$openReminders pengingat terbuka'),
           ],
         ),
@@ -1461,16 +1488,24 @@ List<String> _eventChangeSummary(EventRecord before, EventRecord after) {
     changes.add('Nama: ${before.name} -> ${after.name.trim()}');
   }
   if (before.startDate != after.startDate) {
-    changes.add('Mulai: ${formatDate(before.startDate)} -> ${formatDate(after.startDate)}');
+    changes.add(
+      'Mulai: ${formatDate(before.startDate)} -> ${formatDate(after.startDate)}',
+    );
   }
   if (before.endDate != after.endDate) {
-    changes.add('Selesai: ${formatDate(before.endDate)} -> ${formatDate(after.endDate)}');
+    changes.add(
+      'Selesai: ${formatDate(before.endDate)} -> ${formatDate(after.endDate)}',
+    );
   }
   if (before.participantCapacity != after.participantCapacity) {
-    changes.add('Kapasitas: ${before.participantCapacity} -> ${after.participantCapacity}');
+    changes.add(
+      'Kapasitas: ${before.participantCapacity} -> ${after.participantCapacity}',
+    );
   }
   if (before.finalBudget != after.finalBudget) {
-    changes.add('Anggaran: ${rupiah(before.finalBudget)} -> ${rupiah(after.finalBudget)}');
+    changes.add(
+      'Anggaran: ${rupiah(before.finalBudget)} -> ${rupiah(after.finalBudget)}',
+    );
   }
   if (before.sponsorName != after.sponsorName ||
       before.sponsorContribution != after.sponsorContribution) {
@@ -1480,7 +1515,9 @@ List<String> _eventChangeSummary(EventRecord before, EventRecord after) {
     );
   }
   if (before.openingBalance != after.openingBalance) {
-    changes.add('Saldo awal: ${rupiah(before.openingBalance)} -> ${rupiah(after.openingBalance)}');
+    changes.add(
+      'Saldo awal: ${rupiah(before.openingBalance)} -> ${rupiah(after.openingBalance)}',
+    );
   }
   return changes;
 }

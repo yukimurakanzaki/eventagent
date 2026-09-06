@@ -9,7 +9,13 @@ $ErrorActionPreference = 'Stop'
 $configPath = Join-Path $PSScriptRoot 'supabase.local.json'
 $config = @{}
 if (Test-Path -LiteralPath $configPath) {
-  $config = Get-Content -LiteralPath $configPath -Raw | ConvertFrom-Json -AsHashtable
+  $parsedConfig = Get-Content -LiteralPath $configPath -Raw | ConvertFrom-Json
+  foreach ($name in @('SUPABASE_URL', 'SUPABASE_PUBLISHABLE_KEY')) {
+    $property = $parsedConfig.PSObject.Properties[$name]
+    if ($null -ne $property -and -not [string]::IsNullOrWhiteSpace($property.Value)) {
+      $config[$name] = [string]$property.Value
+    }
+  }
 }
 foreach ($name in @('SUPABASE_URL', 'SUPABASE_PUBLISHABLE_KEY')) {
   $value = [Environment]::GetEnvironmentVariable($name)

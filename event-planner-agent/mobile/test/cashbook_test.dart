@@ -161,6 +161,43 @@ void main() {
     expect(controller.pendingOperations, isEmpty);
   });
 
+  test(
+    'counts a selected participant payment in that participant total',
+    () async {
+      final controller = CashbookController.forTesting();
+      final participant = controller.participants.first;
+      final before = participantPaid(controller.transactions, participant.id);
+
+      await controller.recordTransaction(
+        type: TransactionType.participantPayment,
+        amount: 125000,
+        description: 'Cicilan pertama',
+        participantId: participant.id,
+      );
+
+      expect(
+        participantPaid(controller.transactions, participant.id),
+        before + 125000,
+      );
+    },
+  );
+
+  test(
+    'does not record a participant payment without a valid participant',
+    () async {
+      final controller = CashbookController.forTesting();
+      final before = controller.transactions.length;
+
+      await controller.recordTransaction(
+        type: TransactionType.participantPayment,
+        amount: 125000,
+        description: 'Tidak terhubung',
+      );
+
+      expect(controller.transactions, hasLength(before));
+    },
+  );
+
   test('schedules a reminder locally and cancels it when completed', () async {
     final notifier = RecordingReminderNotifier();
     final controller = CashbookController.forTesting(
@@ -254,23 +291,26 @@ void main() {
     );
   });
 
-  test('rebases an explicit local conflict choice and synchronizes it', () async {
-    final remote = CashbookSnapshot.demo().copyWith(syncVersion: 4);
-    final adapter = ConflictThenSyncAdapter(remote);
-    final controller = CashbookController.forTesting(syncAdapter: adapter);
+  test(
+    'rebases an explicit local conflict choice and synchronizes it',
+    () async {
+      final remote = CashbookSnapshot.demo().copyWith(syncVersion: 4);
+      final adapter = ConflictThenSyncAdapter(remote);
+      final controller = CashbookController.forTesting(syncAdapter: adapter);
 
-    await controller.addParticipant('Tetap Lokal');
-    expect(controller.isReadOnly, isTrue);
+      await controller.addParticipant('Tetap Lokal');
+      expect(controller.isReadOnly, isTrue);
 
-    await controller.resolveConflictWithLocal();
+      await controller.resolveConflictWithLocal();
 
-    expect(controller.isReadOnly, isFalse);
-    expect(adapter.pushes, 2);
-    expect(controller.snapshot.syncVersion, 5);
-    expect(controller.pendingOperations, isEmpty);
-    expect(
-      controller.participants.any((item) => item.name == 'Tetap Lokal'),
-      isTrue,
-    );
-  });
+      expect(controller.isReadOnly, isFalse);
+      expect(adapter.pushes, 2);
+      expect(controller.snapshot.syncVersion, 5);
+      expect(controller.pendingOperations, isEmpty);
+      expect(
+        controller.participants.any((item) => item.name == 'Tetap Lokal'),
+        isTrue,
+      );
+    },
+  );
 }

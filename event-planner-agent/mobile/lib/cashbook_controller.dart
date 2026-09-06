@@ -42,7 +42,8 @@ class CashbookController extends ChangeNotifier {
     final remote = await syncAdapter?.load();
     final notifier = LocalReminderNotifier();
     await notifier.initialize();
-    final initial = saved != null &&
+    final initial =
+        saved != null &&
             (saved.pendingOperations.isNotEmpty || saved.syncConflict != null)
         ? saved
         : remote ?? saved ?? CashbookSnapshot.demo();
@@ -127,6 +128,13 @@ class CashbookController extends ChangeNotifier {
     if (isReadOnly) return;
     if (amount <= 0 || description.trim().isEmpty) return;
     if (type == TransactionType.sponsor && !canAddSponsor(transactions)) return;
+    if (type == TransactionType.participantPayment ||
+        type == TransactionType.refund) {
+      final hasParticipant =
+          participantId != null &&
+          participants.any((participant) => participant.id == participantId);
+      if (!hasParticipant) return;
+    }
     final transaction = TransactionRecord(
       id: _newId('transaction'),
       type: type,
@@ -345,7 +353,8 @@ class CashbookController extends ChangeNotifier {
         if (result.status == SyncResultStatus.conflict) {
           final remote = result.remoteSnapshot;
           if (remote == null) {
-            _syncError = 'Konflik ditemukan, tetapi data online tidak dapat dibaca.';
+            _syncError =
+                'Konflik ditemukan, tetapi data online tidak dapat dibaca.';
             notifyListeners();
             return;
           }
@@ -353,9 +362,7 @@ class CashbookController extends ChangeNotifier {
           _snapshot = _snapshot.copyWith(
             syncConflict: SyncConflict(
               localSnapshot: local.toJson(),
-              remoteSnapshot: remote
-                  .copyWith(clearSyncConflict: true)
-                  .toJson(),
+              remoteSnapshot: remote.copyWith(clearSyncConflict: true).toJson(),
               operation: operation,
               remoteVersion: result.version,
               remoteUpdatedBy: result.remoteUpdatedBy,

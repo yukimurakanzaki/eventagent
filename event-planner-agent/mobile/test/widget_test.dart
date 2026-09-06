@@ -106,6 +106,37 @@ void main() {
     expect(find.text('Simpan pembatalan'), findsOneWidget);
   });
 
+  testWidgets('requires a transaction type before saving money', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      WargakasApp(controller: CashbookController.forTesting()),
+    );
+
+    await tester.tap(find.text('Uang'));
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(ListView), const Offset(0, -250));
+    await tester.pumpAndSettle();
+    final recordTransaction = find.ancestor(
+      of: find.text('Catat pemasukan atau pengeluaran'),
+      matching: find.byType(ListTile),
+    );
+    await tester.tap(recordTransaction);
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Jumlah (rupiah)'),
+      '125000',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Keterangan'),
+      'Cicilan peserta',
+    );
+    await tester.tap(find.text('Simpan transaksi'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Jenis transaksi belum dipilih'), findsOneWidget);
+  });
+
   testWidgets(
     'shows a clear setup screen instead of silently opening demo mode',
     (tester) async {
@@ -186,29 +217,33 @@ void main() {
     expect(signOutCalled, isFalse);
   });
 
-  testWidgets('edits configurable event after showing before and after values', (
-    tester,
-  ) async {
-    final controller = CashbookController.forTesting();
-    await tester.pumpWidget(WargakasApp(controller: controller));
+  testWidgets(
+    'edits configurable event after showing before and after values',
+    (tester) async {
+      final controller = CashbookController.forTesting();
+      await tester.pumpWidget(WargakasApp(controller: controller));
 
-    await tester.tap(find.byTooltip('Edit acara'));
-    await tester.pumpAndSettle();
-    await tester.enterText(
-      find.widgetWithText(TextField, 'Nama acara'),
-      'Wisata Bandung',
-    );
-    await tester.tap(find.text('Tinjau perubahan'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Edit acara'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Nama acara'),
+        'Wisata Bandung',
+      );
+      await tester.tap(find.text('Tinjau perubahan'));
+      await tester.pumpAndSettle();
 
-    expect(find.text('Simpan perubahan acara?'), findsOneWidget);
-    expect(find.textContaining('Wisata Dieng -> Wisata Bandung'), findsOneWidget);
-    await tester.tap(find.text('Simpan'));
-    await tester.pumpAndSettle();
+      expect(find.text('Simpan perubahan acara?'), findsOneWidget);
+      expect(
+        find.textContaining('Wisata Dieng -> Wisata Bandung'),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Simpan'));
+      await tester.pumpAndSettle();
 
-    expect(controller.event.name, 'Wisata Bandung');
-    expect(find.text('Wisata Bandung'), findsOneWidget);
-  });
+      expect(controller.event.name, 'Wisata Bandung');
+      expect(find.text('Wisata Bandung'), findsOneWidget);
+    },
+  );
 
   testWidgets('blocks edits and offers both conflict choices', (tester) async {
     final controller = CashbookController.forTesting(
@@ -218,7 +253,10 @@ void main() {
     await tester.pumpWidget(WargakasApp(controller: controller));
 
     expect(find.text('Pilih versi data sebelum melanjutkan'), findsOneWidget);
-    expect(find.byTooltip('Selesaikan konflik sebelum mengedit acara'), findsOneWidget);
+    expect(
+      find.byTooltip('Selesaikan konflik sebelum mengedit acara'),
+      findsOneWidget,
+    );
     await tester.tap(find.text('Bandingkan'));
     await tester.pumpAndSettle();
 
@@ -251,6 +289,9 @@ void main() {
     await tester.tap(find.text('Bagikan pesan WhatsApp'));
     await tester.pumpAndSettle();
     expect(gateway.messageCalled, isTrue);
-    expect(find.text('Pesan belum dapat dibagikan. Coba lagi.'), findsOneWidget);
+    expect(
+      find.text('Pesan belum dapat dibagikan. Coba lagi.'),
+      findsOneWidget,
+    );
   });
 }
