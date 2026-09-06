@@ -1,8 +1,14 @@
 import 'cashbook_models.dart';
 
 int participantTarget(EventRecord event) {
-  final capacity = event.participantCapacity < 1 ? 1 : event.participantCapacity;
-  return ((event.finalBudget - event.sponsorContribution - event.openingBalance) / capacity).round();
+  final capacity = event.participantCapacity < 1
+      ? 1
+      : event.participantCapacity;
+  return ((event.finalBudget -
+              event.sponsorContribution -
+              event.openingBalance) /
+          capacity)
+      .round();
 }
 
 int incomeTotal(Iterable<TransactionRecord> transactions) {
@@ -22,17 +28,26 @@ int expenseTotal(Iterable<TransactionRecord> transactions) {
     TransactionType.refund,
     TransactionType.refundReversal,
   };
-  return transactions.where((transaction) => expenses.contains(transaction.type)).fold(
+  return transactions
+      .where((transaction) => expenses.contains(transaction.type))
+      .fold(
         0,
-        (sum, transaction) => sum +
+        (sum, transaction) =>
+            sum +
             (transaction.type == TransactionType.refundReversal
                 ? -transaction.amount
                 : transaction.amount),
       );
 }
 
-int currentBalance(EventRecord event, Iterable<TransactionRecord> transactions) {
-  return event.openingBalance + event.sponsorContribution + incomeTotal(transactions) - expenseTotal(transactions);
+int currentBalance(
+  EventRecord event,
+  Iterable<TransactionRecord> transactions,
+) {
+  return event.openingBalance +
+      event.sponsorContribution +
+      incomeTotal(transactions) -
+      expenseTotal(transactions);
 }
 
 String paymentStatus(int paidAmount, int target) {
@@ -42,7 +57,9 @@ String paymentStatus(int paidAmount, int target) {
 }
 
 bool canAddSponsor(Iterable<TransactionRecord> transactions) {
-  return !transactions.any((transaction) => transaction.type == TransactionType.participantPayment);
+  return !transactions.any(
+    (transaction) => transaction.type == TransactionType.participantPayment,
+  );
 }
 
 int refundAmount(RefundPolicy policy, int paidAmount, int requestedAmount) {
@@ -57,24 +74,35 @@ int refundAmount(RefundPolicy policy, int paidAmount, int requestedAmount) {
   }
 }
 
-int participantPaid(Iterable<TransactionRecord> transactions, String participantId) {
+int participantPaid(
+  Iterable<TransactionRecord> transactions,
+  String participantId,
+) {
   return transactions
-      .where((transaction) =>
-          transaction.type == TransactionType.participantPayment &&
-          transaction.participantId == participantId)
+      .where(
+        (transaction) =>
+            transaction.type == TransactionType.participantPayment &&
+            transaction.participantId == participantId,
+      )
       .fold(0, (sum, transaction) => sum + transaction.amount);
 }
 
-int refundTotalForParticipant(Iterable<TransactionRecord> transactions, String participantId) {
-  return transactions.where((transaction) {
-    return transaction.participantId == participantId &&
-        (transaction.type == TransactionType.refund ||
-            transaction.type == TransactionType.refundReversal);
-  }).fold(
-    0,
-    (sum, transaction) => sum +
-        (transaction.type == TransactionType.refundReversal
-            ? -transaction.amount
-            : transaction.amount),
-  );
+int refundTotalForParticipant(
+  Iterable<TransactionRecord> transactions,
+  String participantId,
+) {
+  return transactions
+      .where((transaction) {
+        return transaction.participantId == participantId &&
+            (transaction.type == TransactionType.refund ||
+                transaction.type == TransactionType.refundReversal);
+      })
+      .fold(
+        0,
+        (sum, transaction) =>
+            sum +
+            (transaction.type == TransactionType.refundReversal
+                ? -transaction.amount
+                : transaction.amount),
+      );
 }

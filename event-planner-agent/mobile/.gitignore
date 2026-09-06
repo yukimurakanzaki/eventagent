@@ -1,4 +1,5 @@
 # Miscellaneous
+supabase.local.json
 *.class
 *.log
 *.pyc

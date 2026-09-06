@@ -3,10 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'auth_forms.dart';
+import 'auth_support.dart';
 import 'cashbook_controller.dart';
-import 'cashbook_models.dart';
 import 'main.dart' show EventHomePage, wargakasTheme;
 import 'supabase_backend.dart';
+
+export 'auth_support.dart' show authErrorMessage;
+export 'auth_forms.dart' show LoginPage, PasswordRecoveryPage;
 
 class SupabaseApp extends StatefulWidget {
   const SupabaseApp({required this.backend, super.key});
@@ -22,31 +26,104 @@ class _SupabaseAppState extends State<SupabaseApp> {
   Future<CashbookController>? _controllerFuture;
   StreamSubscription<AuthState>? _authSubscription;
   String? _workspaceId;
+  String? _role;
+  String? _authError;
+  bool _passwordRecovery = false;
+  int _loadGeneration = 0;
 
   @override
   void initState() {
     super.initState();
-    _session = widget.backend.client.auth.currentSession;
-    _authSubscription = widget.backend.authChanges.listen((state) {
-      if (!mounted) return;
-      setState(() {
-        _session = state.session;
-        _controllerFuture = state.session == null ? null : _loadController();
-      });
-    });
+    _session = widget.backend.currentSession;
+    _authSubscription = widget.backend.authChanges.listen(
+      (state) {
+        if (!mounted) return;
+        setState(() {
+          final userChanged = _session?.user.id != state.session?.user.id;
+          _session = state.session;
+          _authError = null;
+          if (_session == null) {
+            if (state.signOutReason != null &&
+                state.signOutReason != SignOutReason.userInitiated) {
+              _authError =
+                  'Sesi sudah berakhir. Masuk kembali untuk melanjutkan.';
+            }
+            _passwordRecovery = false;
+            _clearController();
+          } else if (state.event == AuthChangeEvent.passwordRecovery) {
+            _passwordRecovery = true;
+            _clearController();
+          } else if (userChanged) {
+            _passwordRecovery = false;
+            _clearController();
+            _controllerFuture = _loadController();
+          } else if (!_passwordRecovery && _controllerFuture == null) {
+            _controllerFuture = _loadController();
+          }
+          // A refresh or userUpdated event for this user must not leave the
+          // recovery form, reload local state, or discard pending edits.
+        });
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        if (!mounted) return;
+        setState(() {
+          if (isExpiredAuthSession(error)) {
+            _session = null;
+            _passwordRecovery = false;
+            _clearController();
+          }
+          _authError = authErrorMessage(error);
+        });
+      },
+    );
     if (_session != null) _controllerFuture = _loadController();
   }
 
   @override
   void dispose() {
+    _loadGeneration++;
     _authSubscription?.cancel();
     super.dispose();
   }
 
-  Future<CashbookController> _loadController() async {
-    final adapter = await widget.backend.openCashbook(CashbookSnapshot.demo());
-    _workspaceId = adapter.workspaceId;
-    return CashbookController.bootstrap(syncAdapter: adapter);
+  Future<CashbookController> _loadController() {
+    final generation = ++_loadGeneration;
+    final userId = _session?.user.id;
+    Future<CashbookController> load() async {
+      final opened = await widget.backend.loadCashbook();
+      if (!mounted ||
+          generation != _loadGeneration ||
+          _session?.user.id != userId) {
+        opened.controller.dispose();
+        throw StateError('Pemuatan akun sebelumnya dibatalkan.');
+      }
+      _workspaceId = opened.workspaceId;
+      _role = opened.role;
+      return opened.controller;
+    }
+
+    return load().timeout(
+      const Duration(seconds: 30),
+      onTimeout: () {
+        if (generation == _loadGeneration) _loadGeneration++;
+        throw TimeoutException('Pemuatan acara terlalu lama.');
+      },
+    );
+  }
+
+  void _clearController() {
+    _loadGeneration++;
+    _workspaceId = null;
+    _role = null;
+    _controllerFuture = null;
+  }
+
+  void _finishRecovery() {
+    setState(() {
+      _passwordRecovery = false;
+      _authError = null;
+      _controllerFuture = _session == null ? null : _loadController();
+    });
   }
 
   Future<void> _inviteChairperson(String email) async {
@@ -64,13 +141,37 @@ class _SupabaseAppState extends State<SupabaseApp> {
       title: 'Wargakas',
       debugShowCheckedModeBanner: false,
       theme: wargakasTheme(),
-      home: _buildHome(),
+      home: Scaffold(
+        body: SafeArea(
+          child: Column(
+            children: [
+              if (_authError != null && _session != null)
+                MaterialBanner(
+                  content: Text(_authError!),
+                  actions: [
+                    TextButton(
+                      onPressed: () => setState(() => _authError = null),
+                      child: const Text('Tutup'),
+                    ),
+                  ],
+                ),
+              Expanded(child: _buildHome()),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
   Widget _buildHome() {
+    if (_passwordRecovery) {
+      return PasswordRecoveryPage(
+        backend: widget.backend,
+        onCompleted: _finishRecovery,
+      );
+    }
     if (_session == null) {
-      return LoginPage(backend: widget.backend);
+      return LoginPage(backend: widget.backend, initialError: _authError);
     }
 
     final controllerFuture = _controllerFuture;
@@ -81,232 +182,40 @@ class _SupabaseAppState extends State<SupabaseApp> {
     return FutureBuilder<CashbookController>(
       future: controllerFuture,
       builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return SetupErrorPage(
-            message: snapshot.error.toString(),
-            onSignOut: widget.backend.signOut,
-            onRetry: () =>
-                setState(() => _controllerFuture = _loadController()),
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
           );
         }
-        if (!snapshot.hasData) {
+        if (snapshot.hasError) {
+          return SetupErrorPage(
+            message: 'Periksa koneksi internet lalu coba lagi. Jika tetap gagal, hubungi pengelola Wargakas.',
+            onSignOut: widget.backend.signOut,
+            onRetry: () => setState(() {
+              _controllerFuture = _loadController();
+            }),
+          );
+        }
+        if (snapshot.connectionState != ConnectionState.done ||
+            !snapshot.hasData) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
         return EventHomePage(
+          key: ValueKey(_session!.user.id),
           controller: snapshot.data!,
           onSignOut: widget.backend.signOut,
           onInviteChairperson: _inviteChairperson,
+          accountEmail: widget.backend.user?.email,
+          accountRole: _role,
         );
       },
     );
   }
 }
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({required this.backend, super.key});
-
-  final SupabaseBackend backend;
-
-  @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _createAccount = false;
-  bool _busy = false;
-  String? _error;
-  bool _showResendConfirmation = false;
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    final email = _emailController.text.trim();
-    final password = _passwordController.text;
-    if (!email.contains('@') || password.length < 6) {
-      setState(
-        () => _error =
-            'Masukkan email yang benar dan kata sandi minimal 6 karakter.',
-      );
-      return;
-    }
-    setState(() {
-      _busy = true;
-      _error = null;
-    });
-    try {
-      if (_createAccount) {
-        await widget.backend.signUp(email, password);
-        if (mounted && widget.backend.user == null) {
-          setState(() {
-            _error = 'Akun dibuat. Periksa email untuk konfirmasi, lalu masuk.';
-            _showResendConfirmation = true;
-          });
-        }
-      } else {
-        await widget.backend.signIn(email, password);
-      }
-    } on AuthException catch (error) {
-      if (mounted) setState(() => _error = error.message);
-    } catch (_) {
-      if (mounted) {
-        setState(
-          () =>
-              _error = 'Tidak dapat terhubung. Coba lagi saat sinyal tersedia.',
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
-  Future<void> _resendConfirmation() async {
-    final email = _emailController.text.trim();
-    if (!email.contains('@')) return;
-    setState(() => _busy = true);
-    try {
-      await widget.backend.resendSignupConfirmation(email);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Permintaan diproses. Jika akun sudah dikonfirmasi, pilih Masuk.',
-            ),
-          ),
-        );
-      }
-    } on AuthException catch (error) {
-      if (mounted) setState(() => _error = error.message);
-    } catch (_) {
-      if (mounted) {
-        setState(
-          () => _error =
-              'Tidak dapat mengirim ulang. Coba lagi saat sinyal tersedia.',
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
-  void _switchToSignIn() {
-    setState(() {
-      _createAccount = false;
-      _showResendConfirmation = false;
-      _error = null;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Masuk ke Wargakas')),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 460),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Icon(Icons.account_balance_wallet_outlined, size: 64),
-                const SizedBox(height: 16),
-                Text(
-                  _createAccount
-                      ? 'Buat akun bersama'
-                      : 'Masuk untuk melihat acara bersama',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Akun menjaga data kas tetap aman saat treasurer berganti perangkat. '
-                  'Chairperson dan treasurer dapat berbagi acara melalui Supabase.',
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
-                TextField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Kata sandi',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                if (_error != null) ...[
-                  const SizedBox(height: 12),
-                  Text(_error!, style: TextStyle(color: Colors.red)),
-                ],
-                const SizedBox(height: 20),
-                FilledButton(
-                  onPressed: _busy ? null : _submit,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Text(
-                      _busy
-                          ? 'Memproses…'
-                          : _createAccount
-                          ? 'Buat akun'
-                          : 'Masuk',
-                    ),
-                  ),
-                ),
-                if (_showResendConfirmation)
-                  Column(
-                    children: [
-                      TextButton(
-                        onPressed: _busy ? null : _resendConfirmation,
-                        child: const Text('Kirim ulang email konfirmasi'),
-                      ),
-                      TextButton(
-                        onPressed: _busy ? null : _switchToSignIn,
-                        child: const Text(
-                          'Akun sudah dikonfirmasi? Masuk sekarang',
-                        ),
-                      ),
-                    ],
-                  ),
-                TextButton(
-                  onPressed: _busy
-                      ? null
-                      : () => setState(() {
-                          _createAccount = !_createAccount;
-                          _error = null;
-                          _showResendConfirmation = false;
-                        }),
-                  child: Text(
-                    _createAccount
-                        ? 'Sudah punya akun? Masuk'
-                        : 'Belum punya akun? Buat akun',
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class SetupErrorPage extends StatelessWidget {
+class SetupErrorPage extends StatefulWidget {
   const SetupErrorPage({
     required this.message,
     required this.onSignOut,
@@ -319,32 +228,65 @@ class SetupErrorPage extends StatelessWidget {
   final VoidCallback onRetry;
 
   @override
+  State<SetupErrorPage> createState() => _SetupErrorPageState();
+}
+
+class _SetupErrorPageState extends State<SetupErrorPage> {
+  bool _busy = false;
+  String? _error;
+
+  Future<void> _signOut() async {
+    if (_busy) return;
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await widget.onSignOut().timeout(const Duration(seconds: 30));
+    } catch (error) {
+      if (mounted) setState(() => _error = authErrorMessage(error));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Wargakas')),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Icon(Icons.cloud_off_outlined, size: 56),
-            const SizedBox(height: 16),
-            const Text(
-              'Acara bersama belum dapat dibuka.',
-              textAlign: TextAlign.center,
+      body: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Icon(Icons.cloud_off_outlined, size: 56),
+                const SizedBox(height: 16),
+                const Text(
+                  'Acara bersama belum dapat dibuka.',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _error ?? widget.message,
+                  textAlign: TextAlign.center,
+                  maxLines: 4,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 20),
+                FilledButton(
+                  onPressed: _busy ? null : widget.onRetry,
+                  child: const Text('Coba lagi'),
+                ),
+                TextButton(
+                  onPressed: _busy ? null : _signOut,
+                  child: Text(_busy ? 'Memproses…' : 'Keluar'),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              maxLines: 4,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 20),
-            FilledButton(onPressed: onRetry, child: const Text('Coba lagi')),
-            TextButton(onPressed: onSignOut, child: const Text('Keluar')),
-          ],
+          ),
         ),
       ),
     );

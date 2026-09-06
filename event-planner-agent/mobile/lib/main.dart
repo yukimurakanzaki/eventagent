@@ -8,13 +8,70 @@ import 'supabase_backend.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final backend = await SupabaseBackend.initializeFromEnvironment();
-  if (backend != null) {
-    runApp(SupabaseApp(backend: backend));
+  if (SupabaseBackend.isDemoMode) {
+    final controller = await CashbookController.bootstrap();
+    runApp(WargakasApp(controller: controller));
     return;
   }
-  final controller = await CashbookController.bootstrap();
-  runApp(WargakasApp(controller: controller));
+  final configurationError = SupabaseBackend.configurationError;
+  if (configurationError != null) {
+    runApp(ConfigurationErrorApp(message: configurationError));
+    return;
+  }
+  try {
+    final backend = await SupabaseBackend.initializeFromEnvironment();
+    if (backend != null) {
+      runApp(SupabaseApp(backend: backend));
+      return;
+    }
+  } catch (_) {
+    runApp(
+      const ConfigurationErrorApp(
+        message: 'Tidak dapat memulai koneksi Supabase. Periksa build hosted.',
+      ),
+    );
+    return;
+  }
+  runApp(
+    const ConfigurationErrorApp(
+      message: 'Supabase belum siap. Periksa konfigurasi build.',
+    ),
+  );
+}
+
+class ConfigurationErrorApp extends StatelessWidget {
+  const ConfigurationErrorApp({required this.message, super.key});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Wargakas',
+      debugShowCheckedModeBanner: false,
+      theme: wargakasTheme(),
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Wargakas')),
+        body: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Icon(Icons.settings_outlined, size: 56),
+              const SizedBox(height: 16),
+              const Text(
+                'Aplikasi belum dikonfigurasi untuk login.',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(message, textAlign: TextAlign.center),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class WargakasApp extends StatelessWidget {
@@ -22,12 +79,16 @@ class WargakasApp extends StatelessWidget {
     required this.controller,
     this.onSignOut,
     this.onInviteChairperson,
+    this.accountEmail,
+    this.accountRole,
     super.key,
   });
 
   final CashbookController controller;
   final Future<void> Function()? onSignOut;
   final Future<void> Function(String email)? onInviteChairperson;
+  final String? accountEmail;
+  final String? accountRole;
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +100,8 @@ class WargakasApp extends StatelessWidget {
         controller: controller,
         onSignOut: onSignOut,
         onInviteChairperson: onInviteChairperson,
+        accountEmail: accountEmail,
+        accountRole: accountRole,
       ),
     );
   }
@@ -59,12 +122,16 @@ class EventHomePage extends StatefulWidget {
     required this.controller,
     this.onSignOut,
     this.onInviteChairperson,
+    this.accountEmail,
+    this.accountRole,
     super.key,
   });
 
   final CashbookController controller;
   final Future<void> Function()? onSignOut;
   final Future<void> Function(String email)? onInviteChairperson;
+  final String? accountEmail;
+  final String? accountRole;
 
   @override
   State<EventHomePage> createState() => _EventHomePageState();
@@ -96,7 +163,7 @@ class _EventHomePageState extends State<EventHomePage> {
                     context,
                     widget.onInviteChairperson!,
                   ),
-                  tooltip: 'Tambah chairperson',
+                  tooltip: 'Tambah ketua acara',
                   icon: const Icon(Icons.person_add_outlined),
                 ),
               IconButton(
@@ -106,9 +173,15 @@ class _EventHomePageState extends State<EventHomePage> {
               ),
               if (widget.onSignOut != null)
                 IconButton(
-                  onPressed: () => widget.onSignOut!(),
-                  tooltip: 'Keluar',
-                  icon: const Icon(Icons.logout),
+                  onPressed: () => showAccountDialog(
+                    context,
+                    widget.controller,
+                    widget.onSignOut!,
+                    email: widget.accountEmail,
+                    role: widget.accountRole,
+                  ),
+                  tooltip: 'Akun',
+                  icon: const Icon(Icons.account_circle_outlined),
                 ),
             ],
           ),
@@ -1001,7 +1074,7 @@ Future<void> showInviteChairpersonDialog(
     context: context,
     builder: (dialogContext) => StatefulBuilder(
       builder: (dialogContext, setState) => AlertDialog(
-        title: const Text('Tambah chairperson'),
+        title: const Text('Tambah ketua acara'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -1010,7 +1083,7 @@ Future<void> showInviteChairpersonDialog(
             TextField(
               controller: emailController,
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(labelText: 'Email chairperson'),
+              decoration: const InputDecoration(labelText: 'Email ketua acara'),
             ),
           ],
         ),
@@ -1028,7 +1101,7 @@ Future<void> showInviteChairpersonDialog(
                       await showInfo(
                         dialogContext,
                         'Email belum benar',
-                        'Masukkan email akun chairperson.',
+                        'Masukkan email akun ketua acara.',
                       );
                       return;
                     }
@@ -1040,7 +1113,7 @@ Future<void> showInviteChairpersonDialog(
                       await showInfo(
                         context,
                         'Akses diberikan',
-                        '$email sekarang dapat membuka acara ini sebagai chairperson.',
+                        '$email sekarang dapat membuka acara ini sebagai ketua acara.',
                       );
                     } catch (error) {
                       if (!dialogContext.mounted) return;
@@ -1061,6 +1134,81 @@ Future<void> showInviteChairpersonDialog(
   emailController.dispose();
 }
 
+Future<void> showAccountDialog(
+  BuildContext context,
+  CashbookController controller,
+  Future<void> Function() onSignOut, {
+  String? email,
+  String? role,
+}) async {
+  final action = await showDialog<String>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: const Text('Akun'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.person_outline),
+            title: Text(email ?? 'Akun Wargakas'),
+            subtitle: Text(roleLabel(role)),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Data acara tetap tersimpan di Supabase dan di perangkat ini untuk digunakan saat sinyal lemah.',
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext),
+          child: const Text('Tutup'),
+        ),
+        FilledButton.icon(
+          onPressed: () => Navigator.pop(dialogContext, 'signOut'),
+          icon: const Icon(Icons.logout),
+          label: const Text('Keluar'),
+        ),
+      ],
+    ),
+  );
+  if (action != 'signOut' || !context.mounted) return;
+
+  if (controller.pendingOperations.isNotEmpty) {
+    final pendingCount = controller.pendingOperations.length;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Perubahan belum tersinkron'),
+        content: Text(
+          '$pendingCount perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Tetap di sini'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Keluar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+  }
+
+  try {
+    await onSignOut();
+  } catch (error) {
+    if (context.mounted) {
+      await showInfo(context, 'Belum berhasil keluar', authErrorMessage(error));
+    }
+  }
+}
+
 Future<void> showInfo(BuildContext context, String title, String message) {
   return showDialog<void>(
     context: context,
@@ -1075,6 +1223,17 @@ Future<void> showInfo(BuildContext context, String title, String message) {
       ],
     ),
   );
+}
+
+String roleLabel(String? role) {
+  switch (role) {
+    case 'treasurer':
+      return 'Bendahara';
+    case 'chairperson':
+      return 'Ketua acara';
+    default:
+      return 'Anggota acara';
+  }
 }
 
 String refundPolicyLabel(RefundPolicy policy) {

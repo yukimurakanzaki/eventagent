@@ -59,16 +59,16 @@ class EventRecord {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'startDate': startDate.toIso8601String(),
-        'endDate': endDate.toIso8601String(),
-        'participantCapacity': participantCapacity,
-        'finalBudget': finalBudget,
-        'sponsorName': sponsorName,
-        'sponsorContribution': sponsorContribution,
-        'openingBalance': openingBalance,
-      };
+    'id': id,
+    'name': name,
+    'startDate': startDate.toIso8601String(),
+    'endDate': endDate.toIso8601String(),
+    'participantCapacity': participantCapacity,
+    'finalBudget': finalBudget,
+    'sponsorName': sponsorName,
+    'sponsorContribution': sponsorContribution,
+    'openingBalance': openingBalance,
+  };
 
   factory EventRecord.fromJson(Map<String, dynamic> json) {
     return EventRecord(
@@ -120,13 +120,13 @@ class ParticipantRecord {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'state': state.name,
-        'refundPolicy': refundPolicy.name,
-        'replacementForId': replacementForId,
-        'cancelledAt': cancelledAt?.toIso8601String(),
-      };
+    'id': id,
+    'name': name,
+    'state': state.name,
+    'refundPolicy': refundPolicy.name,
+    'replacementForId': replacementForId,
+    'cancelledAt': cancelledAt?.toIso8601String(),
+  };
 
   factory ParticipantRecord.fromJson(Map<String, dynamic> json) {
     return ParticipantRecord(
@@ -162,14 +162,14 @@ class TransactionRecord {
   final String? relatedTransactionId;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'type': type.name,
-        'amount': amount,
-        'description': description,
-        'createdAt': createdAt.toIso8601String(),
-        'participantId': participantId,
-        'relatedTransactionId': relatedTransactionId,
-      };
+    'id': id,
+    'type': type.name,
+    'amount': amount,
+    'description': description,
+    'createdAt': createdAt.toIso8601String(),
+    'participantId': participantId,
+    'relatedTransactionId': relatedTransactionId,
+  };
 
   factory TransactionRecord.fromJson(Map<String, dynamic> json) {
     return TransactionRecord(
@@ -199,7 +199,12 @@ class ReminderRecord {
   final String note;
   final bool isDone;
 
-  ReminderRecord copyWith({String? title, DateTime? dueAt, String? note, bool? isDone}) {
+  ReminderRecord copyWith({
+    String? title,
+    DateTime? dueAt,
+    String? note,
+    bool? isDone,
+  }) {
     return ReminderRecord(
       id: id,
       title: title ?? this.title,
@@ -210,12 +215,12 @@ class ReminderRecord {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'title': title,
-        'dueAt': dueAt.toIso8601String(),
-        'note': note,
-        'isDone': isDone,
-      };
+    'id': id,
+    'title': title,
+    'dueAt': dueAt.toIso8601String(),
+    'note': note,
+    'isDone': isDone,
+  };
 
   factory ReminderRecord.fromJson(Map<String, dynamic> json) {
     return ReminderRecord(
@@ -260,14 +265,14 @@ class SyncOperation {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'entity': entity,
-        'entityId': entityId,
-        'action': action,
-        'createdAt': createdAt.toIso8601String(),
-        'payload': payload,
-        'attempts': attempts,
-      };
+    'id': id,
+    'entity': entity,
+    'entityId': entityId,
+    'action': action,
+    'createdAt': createdAt.toIso8601String(),
+    'payload': payload,
+    'attempts': attempts,
+  };
 
   factory SyncOperation.fromJson(Map<String, dynamic> json) {
     return SyncOperation(
@@ -318,28 +323,46 @@ class CashbookSnapshot {
   }
 
   Map<String, dynamic> toJson() => {
-        'event': event.toJson(),
-        'participants': participants.map((item) => item.toJson()).toList(),
-        'transactions': transactions.map((item) => item.toJson()).toList(),
-        'reminders': reminders.map((item) => item.toJson()).toList(),
-        'pendingOperations': pendingOperations.map((item) => item.toJson()).toList(),
-        'syncVersion': syncVersion,
-      };
+    'event': event.toJson(),
+    'participants': participants.map((item) => item.toJson()).toList(),
+    'transactions': transactions.map((item) => item.toJson()).toList(),
+    'reminders': reminders.map((item) => item.toJson()).toList(),
+    'pendingOperations': pendingOperations
+        .map((item) => item.toJson())
+        .toList(),
+    'syncVersion': syncVersion,
+  };
 
   factory CashbookSnapshot.fromJson(Map<String, dynamic> json) {
     return CashbookSnapshot(
-      event: EventRecord.fromJson(Map<String, dynamic>.from(json['event'] as Map)),
+      event: EventRecord.fromJson(
+        Map<String, dynamic>.from(json['event'] as Map),
+      ),
       participants: (json['participants'] as List)
-          .map((item) => ParticipantRecord.fromJson(Map<String, dynamic>.from(item as Map)))
+          .map(
+            (item) => ParticipantRecord.fromJson(
+              Map<String, dynamic>.from(item as Map),
+            ),
+          )
           .toList(),
       transactions: (json['transactions'] as List)
-          .map((item) => TransactionRecord.fromJson(Map<String, dynamic>.from(item as Map)))
+          .map(
+            (item) => TransactionRecord.fromJson(
+              Map<String, dynamic>.from(item as Map),
+            ),
+          )
           .toList(),
       reminders: (json['reminders'] as List)
-          .map((item) => ReminderRecord.fromJson(Map<String, dynamic>.from(item as Map)))
+          .map(
+            (item) =>
+                ReminderRecord.fromJson(Map<String, dynamic>.from(item as Map)),
+          )
           .toList(),
       pendingOperations: (json['pendingOperations'] as List)
-          .map((item) => SyncOperation.fromJson(Map<String, dynamic>.from(item as Map)))
+          .map(
+            (item) =>
+                SyncOperation.fromJson(Map<String, dynamic>.from(item as Map)),
+          )
           .toList(),
       syncVersion: (json['syncVersion'] as num?)?.toInt() ?? 0,
     );

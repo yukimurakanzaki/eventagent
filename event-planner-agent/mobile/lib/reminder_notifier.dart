@@ -5,7 +5,12 @@ import 'package:timezone/timezone.dart' as tz;
 abstract interface class ReminderNotifier {
   Future<void> initialize();
 
-  Future<void> schedule({required String id, required String title, required DateTime dueAt, String note = ''});
+  Future<void> schedule({
+    required String id,
+    required String title,
+    required DateTime dueAt,
+    String note = '',
+  });
 
   Future<void> cancel(String id);
 }
@@ -17,18 +22,25 @@ class NoopReminderNotifier implements ReminderNotifier {
   Future<void> initialize() async {}
 
   @override
-  Future<void> schedule({required String id, required String title, required DateTime dueAt, String note = ''}) async {}
+  Future<void> schedule({
+    required String id,
+    required String title,
+    required DateTime dueAt,
+    String note = '',
+  }) async {}
 
   @override
   Future<void> cancel(String id) async {}
 }
 
 class LocalReminderNotifier implements ReminderNotifier {
-  LocalReminderNotifier({FlutterLocalNotificationsPlugin? plugin}) : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
+  LocalReminderNotifier({FlutterLocalNotificationsPlugin? plugin})
+    : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
 
   static const _channelId = 'wargakas_deadlines';
   static const _channelName = 'Pengingat acara';
-  static const _channelDescription = 'Pengingat pembayaran, pengumpulan, dan persiapan acara.';
+  static const _channelDescription =
+      'Pengingat pembayaran, pengumpulan, dan persiapan acara.';
 
   final FlutterLocalNotificationsPlugin _plugin;
 
@@ -42,12 +54,19 @@ class LocalReminderNotifier implements ReminderNotifier {
     );
     await _plugin.initialize(settings: settings);
     await _plugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.requestNotificationsPermission();
   }
 
   @override
-  Future<void> schedule({required String id, required String title, required DateTime dueAt, String note = ''}) async {
+  Future<void> schedule({
+    required String id,
+    required String title,
+    required DateTime dueAt,
+    String note = '',
+  }) async {
     final scheduled = tz.TZDateTime.from(dueAt, tz.local);
     if (scheduled.isBefore(tz.TZDateTime.now(tz.local))) return;
     await _plugin.zonedSchedule(
@@ -72,5 +91,6 @@ class LocalReminderNotifier implements ReminderNotifier {
   @override
   Future<void> cancel(String id) => _plugin.cancel(id: _notificationId(id));
 
-  int _notificationId(String id) => id.codeUnits.fold(0, (value, unit) => (value * 31 + unit) & 0x7fffffff);
+  int _notificationId(String id) =>
+      id.codeUnits.fold(0, (value, unit) => (value * 31 + unit) & 0x7fffffff);
 }

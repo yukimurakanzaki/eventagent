@@ -11,9 +11,11 @@ abstract interface class CashbookStore {
 }
 
 class LocalCashbookStore implements CashbookStore {
-  LocalCashbookStore({this._preferences});
+  LocalCashbookStore({this._preferences, String namespace = 'demo'})
+    : storageKey = '$storageKeyPrefix.$namespace';
 
-  static const storageKey = 'wargakas.cashbook.snapshot.v1';
+  static const storageKeyPrefix = 'wargakas.cashbook.snapshot.v1';
+  final String storageKey;
   SharedPreferences? _preferences;
 
   Future<SharedPreferences> _getPreferences() async {

@@ -16,7 +16,12 @@ class RecordingReminderNotifier implements ReminderNotifier {
   Future<void> initialize() async {}
 
   @override
-  Future<void> schedule({required String id, required String title, required DateTime dueAt, String note = ''}) async {
+  Future<void> schedule({
+    required String id,
+    required String title,
+    required DateTime dueAt,
+    String note = '',
+  }) async {
     scheduled.add(id);
   }
 
@@ -33,7 +38,10 @@ class RecordingSyncAdapter implements CashbookSyncAdapter {
   Future<CashbookSnapshot?> load() async => null;
 
   @override
-  Future<SyncResult> push({required CashbookSnapshot snapshot, required SyncOperation operation}) async {
+  Future<SyncResult> push({
+    required CashbookSnapshot snapshot,
+    required SyncOperation operation,
+  }) async {
     pushed.add(operation.id);
     return SyncResult.synced(version: snapshot.syncVersion + 1);
   }
@@ -74,34 +82,43 @@ void main() {
   test('serializes the local snapshot without losing queued operations', () {
     final controller = CashbookController.forTesting();
 
-    return controller.addReminder(
-      title: 'Bayar uang muka penginapan',
-      dueAt: DateTime(2026, 8, 30, 10),
-      note: 'Konfirmasi ke ketua.',
-    ).then((_) {
-      final encoded = jsonEncode(controller.snapshot.toJson());
-      final restored = CashbookSnapshot.fromJson(jsonDecode(encoded) as Map<String, dynamic>);
+    return controller
+        .addReminder(
+          title: 'Bayar uang muka penginapan',
+          dueAt: DateTime(2026, 8, 30, 10),
+          note: 'Konfirmasi ke ketua.',
+        )
+        .then((_) {
+          final encoded = jsonEncode(controller.snapshot.toJson());
+          final restored = CashbookSnapshot.fromJson(
+            jsonDecode(encoded) as Map<String, dynamic>,
+          );
 
-      expect(restored.reminders.last.title, 'Bayar uang muka penginapan');
-      expect(restored.pendingOperations, hasLength(1));
-      expect(restored.pendingOperations.single.entity, 'reminder');
-    });
+          expect(restored.reminders.last.title, 'Bayar uang muka penginapan');
+          expect(restored.pendingOperations, hasLength(1));
+          expect(restored.pendingOperations.single.entity, 'reminder');
+        });
   });
 
-  test('records local changes in the sync queue and can acknowledge them', () async {
-    final controller = CashbookController.forTesting();
-    final initialCount = controller.participants.length;
+  test(
+    'records local changes in the sync queue and can acknowledge them',
+    () async {
+      final controller = CashbookController.forTesting();
+      final initialCount = controller.participants.length;
 
-    await controller.addParticipant('Pak Joko');
+      await controller.addParticipant('Pak Joko');
 
-    expect(controller.participants, hasLength(initialCount + 1));
-    expect(controller.pendingOperations, hasLength(1));
-    expect(controller.pendingOperations.single.action, 'upsert');
+      expect(controller.participants, hasLength(initialCount + 1));
+      expect(controller.pendingOperations, hasLength(1));
+      expect(controller.pendingOperations.single.action, 'upsert');
 
-    await controller.markSyncOperationSynced(controller.pendingOperations.single.id);
+      await controller.markSyncOperationSynced(
+        controller.pendingOperations.single.id,
+      );
 
-    expect(controller.pendingOperations, isEmpty);
-  });
+      expect(controller.pendingOperations, isEmpty);
+    },
+  );
 
   test('does not add a sponsor after participant payments start', () async {
     final controller = CashbookController.forTesting();
@@ -119,7 +136,9 @@ void main() {
 
   test('schedules a reminder locally and cancels it when completed', () async {
     final notifier = RecordingReminderNotifier();
-    final controller = CashbookController.forTesting(reminderNotifier: notifier);
+    final controller = CashbookController.forTesting(
+      reminderNotifier: notifier,
+    );
 
     await controller.addReminder(
       title: 'Kumpulkan tahap 2',
@@ -134,14 +153,17 @@ void main() {
     expect(notifier.cancelled, contains(reminder.id));
   });
 
-  test('flushes queued local changes through the hosted sync adapter', () async {
-    final adapter = RecordingSyncAdapter();
-    final controller = CashbookController.forTesting(syncAdapter: adapter);
+  test(
+    'flushes queued local changes through the hosted sync adapter',
+    () async {
+      final adapter = RecordingSyncAdapter();
+      final controller = CashbookController.forTesting(syncAdapter: adapter);
 
-    await controller.addParticipant('Ibu Joko');
+      await controller.addParticipant('Ibu Joko');
 
-    expect(adapter.pushed, hasLength(1));
-    expect(controller.pendingOperations, isEmpty);
-    expect(controller.snapshot.syncVersion, 1);
-  });
+      expect(adapter.pushed, hasLength(1));
+      expect(controller.pendingOperations, isEmpty);
+      expect(controller.snapshot.syncVersion, 1);
+    },
+  );
 }

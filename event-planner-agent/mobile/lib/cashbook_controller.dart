@@ -7,7 +7,12 @@ import 'cashbook_sync.dart';
 import 'reminder_notifier.dart';
 
 class CashbookController extends ChangeNotifier {
-  CashbookController._(this._store, this._snapshot, this._reminderNotifier, this._syncAdapter);
+  CashbookController._(
+    this._store,
+    this._snapshot,
+    this._reminderNotifier,
+    this._syncAdapter,
+  );
 
   final CashbookStore _store;
   final ReminderNotifier _reminderNotifier;
@@ -26,8 +31,11 @@ class CashbookController extends ChangeNotifier {
   int get contributionTarget => participantTarget(event);
   int get balance => currentBalance(event, transactions);
 
-  static Future<CashbookController> bootstrap({CashbookSyncAdapter? syncAdapter}) async {
-    final store = LocalCashbookStore();
+  static Future<CashbookController> bootstrap({
+    CashbookSyncAdapter? syncAdapter,
+    String storageNamespace = 'demo',
+  }) async {
+    final store = LocalCashbookStore(namespace: storageNamespace);
     final saved = await store.load();
     final remote = await syncAdapter?.load();
     final notifier = LocalReminderNotifier();
@@ -35,7 +43,12 @@ class CashbookController extends ChangeNotifier {
     final initial = saved != null && saved.pendingOperations.isNotEmpty
         ? saved
         : remote ?? saved ?? CashbookSnapshot.demo();
-    final controller = CashbookController._(store, initial, notifier, syncAdapter);
+    final controller = CashbookController._(
+      store,
+      initial,
+      notifier,
+      syncAdapter,
+    );
     if (saved == null || remote != null) await store.save(controller.snapshot);
     await controller._schedulePendingReminders();
     await controller._flushPending();
@@ -156,7 +169,9 @@ class CashbookController extends ChangeNotifier {
     final updated = reminder.copyWith(isDone: !reminder.isDone);
     await _commit(
       _snapshot.copyWith(
-        reminders: reminders.map((item) => item.id == reminder.id ? updated : item).toList(),
+        reminders: reminders
+            .map((item) => item.id == reminder.id ? updated : item)
+            .toList(),
       ),
       entity: 'reminder',
       entityId: reminder.id,
@@ -189,11 +204,15 @@ class CashbookController extends ChangeNotifier {
   Future<void> markSyncOperationSynced(String operationId) async {
     await _store.save(
       _snapshot.copyWith(
-        pendingOperations: pendingOperations.where((item) => item.id != operationId).toList(),
+        pendingOperations: pendingOperations
+            .where((item) => item.id != operationId)
+            .toList(),
       ),
     );
     _snapshot = _snapshot.copyWith(
-      pendingOperations: pendingOperations.where((item) => item.id != operationId).toList(),
+      pendingOperations: pendingOperations
+          .where((item) => item.id != operationId)
+          .toList(),
     );
     notifyListeners();
   }
@@ -239,17 +258,21 @@ class CashbookController extends ChangeNotifier {
         }
         _snapshot = _snapshot.copyWith(
           syncVersion: result.version,
-          pendingOperations: _snapshot.pendingOperations.where((item) => item.id != operation.id).toList(),
+          pendingOperations: _snapshot.pendingOperations
+              .where((item) => item.id != operation.id)
+              .toList(),
         );
         await _store.save(_snapshot);
         notifyListeners();
       } catch (_) {
-        _syncError = 'Belum tersambung. Perubahan tetap tersimpan di perangkat.';
+        _syncError =
+            'Belum tersambung. Perubahan tetap tersimpan di perangkat.';
         notifyListeners();
         return;
       }
     }
   }
 
-  String _newId(String prefix) => '$prefix-${DateTime.now().microsecondsSinceEpoch}';
+  String _newId(String prefix) =>
+      '$prefix-${DateTime.now().microsecondsSinceEpoch}';
 }
