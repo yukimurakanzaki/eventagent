@@ -144,3 +144,29 @@ Add future dated notes below this line.
 
 - MuMu testing exposed that the money-entry dialog silently defaulted to `Pengeluaran`. A user who entered an amount and note without deliberately changing the type would not increase the participant-payment total.
 - The dialog now requires an explicit transaction type, explains that `Pembayaran peserta` requires a selected participant, and the controller rejects participant payments/refunds that have no valid participant. Unit and widget tests cover the calculation and the missing-type guard.
+
+## 2026-09-07 Focused mobile UI refresh
+
+- Added a labelled, persistent `Catat transaksi` floating shortcut on every authenticated tab. It opens one explicit transaction form; during a sync conflict, the same position instead directs the user to resolve the conflict.
+- Reworked the transaction form for recognition and error prevention: four visible transaction choices, conditional participant selection, formatted rupiah input, outlined fields, inline guidance, and a disabled save action until the form is complete.
+- Reduced repeated event-header height, placed report sharing actions before the long preview, grouped active and cancelled participants, clarified healthy offline status, and made confirmation resend contextual.
+- Local verification covers analyzer, all tests, and an emulator visual pass. Usability validation with 2–3 treasurers aged 50+ remains a separate manual step.
+
+## 2026-09-07 Event editor narrow-screen repair
+
+- Replaced the compressed two-column date row with full-width, 56dp start and end date controls; widened the responsive dialog inset, made the form vertically scannable, and kept the action row visible while the fields scroll.
+- Added a 320dp / 200% text-scale widget check and visually inspected the repaired editor on MuMu. Event validation, sponsor locking, confirmation, and audit behavior remain unchanged.
+
+## 2026-09-07 Refund dialog lifecycle repair
+
+- Reproduced Flutter's `_dependents.isEmpty` assertion while saving a participant refund: the form's text controllers were disposed before the dialog route and its participant dropdown had finished leaving the widget tree.
+- Refund and cancellation dialogs now return the selected data first, then apply the cashbook mutation after the route closes. Widget coverage verifies cancellation and a selected participant refund; `flutter analyze` and the full test suite pass.
+
+## 2026-09-08 Refund accounting guard
+
+- Fixed the cancellation path so `Refund penuh` creates an explicit refund transaction for the participant's remaining paid amount, while `Refund sebagian` requires a valid amount before cancelling the participant.
+- Manual refund entry now lists only participants with refundable value, shows the available maximum, and rejects any refund above the participant's net payment. Controller and widget regression coverage covers full refund creation, partial-refund caps, and over-refund rejection.
+
+## 2026-09-08 Net payment status after refund
+
+- Fixed the participant status and report display to use net payment (`participant payments - refunds`) rather than gross payment. A participant who was fully paid and receives a partial refund now shows `Sebagian`, with gross payment, refund, and net value visible for auditability.

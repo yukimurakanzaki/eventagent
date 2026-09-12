@@ -225,6 +225,8 @@ class _LoginPageState extends State<LoginPage> {
     final pending = _mode == _Mode.confirmation;
     final register = _mode == _Mode.signUp;
     final reset = _mode == _Mode.reset;
+    final canResendConfirmation =
+        pending || (_error?.contains('Email belum dikonfirmasi') ?? false);
     final title = pending
         ? 'Periksa email atau masuk'
         : register
@@ -378,7 +380,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
-                    if (!register && !reset)
+                    if (canResendConfirmation)
                       TextButton(
                         key: const Key('auth-resend'),
                         onPressed: _mailBlocked ? null : _resend,

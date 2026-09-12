@@ -7,6 +7,8 @@ import 'package:wargakas_mobile/cashbook_controller.dart';
 import 'package:wargakas_mobile/cashbook_models.dart';
 import 'package:wargakas_mobile/cashbook_sync.dart';
 import 'package:wargakas_mobile/reminder_notifier.dart';
+import 'package:timezone/data/latest.dart' as tz_data;
+import 'package:timezone/timezone.dart' as tz;
 
 class RecordingReminderNotifier implements ReminderNotifier {
   final scheduled = <String>[];
@@ -112,7 +114,7 @@ void main() {
     return controller
         .addReminder(
           title: 'Bayar uang muka penginapan',
-          dueAt: DateTime(2026, 8, 30, 10),
+          dueAt: DateTime.now().add(const Duration(days: 7)),
           note: 'Konfirmasi ke ketua.',
         )
         .then((_) {
@@ -146,6 +148,40 @@ void main() {
       expect(controller.pendingOperations, isEmpty);
     },
   );
+
+  test(
+    'rejects participants over capacity before queuing an offline change',
+    () async {
+      final demo = CashbookSnapshot.demo();
+      final activeCount = demo.participants
+          .where((item) => item.state == ParticipantState.active)
+          .length;
+      final controller = CashbookController.forTesting(
+        initial: demo.copyWith(
+          event: demo.event.copyWith(participantCapacity: activeCount),
+        ),
+      );
+
+      final error = await controller.addParticipant('Peserta kelebihan');
+
+      expect(error, contains('Kapasitas'));
+      expect(controller.pendingOperations, isEmpty);
+    },
+  );
+
+  test('links a replacement only to a cancelled participant', () async {
+    final controller = CashbookController.forTesting();
+    final cancelled = controller.participants.first;
+    await controller.cancelParticipant(cancelled, RefundPolicy.none);
+
+    final error = await controller.addParticipant(
+      'Peserta Pengganti',
+      replacementForId: cancelled.id,
+    );
+
+    expect(error, isNull);
+    expect(controller.participants.last.replacementForId, cancelled.id);
+  });
 
   test('does not add a sponsor after participant payments start', () async {
     final controller = CashbookController.forTesting();
@@ -183,6 +219,144 @@ void main() {
   );
 
   test(
+    'cancelling with a full refund records the paid amount explicitly',
+    () async {
+      final controller = CashbookController.forTesting();
+      final participant = controller.participants.first;
+      final balanceBefore = controller.balance;
+
+      final saved = await controller.cancelParticipant(
+        participant,
+        RefundPolicy.full,
+      );
+
+      expect(saved, isTrue);
+      expect(
+        controller.participants
+            .singleWhere((item) => item.id == participant.id)
+            .state,
+        ParticipantState.cancelled,
+      );
+      final refund = controller.transactions.last;
+      expect(refund.type, TransactionType.refund);
+      expect(refund.participantId, participant.id);
+      expect(refund.amount, 1850000);
+      expect(controller.balance, balanceBefore - refund.amount);
+    },
+  );
+
+  test('partial refunds are capped by the participant net payment', () async {
+    final controller = CashbookController.forTesting();
+    final participant = controller.participants.first;
+    final transactionCount = controller.transactions.length;
+
+    final rejected = await controller.cancelParticipant(
+      participant,
+      RefundPolicy.partial,
+      partialRefundAmount: 1850001,
+    );
+    expect(rejected, isFalse);
+    expect(controller.transactions, hasLength(transactionCount));
+    expect(
+      controller.participants
+          .singleWhere((item) => item.id == participant.id)
+          .state,
+      ParticipantState.active,
+    );
+
+    final saved = await controller.cancelParticipant(
+      participant,
+      RefundPolicy.partial,
+      partialRefundAmount: 250000,
+    );
+    expect(saved, isTrue);
+    expect(controller.transactions.last.type, TransactionType.refund);
+    expect(controller.transactions.last.amount, 250000);
+  });
+
+  test(
+    'keeps cancellation and refund together in a sync conflict snapshot',
+    () async {
+      final remote = CashbookSnapshot.demo().copyWith(syncVersion: 4);
+      final controller = CashbookController.forTesting(
+        syncAdapter: ConflictThenSyncAdapter(remote),
+      );
+      final participant = controller.participants.first;
+
+      expect(
+        await controller.cancelParticipant(participant, RefundPolicy.full),
+        isTrue,
+      );
+
+      final conflict = controller.syncConflict;
+      expect(conflict, isNotNull);
+      final local = CashbookSnapshot.fromJson(conflict!.localSnapshot);
+      expect(
+        local.participants
+            .singleWhere((item) => item.id == participant.id)
+            .state,
+        ParticipantState.cancelled,
+      );
+      expect(
+        local.transactions.any(
+          (item) =>
+              item.type == TransactionType.refund &&
+              item.participantId == participant.id,
+        ),
+        isTrue,
+      );
+    },
+  );
+
+  test('rejects a manual refund above a participant net payment', () async {
+    final controller = CashbookController.forTesting();
+    final paidParticipant = controller.participants.first;
+    final unpaidParticipant = controller.participants.last;
+    final transactionCount = controller.transactions.length;
+
+    final overRefunded = await controller.recordTransaction(
+      type: TransactionType.refund,
+      amount: 1850001,
+      description: 'Terlalu besar',
+      participantId: paidParticipant.id,
+    );
+    final refundWithoutPayment = await controller.recordTransaction(
+      type: TransactionType.refund,
+      amount: 1,
+      description: 'Tidak ada pembayaran',
+      participantId: unpaidParticipant.id,
+    );
+
+    expect(overRefunded, isFalse);
+    expect(refundWithoutPayment, isFalse);
+    expect(controller.transactions, hasLength(transactionCount));
+  });
+
+  test('a participant payment status uses the net amount after a refund', () {
+    final snapshot = CashbookSnapshot.demo();
+    const participantId = 'p-sari';
+    final transactions = [
+      ...snapshot.transactions,
+      TransactionRecord(
+        id: 'refund-sari',
+        type: TransactionType.refund,
+        amount: 10000,
+        description: 'Pengembalian kelebihan bayar',
+        participantId: participantId,
+        createdAt: DateTime(2026, 9, 8),
+      ),
+    ];
+
+    expect(participantPaid(transactions, participantId), 1850000);
+    expect(refundTotalForParticipant(transactions, participantId), 10000);
+    expect(participantNetPaid(transactions, participantId), 1840000);
+    expect(
+      paymentStatus(participantNetPaid(transactions, participantId), 1850000),
+      'Sebagian',
+    );
+  });
+
+  test(
     'does not record a participant payment without a valid participant',
     () async {
       final controller = CashbookController.forTesting();
@@ -206,7 +380,7 @@ void main() {
 
     await controller.addReminder(
       title: 'Kumpulkan tahap 2',
-      dueAt: DateTime(2026, 9, 1, 9),
+      dueAt: DateTime.now().add(const Duration(days: 7)),
     );
     final reminder = controller.reminders.last;
 
@@ -313,4 +487,52 @@ void main() {
       );
     },
   );
+
+  test('retries queued changes after a transient sync failure', () async {
+    final adapter = _FailOnceSyncAdapter();
+    final controller = CashbookController.forTesting(syncAdapter: adapter);
+
+    await controller.addParticipant('Tetap Tersimpan');
+    expect(controller.pendingOperations, hasLength(1));
+
+    await controller.retryPendingSync();
+    expect(controller.pendingOperations, isEmpty);
+    expect(adapter.pushes, 2);
+  });
+
+  test('delays quiet-hour reminders until 07:00 in the device time zone', () {
+    tz_data.initializeTimeZones();
+    final jakarta = tz.getLocation('Asia/Jakarta');
+
+    final late = scheduleAfterQuietHours(
+      tz.TZDateTime(jakarta, 2026, 9, 8, 20),
+    );
+    final early = scheduleAfterQuietHours(
+      tz.TZDateTime(jakarta, 2026, 9, 8, 6, 30),
+    );
+    final daytime = scheduleAfterQuietHours(
+      tz.TZDateTime(jakarta, 2026, 9, 8, 9),
+    );
+
+    expect(late, tz.TZDateTime(jakarta, 2026, 9, 9, 7));
+    expect(early, tz.TZDateTime(jakarta, 2026, 9, 8, 7));
+    expect(daytime, tz.TZDateTime(jakarta, 2026, 9, 8, 9));
+  });
+}
+
+class _FailOnceSyncAdapter implements CashbookSyncAdapter {
+  var pushes = 0;
+
+  @override
+  Future<CashbookSnapshot?> load() async => null;
+
+  @override
+  Future<SyncResult> push({
+    required CashbookSnapshot snapshot,
+    required SyncOperation operation,
+  }) async {
+    pushes += 1;
+    if (pushes == 1) throw StateError('temporary offline');
+    return SyncResult.synced(version: snapshot.syncVersion + 1);
+  }
 }

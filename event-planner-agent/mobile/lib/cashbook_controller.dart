@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import 'cashbook_calculations.dart';
@@ -19,6 +21,7 @@ class CashbookController extends ChangeNotifier {
   final CashbookSyncAdapter? _syncAdapter;
   CashbookSnapshot _snapshot;
   String? _syncError;
+  Timer? _retryTimer;
 
   CashbookSnapshot get snapshot => _snapshot;
   EventRecord get event => _snapshot.event;
@@ -56,6 +59,9 @@ class CashbookController extends ChangeNotifier {
     if (saved == null || remote != null) await store.save(controller.snapshot);
     await controller._schedulePendingReminders();
     await controller._flushPending();
+    controller._retryTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      controller._flushPending();
+    });
     return controller;
   }
 
@@ -72,10 +78,27 @@ class CashbookController extends ChangeNotifier {
     );
   }
 
-  Future<void> addParticipant(String name, {String? replacementForId}) async {
-    if (isReadOnly) return;
+  Future<String?> addParticipant(
+    String name, {
+    String? replacementForId,
+  }) async {
+    if (isReadOnly) return 'Selesaikan konflik data sebelum menambah peserta.';
     final trimmedName = name.trim();
-    if (trimmedName.isEmpty) return;
+    if (trimmedName.isEmpty) return 'Nama peserta wajib diisi.';
+    final activeCount = participants
+        .where((item) => item.state == ParticipantState.active)
+        .length;
+    if (activeCount >= event.participantCapacity) {
+      return 'Kapasitas ${event.participantCapacity} peserta aktif sudah penuh.';
+    }
+    if (replacementForId != null &&
+        !participants.any(
+          (item) =>
+              item.id == replacementForId &&
+              item.state == ParticipantState.cancelled,
+        )) {
+      return 'Peserta pengganti harus menggantikan peserta yang dibatalkan.';
+    }
     final participant = ParticipantRecord(
       id: _newId('participant'),
       name: trimmedName,
@@ -88,52 +111,124 @@ class CashbookController extends ChangeNotifier {
       action: 'upsert',
       payload: participant.toJson(),
     );
+    return null;
   }
 
-  Future<void> editParticipant(ParticipantRecord participant) async {
-    if (isReadOnly) return;
+  Future<String?> editParticipant(ParticipantRecord participant) async {
+    if (isReadOnly) return 'Selesaikan konflik data sebelum mengedit peserta.';
+    final trimmedName = participant.name.trim();
+    if (trimmedName.isEmpty) return 'Nama peserta wajib diisi.';
+    final edited = participant.copyWith(name: trimmedName);
     final updated = participants
-        .map((item) => item.id == participant.id ? participant : item)
+        .map((item) => item.id == edited.id ? edited : item)
         .toList();
     await _commit(
       _snapshot.copyWith(participants: updated),
       entity: 'participant',
-      entityId: participant.id,
+      entityId: edited.id,
       action: 'upsert',
-      payload: participant.toJson(),
+      payload: edited.toJson(),
     );
+    return null;
   }
 
-  Future<void> cancelParticipant(
+  Future<bool> cancelParticipant(
     ParticipantRecord participant,
-    RefundPolicy policy,
-  ) async {
-    if (isReadOnly) return;
-    await editParticipant(
-      participant.copyWith(
-        state: ParticipantState.cancelled,
-        refundPolicy: policy,
-        cancelledAt: DateTime.now(),
-      ),
+    RefundPolicy policy, {
+    int partialRefundAmount = 0,
+  }) async {
+    if (isReadOnly) return false;
+    final refundable = refundableAmountForParticipant(
+      transactions,
+      participant.id,
     );
+    final amount = switch (policy) {
+      RefundPolicy.full => refundable,
+      RefundPolicy.partial => partialRefundAmount,
+      RefundPolicy.none || RefundPolicy.undecided => 0,
+    };
+    if (policy == RefundPolicy.partial &&
+        (amount <= 0 || amount > refundable)) {
+      return false;
+    }
+    final cancelled = participant.copyWith(
+      state: ParticipantState.cancelled,
+      refundPolicy: policy,
+      cancelledAt: DateTime.now(),
+    );
+    final updatedParticipants = participants
+        .map((item) => item.id == participant.id ? cancelled : item)
+        .toList();
+    final operations = <SyncOperation>[
+      _operation(
+        entity: 'participant',
+        entityId: participant.id,
+        action: 'upsert',
+        payload: cancelled.toJson(),
+      ),
+    ];
+    var nextTransactions = transactions;
+    if (amount > 0) {
+      final refund = TransactionRecord(
+        id: _newId('transaction'),
+        type: TransactionType.refund,
+        amount: amount,
+        description: policy == RefundPolicy.full
+            ? 'Refund penuh untuk ${participant.name}'
+            : 'Refund sebagian untuk ${participant.name}',
+        createdAt: DateTime.now(),
+        participantId: participant.id,
+      );
+      nextTransactions = [...transactions, refund];
+      operations.add(
+        _operation(
+          entity: 'transaction',
+          entityId: refund.id,
+          action: 'create',
+          payload: refund.toJson(),
+        ),
+      );
+    }
+    await _commitBatch(
+      _snapshot.copyWith(
+        participants: updatedParticipants,
+        transactions: nextTransactions,
+      ),
+      operations,
+    );
+    return true;
   }
 
-  Future<void> recordTransaction({
+  Future<bool> recordTransaction({
     required TransactionType type,
     required int amount,
     required String description,
     String? participantId,
     String? relatedTransactionId,
   }) async {
-    if (isReadOnly) return;
-    if (amount <= 0 || description.trim().isEmpty) return;
-    if (type == TransactionType.sponsor && !canAddSponsor(transactions)) return;
+    if (isReadOnly) return false;
+    if (amount <= 0 || description.trim().isEmpty) return false;
+    if (type == TransactionType.sponsor && !canAddSponsor(transactions)) {
+      return false;
+    }
     if (type == TransactionType.participantPayment ||
         type == TransactionType.refund) {
       final hasParticipant =
           participantId != null &&
           participants.any((participant) => participant.id == participantId);
-      if (!hasParticipant) return;
+      if (!hasParticipant) return false;
+    }
+    if (type == TransactionType.participantPayment &&
+        !participants.any(
+          (participant) =>
+              participant.id == participantId &&
+              participant.state == ParticipantState.active,
+        )) {
+      return false;
+    }
+    if (type == TransactionType.refund &&
+        amount > refundableAmountForParticipant(transactions, participantId!)) {
+      return false;
     }
     final transaction = TransactionRecord(
       id: _newId('transaction'),
@@ -151,15 +246,21 @@ class CashbookController extends ChangeNotifier {
       action: 'create',
       payload: transaction.toJson(),
     );
+    return true;
   }
 
-  Future<void> addReminder({
+  Future<String?> addReminder({
     required String title,
     required DateTime dueAt,
     String note = '',
   }) async {
-    if (isReadOnly) return;
-    if (title.trim().isEmpty) return;
+    if (isReadOnly) {
+      return 'Selesaikan konflik data sebelum menambah pengingat.';
+    }
+    if (title.trim().isEmpty) return 'Judul pengingat wajib diisi.';
+    if (dueAt.isBefore(DateTime.now())) {
+      return 'Jatuh tempo sudah lewat. Pilih tanggal dan jam yang belum lewat.';
+    }
     final reminder = ReminderRecord(
       id: _newId('reminder'),
       title: title.trim(),
@@ -179,6 +280,7 @@ class CashbookController extends ChangeNotifier {
       dueAt: reminder.dueAt,
       note: reminder.note,
     );
+    return null;
   }
 
   Future<void> toggleReminder(ReminderRecord reminder) async {
@@ -234,6 +336,9 @@ class CashbookController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Lets the app retry queued offline changes as soon as connectivity returns.
+  Future<void> retryPendingSync() => _flushPending();
+
   String? validateEventUpdate(EventRecord next) {
     if (next.name.trim().isEmpty) return 'Nama acara wajib diisi.';
     if (next.endDate.isBefore(next.startDate)) {
@@ -250,6 +355,9 @@ class CashbookController extends ChangeNotifier {
         next.sponsorContribution < 0 ||
         next.openingBalance < 0) {
       return 'Nilai uang tidak boleh negatif.';
+    }
+    if (next.sponsorContribution + next.openingBalance > next.finalBudget) {
+      return 'Sponsor dan saldo awal tidak boleh melebihi anggaran final.';
     }
     final paymentsStarted = transactions.any(
       (item) => item.type == TransactionType.participantPayment,
@@ -323,21 +431,47 @@ class CashbookController extends ChangeNotifier {
     required Map<String, dynamic> payload,
   }) async {
     if (isReadOnly) return;
-    final operation = SyncOperation(
-      id: _newId('sync'),
+    final operation = _operation(
       entity: entity,
       entityId: entityId,
       action: action,
-      createdAt: DateTime.now(),
       payload: payload,
     );
+    await _commitBatch(next, [operation]);
+  }
+
+  SyncOperation _operation({
+    required String entity,
+    required String entityId,
+    required String action,
+    required Map<String, dynamic> payload,
+  }) => SyncOperation(
+    id: _newId('sync'),
+    entity: entity,
+    entityId: entityId,
+    action: action,
+    createdAt: DateTime.now(),
+    payload: payload,
+  );
+
+  Future<void> _commitBatch(
+    CashbookSnapshot next,
+    List<SyncOperation> operations,
+  ) async {
+    if (isReadOnly) return;
     final withQueue = next.copyWith(
-      pendingOperations: [...next.pendingOperations, operation],
+      pendingOperations: [...next.pendingOperations, ...operations],
     );
     await _store.save(withQueue);
     _snapshot = withQueue;
     notifyListeners();
     await _flushPending();
+  }
+
+  @override
+  void dispose() {
+    _retryTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _flushPending() async {

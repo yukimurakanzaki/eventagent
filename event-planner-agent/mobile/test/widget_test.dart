@@ -106,35 +106,138 @@ void main() {
     expect(find.text('Simpan pembatalan'), findsOneWidget);
   });
 
-  testWidgets('requires a transaction type before saving money', (
+  testWidgets('cancels a participant after its refund choice dialog closes', (
+    tester,
+  ) async {
+    final controller = CashbookController.forTesting();
+    await tester.pumpWidget(WargakasApp(controller: controller));
+
+    await tester.tap(find.text('Peserta'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Ibu Sari'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Batalkan peserta'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Simpan pembatalan'));
+    await tester.pumpAndSettle();
+
+    expect(
+      controller.participants
+          .singleWhere((participant) => participant.name == 'Ibu Sari')
+          .state,
+      ParticipantState.cancelled,
+    );
+  });
+
+  testWidgets('global transaction shortcut is available on every event tab', (
     tester,
   ) async {
     await tester.pumpWidget(
       WargakasApp(controller: CashbookController.forTesting()),
     );
 
-    await tester.tap(find.text('Uang'));
+    for (final tab in ['Ringkasan', 'Peserta', 'Uang', 'Laporan']) {
+      await tester.tap(find.text(tab).last);
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('global-transaction-shortcut')),
+        findsOneWidget,
+      );
+    }
+    await tester.tap(find.byKey(const Key('global-transaction-shortcut')));
     await tester.pumpAndSettle();
-    await tester.drag(find.byType(ListView), const Offset(0, -250));
-    await tester.pumpAndSettle();
-    final recordTransaction = find.ancestor(
-      of: find.text('Catat pemasukan atau pengeluaran'),
-      matching: find.byType(ListTile),
+    expect(find.text('Catat transaksi'), findsNWidgets(2));
+    expect(
+      tester
+          .widget<FilledButton>(
+            find.widgetWithText(FilledButton, 'Simpan transaksi'),
+          )
+          .onPressed,
+      isNull,
     );
-    await tester.tap(recordTransaction);
+  });
+
+  testWidgets('transaction shortcut saves a selected transaction', (
+    tester,
+  ) async {
+    final controller = CashbookController.forTesting();
+    await tester.pumpWidget(WargakasApp(controller: controller));
+
+    await tester.tap(find.byKey(const Key('global-transaction-shortcut')));
     await tester.pumpAndSettle();
+    await tester.tap(find.text('Pengeluaran'));
     await tester.enterText(
-      find.widgetWithText(TextField, 'Jumlah (rupiah)'),
+      find.byKey(const Key('transaction-amount')),
       '125000',
     );
     await tester.enterText(
-      find.widgetWithText(TextField, 'Keterangan'),
-      'Cicilan peserta',
+      find.byKey(const Key('transaction-description')),
+      'Uang muka bus',
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      tester
+          .widget<FilledButton>(
+            find.widgetWithText(FilledButton, 'Simpan transaksi'),
+          )
+          .onPressed,
+      isNotNull,
     );
     await tester.tap(find.text('Simpan transaksi'));
     await tester.pumpAndSettle();
+    expect(find.text('Transaksi berhasil disimpan.'), findsOneWidget);
+    expect(controller.transactions.last.amount, 125000);
+  });
 
-    expect(find.text('Jenis transaksi belum dipilih'), findsOneWidget);
+  testWidgets('transaction form reveals a participant only when needed', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      WargakasApp(controller: CashbookController.forTesting()),
+    );
+
+    await tester.tap(find.byKey(const Key('global-transaction-shortcut')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('transaction-participant')), findsNothing);
+
+    await tester.tap(find.text('Pembayaran peserta'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('transaction-participant')), findsOneWidget);
+
+    await tester.tap(find.text('Pengeluaran'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('transaction-participant')), findsNothing);
+  });
+
+  testWidgets('saves a participant refund after closing its form', (
+    tester,
+  ) async {
+    final controller = CashbookController.forTesting();
+    await tester.pumpWidget(WargakasApp(controller: controller));
+
+    await tester.tap(find.byKey(const Key('global-transaction-shortcut')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Refund peserta'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('transaction-participant')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.textContaining('Ibu Sari').last);
+    await tester.enterText(
+      find.byKey(const Key('transaction-amount')),
+      '50000',
+    );
+    await tester.enterText(
+      find.byKey(const Key('transaction-description')),
+      'Refund pembatalan',
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Simpan transaksi'));
+    await tester.pumpAndSettle();
+
+    expect(controller.transactions.last.type, TransactionType.refund);
+    expect(controller.transactions.last.participantId, 'p-sari');
+    expect(controller.transactions.last.amount, 50000);
   });
 
   testWidgets(
@@ -245,6 +348,38 @@ void main() {
     },
   );
 
+  testWidgets(
+    'keeps the event editor readable on a narrow screen at large text',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 700);
+      tester.view.devicePixelRatio = 1;
+      tester.view.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+        tester.view.platformDispatcher.clearTextScaleFactorTestValue();
+      });
+
+      await tester.pumpWidget(
+        WargakasApp(controller: CashbookController.forTesting()),
+      );
+      await tester.tap(find.byTooltip('Edit acara'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Tanggal acara'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel('Pilih tanggal Mulai, 12/09/2026'),
+        findsOneWidget,
+      );
+      expect(
+        find.bySemanticsLabel('Pilih tanggal Selesai, 14/09/2026'),
+        findsOneWidget,
+      );
+      expect(find.text('Tinjau perubahan'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('blocks edits and offers both conflict choices', (tester) async {
     final controller = CashbookController.forTesting(
       syncAdapter: WidgetConflictAdapter(),
@@ -253,11 +388,12 @@ void main() {
     await tester.pumpWidget(WargakasApp(controller: controller));
 
     expect(find.text('Pilih versi data sebelum melanjutkan'), findsOneWidget);
+    expect(find.text('Selesaikan konflik'), findsOneWidget);
     expect(
       find.byTooltip('Selesaikan konflik sebelum mengedit acara'),
       findsOneWidget,
     );
-    await tester.tap(find.text('Bandingkan'));
+    await tester.tap(find.byKey(const Key('global-transaction-shortcut')));
     await tester.pumpAndSettle();
 
     expect(find.text('Perangkat ini'), findsOneWidget);
@@ -278,8 +414,6 @@ void main() {
     );
 
     await tester.tap(find.text('Laporan'));
-    await tester.pumpAndSettle();
-    await tester.drag(find.byType(ListView), const Offset(0, -700));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Buat dan bagikan PDF'));
     await tester.pumpAndSettle();

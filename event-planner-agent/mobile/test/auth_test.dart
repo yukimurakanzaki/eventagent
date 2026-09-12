@@ -232,7 +232,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  for (final action in ['reset', 'resend']) {
+  for (final action in ['reset']) {
     testWidgets(
       '$action delivery failure never shows success and allows retry',
       (tester) async {
@@ -261,6 +261,22 @@ void main() {
       },
     );
   }
+
+  testWidgets('resend is shown only for a confirmation state', (tester) async {
+    final backend = FakeBackend();
+    await form(tester, backend);
+
+    expect(find.byKey(const Key('auth-resend')), findsNothing);
+    await tap(tester, 'auth-register');
+    await credentials(tester);
+    await tester.enterText(
+      find.byKey(const Key('auth-confirmation')),
+      'secret123',
+    );
+    await tap(tester, 'auth-submit');
+
+    expect(find.byKey(const Key('auth-resend')), findsOneWidget);
+  });
   group('Validation and errors', () {
     for (final email in [
       '',
@@ -471,16 +487,10 @@ void main() {
       expect(find.text(resetAcceptedMessage), findsOneWidget);
       expect(backend.calls, ['reset']);
       await tap(tester, 'auth-login');
-      expect(
-        tester
-            .widget<TextButton>(find.byKey(const Key('auth-resend')))
-            .onPressed,
-        isNull,
-      );
+      expect(find.byKey(const Key('auth-resend')), findsNothing);
       await tester.pump(const Duration(seconds: 61));
-      await tap(tester, 'auth-resend');
-      expect(backend.calls, ['reset', 'resend']);
-      expect(find.text(resendAcceptedMessage), findsOneWidget);
+      expect(find.byKey(const Key('auth-resend')), findsNothing);
+      expect(backend.calls, ['reset']);
     },
   );
 

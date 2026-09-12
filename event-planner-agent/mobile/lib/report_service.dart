@@ -31,16 +31,16 @@ class CashbookReport {
       .where((item) => item.type == TransactionType.refund)
       .fold(0, (sum, item) => sum + item.amount);
   int get expenses => expenseTotal(snapshot.transactions);
-  int get endingBalance => currentBalance(
-    snapshot.event,
-    snapshot.transactions,
-  );
+  int get endingBalance =>
+      currentBalance(snapshot.event, snapshot.transactions);
 
   String get whatsappText {
     final event = snapshot.event;
     final buffer = StringBuffer()
       ..writeln('*Laporan Wargakas - ${sanitizeReportText(event.name)}*')
-      ..writeln('${formatReportDate(event.startDate)} - ${formatReportDate(event.endDate)}')
+      ..writeln(
+        '${formatReportDate(event.startDate)} - ${formatReportDate(event.endDate)}',
+      )
       ..writeln()
       ..writeln('Saldo awal: ${formatReportRupiah(event.openingBalance)}')
       ..writeln('Sponsor: ${formatReportRupiah(sponsorIncome)}')
@@ -51,12 +51,17 @@ class CashbookReport {
       ..writeln()
       ..writeln('*Status peserta*');
     for (final participant in snapshot.participants) {
-      final paid = participantPaid(snapshot.transactions, participant.id);
+      final grossPaid = participantPaid(snapshot.transactions, participant.id);
+      final refunds = refundTotalForParticipant(
+        snapshot.transactions,
+        participant.id,
+      );
+      final netPaid = grossPaid - refunds;
       final status = participant.state == ParticipantState.cancelled
           ? 'Dibatalkan - ${refundPolicyLabelForReport(participant.refundPolicy)}'
-          : paymentStatus(paid, participantTarget(event));
+          : paymentStatus(netPaid, participantTarget(event));
       buffer.writeln(
-        '- ${sanitizeReportText(participant.name)}: $status, ${formatReportRupiah(paid)}',
+        '- ${sanitizeReportText(participant.name)}: $status, ${formatReportRupiah(netPaid)}${refunds == 0 ? '' : ' (bayar ${formatReportRupiah(grossPaid)}, refund ${formatReportRupiah(refunds)})'}',
       );
     }
     buffer
@@ -77,14 +82,21 @@ class CashbookReport {
     );
     final event = snapshot.event;
     final participantRows = snapshot.participants.map((participant) {
-      final paid = participantPaid(snapshot.transactions, participant.id);
+      final grossPaid = participantPaid(snapshot.transactions, participant.id);
+      final refunds = refundTotalForParticipant(
+        snapshot.transactions,
+        participant.id,
+      );
+      final netPaid = grossPaid - refunds;
       final status = participant.state == ParticipantState.cancelled
           ? 'Dibatalkan - ${refundPolicyLabelForReport(participant.refundPolicy)}'
-          : paymentStatus(paid, participantTarget(event));
+          : paymentStatus(netPaid, participantTarget(event));
       return [
         sanitizeReportText(participant.name),
         status,
-        formatReportRupiah(paid),
+        refunds == 0
+            ? formatReportRupiah(netPaid)
+            : '${formatReportRupiah(netPaid)}\nBayar ${formatReportRupiah(grossPaid)} • Refund ${formatReportRupiah(refunds)}',
       ];
     }).toList();
     final transactionRows = snapshot.transactions.map((transaction) {
@@ -247,7 +259,9 @@ class PlatformReportShareGateway implements ReportShareGateway {
         .toLowerCase()
         .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
         .replaceAll(RegExp(r'^-|-$'), '');
-    final file = File('${directory.path}/wargakas-${slug.isEmpty ? 'laporan' : slug}.pdf');
+    final file = File(
+      '${directory.path}/wargakas-${slug.isEmpty ? 'laporan' : slug}.pdf',
+    );
     await file.writeAsBytes(bytes, flush: true);
     await SharePlus.instance.share(
       ShareParams(
@@ -299,9 +313,14 @@ String sanitizeReportText(String value) {
     RegExp(r'[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}'),
     '[email disembunyikan]',
   );
-  sanitized = sanitized.replaceAll(
-    RegExp(r'(?<!\d)\+?\d[\d\s-]{7,}\d(?!\d)'),
-    '[nomor disembunyikan]',
+  // ponytail: a rupiah amount is strictly 1-3 digits then .ddd groups; anything
+  // else that long (accounts, phones, card numbers) gets redacted.
+  final rupiahAmount = RegExp(r'^\d{1,3}(\.\d{3})+$');
+  sanitized = sanitized.replaceAllMapped(
+    RegExp(r'(?<!\d)\+?\d[\d\s.-]{7,}\d(?!\d)'),
+    (match) => rupiahAmount.hasMatch(match[0]!)
+        ? match[0]!
+        : '[nomor disembunyikan]',
   );
   sanitized = sanitized.replaceAll(
     RegExp(

@@ -33,13 +33,15 @@ if ($BuildApk -and $BuildPilotApk) {
 if ($BuildPilotApk -and -not (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'android/key.properties'))) {
   throw 'Pilot signing is not configured. Run .\setup-pilot-signing.ps1 first.'
 }
-$flutterArgs = if ($BuildPilotApk) {
-  @('build', 'apk', '--release')
-} elseif ($BuildApk) {
-  @('build', 'apk', '--debug')
-} else {
-  @('run')
-}
+$flutterArgs = @(
+  if ($BuildPilotApk) {
+    'build', 'apk', '--release'
+  } elseif ($BuildApk) {
+    'build', 'apk', '--debug'
+  } else {
+    'run'
+  }
+)
 $flutterArgs += @(
   '--dart-define=WARGAKAS_APP_MODE=hosted',
   "--dart-define=SUPABASE_URL=$($config.SUPABASE_URL)",

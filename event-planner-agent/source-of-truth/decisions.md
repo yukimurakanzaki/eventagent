@@ -162,7 +162,13 @@ Decision: Distribute a release-signed APK outside the Play Store for the control
 
 Reasoning: This keeps the pilot narrow enough for one engineer while making financial edits explainable, conflict handling non-destructive, and handoff useful without a network connection.
 
+### 2026-09-08: Reminder recipient and timezone
+
+Decision: A reminder created by the chairperson notifies the treasurer. Production reminders follow the device timezone automatically. Quiet hours are 20:00–07:00 in the device timezone.
+
+Reasoning: The treasurer remains accountable for collections, deadlines, and financial reporting, while automatic device-timezone handling keeps deadline reminders understandable when travelling without adding timezone configuration to the MVP. The quiet-hours window prevents routine reminders from disturbing the community at night.
+
 ## Pending
 
 - Validate the PDF/WhatsApp handoff wording and cancellation refund policy with treasurers.
-- Validate reminder ownership, quiet hours, device timezone behavior, and notification wording with treasurers.
+- Validate notification wording with treasurers.

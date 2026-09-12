@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'cashbook_calculations.dart';
 import 'cashbook_controller.dart';
@@ -112,12 +113,26 @@ class WargakasApp extends StatelessWidget {
 }
 
 ThemeData wargakasTheme() {
+  const primary = Color(0xff006b5b);
   return ThemeData(
     colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color(0xff0b6b5c),
+      seedColor: primary,
       brightness: Brightness.light,
     ),
     useMaterial3: true,
+    scaffoldBackgroundColor: const Color(0xfff8faf8),
+    cardTheme: const CardThemeData(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+    ),
+    inputDecorationTheme: const InputDecorationTheme(
+      border: OutlineInputBorder(),
+      enabledBorder: OutlineInputBorder(),
+      focusedBorder: OutlineInputBorder(),
+      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    ),
+    listTileTheme: const ListTileThemeData(minVerticalPadding: 12),
   );
 }
 
@@ -158,7 +173,6 @@ class _EventHomePageState extends State<EventHomePage> {
     return AnimatedBuilder(
       animation: widget.controller,
       builder: (context, child) {
-        final title = _destinations[_selectedIndex].$1;
         return Scaffold(
           appBar: AppBar(
             title: const Text('Acara Saya'),
@@ -196,7 +210,6 @@ class _EventHomePageState extends State<EventHomePage> {
               children: [
                 _EventHeader(
                   event: widget.controller.event,
-                  title: title,
                   activeCount: widget.controller.participants
                       .where(
                         (participant) =>
@@ -213,6 +226,11 @@ class _EventHomePageState extends State<EventHomePage> {
               ],
             ),
           ),
+          floatingActionButton: _TransactionShortcut(
+            hasConflict: widget.controller.syncConflict != null,
+            onPressed: () => _openTransactionEntry(context),
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
           bottomNavigationBar: NavigationBar(
             selectedIndex: _selectedIndex,
             onDestinationSelected: (index) {
@@ -228,6 +246,27 @@ class _EventHomePageState extends State<EventHomePage> {
           ),
         );
       },
+    );
+  }
+
+  Future<void> _openTransactionEntry(BuildContext context) async {
+    if (widget.controller.syncConflict != null) {
+      await showConflictDialog(context, widget.controller);
+      return;
+    }
+    final saved = await showTransactionDialog(context, widget.controller);
+    if (!saved || !context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Semantics(
+          liveRegion: true,
+          child: Text('Transaksi berhasil disimpan.'),
+        ),
+        action: SnackBarAction(
+          label: 'Lihat di Uang',
+          onPressed: () => setState(() => _selectedIndex = 2),
+        ),
+      ),
     );
   }
 
@@ -271,66 +310,70 @@ class _EventHomePageState extends State<EventHomePage> {
 class _EventHeader extends StatelessWidget {
   const _EventHeader({
     required this.event,
-    required this.title,
     required this.activeCount,
     this.onEdit,
   });
 
   final EventRecord event;
-  final String title;
   final int activeCount;
   final VoidCallback? onEdit;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 24,
-              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-              child: Icon(
-                Icons.landscape_outlined,
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
-              ),
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 20,
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+            child: Icon(
+              Icons.landscape_outlined,
+              color: Theme.of(context).colorScheme.onPrimaryContainer,
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    event.name,
-                    style: Theme.of(context).textTheme.titleLarge
-                        ?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${formatDate(event.startDate)}–${formatDate(event.endDate)} • '
-                    '$activeCount/${event.participantCapacity} aktif',
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                ],
-              ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  event.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${formatDate(event.startDate)}–${formatDate(event.endDate)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  '$activeCount/${event.participantCapacity} peserta aktif',
+                  style: Theme.of(context).textTheme.labelLarge
+                      ?.copyWith(color: Theme.of(context).colorScheme.primary),
+                ),
+              ],
             ),
-            IconButton(
+          ),
+          Tooltip(
+            message: onEdit == null
+                ? 'Selesaikan konflik sebelum mengedit acara'
+                : 'Edit acara',
+            child: TextButton.icon(
               onPressed: onEdit,
-              tooltip: onEdit == null
-                  ? 'Selesaikan konflik sebelum mengedit acara'
-                  : 'Edit acara',
               icon: const Icon(Icons.edit_calendar_outlined),
+              label: const Text('Edit'),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -361,6 +404,36 @@ class _ConflictNotice extends StatelessWidget {
   }
 }
 
+class _TransactionShortcut extends StatelessWidget {
+  const _TransactionShortcut({
+    required this.hasConflict,
+    required this.onPressed,
+  });
+
+  final bool hasConflict;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = hasConflict ? 'Selesaikan konflik' : 'Catat transaksi';
+    return Semantics(
+      button: true,
+      label: label,
+      child: FloatingActionButton.extended(
+        key: const Key('global-transaction-shortcut'),
+        tooltip: label,
+        onPressed: onPressed,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        icon: Icon(
+          hasConflict ? Icons.compare_arrows_outlined : Icons.add_card_outlined,
+        ),
+        label: Text(label),
+      ),
+    );
+  }
+}
+
 class SummaryPage extends StatelessWidget {
   const SummaryPage({required this.controller, super.key});
 
@@ -374,20 +447,9 @@ class SummaryPage extends StatelessWidget {
     final reminders = [...controller.reminders]
       ..sort((a, b) => a.dueAt.compareTo(b.dueAt));
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
       children: [
-        Card(
-          color: Theme.of(context).colorScheme.primaryContainer,
-          child: ListTile(
-            leading: const Icon(Icons.wifi_off_outlined),
-            title: const Text('Mode offline siap'),
-            subtitle: Text(
-              controller.pendingOperations.isEmpty
-                  ? 'Tidak ada perubahan yang menunggu sinkronisasi.'
-                  : '${controller.pendingOperations.length} perubahan menunggu sinkronisasi.',
-            ),
-          ),
-        ),
+        _SyncStatusBanner(pendingCount: controller.pendingOperations.length),
         if (controller.syncError != null) ...[
           const SizedBox(height: 8),
           Card(
@@ -400,16 +462,9 @@ class SummaryPage extends StatelessWidget {
           ),
         ],
         const SizedBox(height: 12),
-        _MetricCard(
-          label: 'Saldo saat ini',
-          value: rupiah(controller.balance),
-          icon: Icons.account_balance_wallet_outlined,
-        ),
-        const SizedBox(height: 12),
-        _MetricCard(
-          label: 'Iuran per peserta',
-          value: rupiah(controller.contributionTarget),
-          icon: Icons.calculate_outlined,
+        _FinancialSummary(
+          balance: rupiah(controller.balance),
+          contribution: rupiah(controller.contributionTarget),
           helper:
               '(Anggaran − sponsor − saldo awal) ÷ kapasitas ${controller.event.participantCapacity} • $activeCount aktif',
         ),
@@ -436,6 +491,7 @@ class SummaryPage extends StatelessWidget {
         else
           for (final reminder in reminders.take(3))
             Card(
+              margin: const EdgeInsets.only(bottom: 8),
               child: CheckboxListTile(
                 value: reminder.isDone,
                 onChanged: controller.isReadOnly
@@ -457,6 +513,106 @@ class SummaryPage extends StatelessWidget {
   }
 }
 
+class _SyncStatusBanner extends StatelessWidget {
+  const _SyncStatusBanner({required this.pendingCount});
+
+  final int pendingCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Row(
+          children: [
+            const Icon(Icons.wifi_off_outlined),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                pendingCount == 0
+                    ? 'Tersimpan di perangkat • tidak ada perubahan menunggu sinkronisasi.'
+                    : '$pendingCount perubahan tersimpan dan menunggu sinkronisasi.',
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FinancialSummary extends StatelessWidget {
+  const _FinancialSummary({
+    required this.balance,
+    required this.contribution,
+    required this.helper,
+  });
+
+  final String balance;
+  final String contribution;
+  final String helper;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _SummaryAmount(
+              icon: Icons.account_balance_wallet_outlined,
+              label: 'Saldo saat ini',
+              value: balance,
+            ),
+            const Divider(height: 28),
+            _SummaryAmount(
+              icon: Icons.calculate_outlined,
+              label: 'Iuran per peserta',
+              value: contribution,
+            ),
+            const SizedBox(height: 6),
+            Text(helper),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SummaryAmount extends StatelessWidget {
+  const _SummaryAmount({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 28),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label),
+              Text(value, style: Theme.of(context).textTheme.headlineSmall),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class ParticipantsPage extends StatelessWidget {
   const ParticipantsPage({required this.controller, super.key});
 
@@ -464,10 +620,14 @@ class ParticipantsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sorted = [...controller.participants]
-      ..sort((a, b) => a.state.index.compareTo(b.state.index));
+    final active = controller.participants
+        .where((item) => item.state == ParticipantState.active)
+        .toList();
+    final cancelled = controller.participants
+        .where((item) => item.state == ParticipantState.cancelled)
+        .toList();
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
       children: [
         FilledButton.icon(
           onPressed: controller.isReadOnly
@@ -478,33 +638,31 @@ class ParticipantsPage extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          '${sorted.where((item) => item.state == ParticipantState.active).length} peserta aktif • kapasitas tetap ${controller.event.participantCapacity}',
+          '${active.length} peserta aktif • kapasitas tetap ${controller.event.participantCapacity}',
           style: Theme.of(context).textTheme.bodyLarge,
         ),
         const SizedBox(height: 8),
-        if (sorted.isEmpty)
+        if (controller.participants.isEmpty)
           const _EmptyState(
             icon: Icons.groups_outlined,
             title: 'Belum ada peserta',
             message: 'Tambahkan nama peserta untuk mulai mencatat pembayaran.',
           )
-        else
-          for (final participant in sorted)
-            _ParticipantTile(
-              participant: participant,
-              paidAmount: participantPaid(
-                controller.transactions,
-                participant.id,
-              ),
-              target: controller.contributionTarget,
-              onTap: controller.isReadOnly
-                  ? null
-                  : () => showParticipantActions(
-                      context,
-                      controller,
-                      participant,
-                    ),
+        else ...[
+          _ParticipantSection(
+            title: 'Peserta aktif',
+            participants: active,
+            controller: controller,
+          ),
+          if (cancelled.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            _ParticipantSection(
+              title: 'Dibatalkan',
+              participants: cancelled,
+              controller: controller,
             ),
+          ],
+        ],
       ],
     );
   }
@@ -520,10 +678,25 @@ class MoneyPage extends StatelessWidget {
     final participantIncome = controller.transactions
         .where((item) => item.type == TransactionType.participantPayment)
         .fold(0, (sum, item) => sum + item.amount);
+    final additionalIncome = controller.transactions
+        .where((item) => item.type == TransactionType.additionalContribution)
+        .fold(0, (sum, item) => sum + item.amount);
     final expense = expenseTotal(controller.transactions);
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
       children: [
+        Card(
+          color: Theme.of(context).colorScheme.primaryContainer,
+          child: ListTile(
+            leading: const Icon(Icons.account_balance_wallet_outlined),
+            title: const Text('Saldo saat ini'),
+            subtitle: Text(
+              rupiah(controller.balance),
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
         _MoneyRow(
           label: 'Anggaran final',
           value: rupiah(controller.event.finalBudget),
@@ -540,24 +713,12 @@ class MoneyPage extends StatelessWidget {
           label: 'Pembayaran peserta',
           value: rupiah(participantIncome),
         ),
+        _MoneyRow(
+          label: 'Kontribusi tambahan',
+          value: rupiah(additionalIncome),
+        ),
         const Divider(height: 24),
         _MoneyRow(label: 'Pengeluaran bersih', value: rupiah(expense)),
-        const SizedBox(height: 12),
-        Card(
-          child: ListTile(
-            leading: Icon(
-              Icons.add_circle_outline,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            title: const Text('Catat pemasukan atau pengeluaran'),
-            subtitle: const Text(
-              'Refund dicatat sebagai transaksi terpisah dan tidak menghapus riwayat.',
-            ),
-            onTap: controller.isReadOnly
-                ? null
-                : () => showTransactionDialog(context, controller),
-          ),
-        ),
         const SizedBox(height: 12),
         Card(
           color: Theme.of(context).colorScheme.errorContainer,
@@ -631,7 +792,7 @@ class _ReportPageState extends State<ReportPage> {
     final controller = widget.controller;
     final report = _report();
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
       children: [
         const Text(
           'Preview laporan',
@@ -640,6 +801,30 @@ class _ReportPageState extends State<ReportPage> {
         const SizedBox(height: 8),
         const Text(
           'Periksa nama, status, transaksi, dan saldo sebelum membagikan laporan.',
+        ),
+        if (_error != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            _error!,
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
+        ],
+        const SizedBox(height: 12),
+        FilledButton.icon(
+          onPressed: _busy ? null : () => _share(pdf: true),
+          icon: const Icon(Icons.picture_as_pdf_outlined),
+          label: Text(_busy ? 'Menyiapkan...' : 'Buat dan bagikan PDF'),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: _busy ? null : () => _share(pdf: false),
+          icon: const Icon(Icons.chat_outlined),
+          label: const Text('Bagikan pesan WhatsApp'),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Periksa penerima sebelum mengirim.',
+          textAlign: TextAlign.center,
         ),
         const SizedBox(height: 16),
         Card(
@@ -671,70 +856,68 @@ class _ReportPageState extends State<ReportPage> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 6),
                     child: Text(
-                      '${participant.name}: ${participant.state == ParticipantState.cancelled ? 'Dibatalkan - ${refundPolicyLabelForReport(participant.refundPolicy)}' : paymentStatus(participantPaid(controller.transactions, participant.id), controller.contributionTarget)}',
+                      '${participant.name}: ${participant.state == ParticipantState.cancelled ? 'Dibatalkan - ${refundPolicyLabelForReport(participant.refundPolicy)}' : paymentStatus(participantNetPaid(controller.transactions, participant.id), controller.contributionTarget)}',
                     ),
                   ),
               ],
             ),
           ),
         ),
-        if (_error != null) ...[
-          const SizedBox(height: 8),
-          Text(
-            _error!,
-            style: TextStyle(color: Theme.of(context).colorScheme.error),
-          ),
-        ],
-        const SizedBox(height: 16),
-        OutlinedButton.icon(
-          onPressed: _busy ? null : () => _share(pdf: true),
-          icon: const Icon(Icons.picture_as_pdf_outlined),
-          label: Text(_busy ? 'Menyiapkan...' : 'Buat dan bagikan PDF'),
-        ),
-        const SizedBox(height: 8),
-        FilledButton.icon(
-          onPressed: _busy ? null : () => _share(pdf: false),
-          icon: const Icon(Icons.chat_outlined),
-          label: const Text('Bagikan pesan WhatsApp'),
-        ),
-        const SizedBox(height: 12),
-        const Text(
-          'Gunakan menu berbagi Android dan pilih WhatsApp. Periksa penerima sebelum mengirim.',
-          textAlign: TextAlign.center,
-        ),
       ],
     );
   }
 }
 
-class _MetricCard extends StatelessWidget {
-  const _MetricCard({
-    required this.label,
-    required this.value,
-    required this.icon,
-    this.helper,
+class _ParticipantSection extends StatelessWidget {
+  const _ParticipantSection({
+    required this.title,
+    required this.participants,
+    required this.controller,
   });
 
-  final String label;
-  final String value;
-  final IconData icon;
-  final String? helper;
+  final String title;
+  final List<ParticipantRecord> participants;
+  final CashbookController controller;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        minVerticalPadding: 16,
-        leading: Icon(icon, size: 32),
-        title: Text(label),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(value, style: Theme.of(context).textTheme.headlineSmall),
-            if (helper != null) Text(helper!),
-          ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '$title (${participants.length})',
+          style: Theme.of(context).textTheme.titleMedium,
         ),
-      ),
+        const SizedBox(height: 8),
+        Card(
+          child: Column(
+            children: [
+              for (var index = 0; index < participants.length; index++) ...[
+                _ParticipantTile(
+                  participant: participants[index],
+                  grossPaidAmount: participantPaid(
+                    controller.transactions,
+                    participants[index].id,
+                  ),
+                  refundAmount: refundTotalForParticipant(
+                    controller.transactions,
+                    participants[index].id,
+                  ),
+                  target: controller.contributionTarget,
+                  onTap: controller.isReadOnly
+                      ? null
+                      : () => showParticipantActions(
+                          context,
+                          controller,
+                          participants[index],
+                        ),
+                ),
+                if (index < participants.length - 1) const Divider(height: 1),
+              ],
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -742,38 +925,55 @@ class _MetricCard extends StatelessWidget {
 class _ParticipantTile extends StatelessWidget {
   const _ParticipantTile({
     required this.participant,
-    required this.paidAmount,
+    required this.grossPaidAmount,
+    required this.refundAmount,
     required this.target,
     required this.onTap,
   });
 
   final ParticipantRecord participant;
-  final int paidAmount;
+  final int grossPaidAmount;
+  final int refundAmount;
   final int target;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final cancelled = participant.state == ParticipantState.cancelled;
+    final netPaidAmount = grossPaidAmount - refundAmount;
     final status = cancelled
         ? 'Dibatalkan • ${refundPolicyLabel(participant.refundPolicy)}'
-        : paymentStatus(paidAmount, target);
-    return Card(
-      child: ListTile(
-        minVerticalPadding: 10,
-        leading: CircleAvatar(
-          child: Icon(cancelled ? Icons.history : Icons.person_outline),
-        ),
-        title: Text(participant.name),
-        subtitle: Text(
-          cancelled ? 'Riwayat pembayaran tetap tersimpan' : rupiah(paidAmount),
-        ),
-        trailing: SizedBox(
-          width: 110,
-          child: Text(status, textAlign: TextAlign.end),
-        ),
-        onTap: onTap,
+        : paymentStatus(netPaidAmount, target);
+    final tone = cancelled
+        ? Theme.of(context).colorScheme.surfaceContainerHighest
+        : netPaidAmount >= target
+        ? Theme.of(context).colorScheme.primaryContainer
+        : Theme.of(context).colorScheme.secondaryContainer;
+    return ListTile(
+      minVerticalPadding: 10,
+      leading: CircleAvatar(
+        child: Icon(cancelled ? Icons.history : Icons.person_outline),
       ),
+      title: Text(participant.name),
+      subtitle: Text(
+        refundAmount == 0
+            ? rupiah(grossPaidAmount)
+            : 'Bayar ${rupiah(grossPaidAmount)} • Refund ${rupiah(refundAmount)}\nBersih ${rupiah(netPaidAmount)}',
+      ),
+      trailing: Container(
+        constraints: const BoxConstraints(maxWidth: 120),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        decoration: BoxDecoration(
+          color: tone,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          status,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.labelMedium,
+        ),
+      ),
+      onTap: onTap,
     );
   }
 }
@@ -829,15 +1029,44 @@ Future<void> showParticipantDialog(
   CashbookController controller,
 ) async {
   final nameController = TextEditingController();
+  String? replacementForId;
   await showDialog<void>(
     context: context,
     builder: (context) => AlertDialog(
       title: const Text('Tambah peserta'),
-      content: TextField(
-        controller: nameController,
-        autofocus: true,
-        textCapitalization: TextCapitalization.words,
-        decoration: const InputDecoration(labelText: 'Nama peserta'),
+      content: StatefulBuilder(
+        builder: (dialogContext, setState) => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              autofocus: true,
+              textCapitalization: TextCapitalization.words,
+              decoration: const InputDecoration(labelText: 'Nama peserta'),
+            ),
+            if (controller.participants.any(
+              (item) => item.state == ParticipantState.cancelled,
+            )) ...[
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                initialValue: replacementForId,
+                decoration: const InputDecoration(
+                  labelText: 'Menggantikan peserta (opsional)',
+                ),
+                items: controller.participants
+                    .where((item) => item.state == ParticipantState.cancelled)
+                    .map(
+                      (item) => DropdownMenuItem(
+                        value: item.id,
+                        child: Text(item.name),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) => setState(() => replacementForId = value),
+              ),
+            ],
+          ],
+        ),
       ),
       actions: [
         TextButton(
@@ -854,7 +1083,14 @@ Future<void> showParticipantDialog(
               );
               return;
             }
-            await controller.addParticipant(nameController.text);
+            final error = await controller.addParticipant(
+              nameController.text,
+              replacementForId: replacementForId,
+            );
+            if (error != null && context.mounted) {
+              await showInfo(context, 'Peserta belum ditambahkan', error);
+              return;
+            }
             if (context.mounted) Navigator.pop(context);
           },
           child: const Text('Simpan'),
@@ -920,10 +1156,20 @@ Future<void> showEditParticipantDialog(
         FilledButton(
           onPressed: () async {
             final name = nameController.text.trim();
-            if (name.isNotEmpty) {
-              await controller.editParticipant(
-                participant.copyWith(name: name),
+            if (name.isEmpty) {
+              await showInfo(
+                context,
+                'Nama belum diisi',
+                'Masukkan nama peserta terlebih dahulu.',
               );
+              return;
+            }
+            final error = await controller.editParticipant(
+              participant.copyWith(name: name),
+            );
+            if (error != null && context.mounted) {
+              await showInfo(context, 'Peserta belum diperbarui', error);
+              return;
             }
             if (context.mounted) Navigator.pop(context);
           },
@@ -940,55 +1186,110 @@ Future<void> showCancelParticipantDialog(
   CashbookController controller,
   ParticipantRecord participant,
 ) async {
-  var policy = participant.refundPolicy == RefundPolicy.undecided
+  final refundable = refundableAmountForParticipant(
+    controller.transactions,
+    participant.id,
+  );
+  var selectedPolicy = participant.refundPolicy == RefundPolicy.undecided
       ? RefundPolicy.none
       : participant.refundPolicy;
-  await showDialog<void>(
+  final partialRefundController = TextEditingController();
+  final draft = await showDialog<_CancellationDraft>(
     context: context,
-    builder: (context) => StatefulBuilder(
-      builder: (context, setState) => AlertDialog(
-        title: const Text('Batalkan peserta'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Riwayat pembayaran tetap disimpan. Pilih kebijakan refund:',
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<RefundPolicy>(
-              initialValue: policy,
-              items: RefundPolicy.values
-                  .map(
-                    (item) => DropdownMenuItem(
-                      value: item,
-                      child: Text(refundPolicyLabel(item)),
+    builder: (dialogContext) => StatefulBuilder(
+      builder: (dialogContext, setState) {
+        final partialAmount = parseRupiahInput(partialRefundController.text);
+        final partialValid = partialAmount > 0 && partialAmount <= refundable;
+        return AlertDialog(
+          title: const Text('Batalkan peserta'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Riwayat pembayaran tetap disimpan. Pilih kebijakan refund:',
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<RefundPolicy>(
+                  initialValue: selectedPolicy,
+                  items: RefundPolicy.values
+                      .where((item) => item != RefundPolicy.undecided)
+                      .map(
+                        (item) => DropdownMenuItem(
+                          value: item,
+                          child: Text(refundPolicyLabel(item)),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) =>
+                      setState(() => selectedPolicy = value ?? selectedPolicy),
+                ),
+                const SizedBox(height: 12),
+                Text('Maksimum refund: ${rupiah(refundable)}.'),
+                if (selectedPolicy == RefundPolicy.full)
+                  Text(
+                    refundable == 0
+                        ? 'Tidak ada pembayaran bersih yang dapat direfund.'
+                        : '${rupiah(refundable)} akan dicatat sebagai refund penuh.',
+                  ),
+                if (selectedPolicy == RefundPolicy.partial) ...[
+                  const SizedBox(height: 12),
+                  TextField(
+                    key: const Key('cancellation-refund-amount'),
+                    controller: partialRefundController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [RupiahTextInputFormatter()],
+                    onChanged: (_) => setState(() {}),
+                    decoration: InputDecoration(
+                      labelText: 'Nominal refund sebagian (rupiah)',
+                      errorText: partialRefundController.text.isEmpty
+                          ? null
+                          : partialValid
+                          ? null
+                          : 'Masukkan nominal dari Rp 1 sampai ${rupiah(refundable)}.',
                     ),
-                  )
-                  .toList(),
-              onChanged: (value) => setState(() => policy = value ?? policy),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Batal'),
+            ),
+            FilledButton(
+              onPressed: selectedPolicy != RefundPolicy.partial || partialValid
+                  ? () => Navigator.pop(
+                      dialogContext,
+                      _CancellationDraft(
+                        policy: selectedPolicy,
+                        partialRefundAmount: partialAmount,
+                      ),
+                    )
+                  : null,
+              child: const Text('Simpan pembatalan'),
             ),
           ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              await controller.cancelParticipant(participant, policy);
-              if (context.mounted) Navigator.pop(context);
-            },
-            child: const Text('Simpan pembatalan'),
-          ),
-        ],
-      ),
+        );
+      },
     ),
+  );
+  partialRefundController.dispose();
+  if (draft == null || !context.mounted) return;
+
+  // Pop the route before notifying the cashbook listeners. Updating while the
+  // dialog is still mounted can deactivate an inherited dropdown with active
+  // dependents, which triggers Flutter's `_dependents.isEmpty` assertion.
+  await controller.cancelParticipant(
+    participant,
+    draft.policy,
+    partialRefundAmount: draft.partialRefundAmount,
   );
 }
 
-Future<void> showTransactionDialog(
+Future<bool> showTransactionDialog(
   BuildContext context,
   CashbookController controller,
 ) async {
@@ -996,130 +1297,292 @@ Future<void> showTransactionDialog(
   String? participantId;
   final amountController = TextEditingController();
   final descriptionController = TextEditingController();
-  await showDialog<void>(
+  var showValidation = false;
+  final draft = await showDialog<_TransactionDraft>(
     context: context,
     builder: (context) => StatefulBuilder(
-      builder: (context, setState) => AlertDialog(
-        title: const Text('Catat transaksi'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              DropdownButtonFormField<TransactionType>(
-                initialValue: type,
-                hint: const Text('Pilih jenis transaksi'),
-                decoration: const InputDecoration(labelText: 'Jenis transaksi'),
-                items: const [
-                  DropdownMenuItem(
-                    value: TransactionType.expense,
-                    child: Text('Pengeluaran'),
-                  ),
-                  DropdownMenuItem(
-                    value: TransactionType.participantPayment,
-                    child: Text('Pembayaran peserta'),
-                  ),
-                  DropdownMenuItem(
-                    value: TransactionType.additionalContribution,
-                    child: Text('Kontribusi tambahan'),
-                  ),
-                  DropdownMenuItem(
-                    value: TransactionType.refund,
-                    child: Text('Refund peserta'),
-                  ),
-                ],
-                onChanged: (value) => setState(() => type = value ?? type),
-              ),
-              if (type == TransactionType.participantPayment ||
-                  type == TransactionType.refund)
-                DropdownButtonFormField<String>(
-                  initialValue: participantId,
-                  hint: const Text('Pilih peserta'),
-                  items: controller.participants
-                      .map(
-                        (item) => DropdownMenuItem(
-                          value: item.id,
-                          child: Text(item.name),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (value) => setState(() => participantId = value),
-                ),
-              if (type == TransactionType.participantPayment)
-                const Padding(
-                  padding: EdgeInsets.only(top: 8),
-                  child: Text(
-                    'Pilih nama peserta agar nominal ini menambah total bayar peserta.',
-                  ),
-                ),
-              TextField(
-                controller: amountController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Jumlah (rupiah)'),
-              ),
-              TextField(
-                controller: descriptionController,
-                decoration: const InputDecoration(labelText: 'Keterangan'),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              final selectedType = type;
-              if (selectedType == null) {
-                await showInfo(
-                  context,
-                  'Jenis transaksi belum dipilih',
-                  'Pilih Pembayaran peserta untuk menambah total bayar peserta, atau pilih jenis transaksi lain.',
-                );
-                return;
-              }
-              final amount =
-                  int.tryParse(
-                    amountController.text
-                        .replaceAll('.', '')
-                        .replaceAll(',', ''),
-                  ) ??
-                  0;
-              if (amount <= 0 || descriptionController.text.trim().isEmpty) {
-                await showInfo(
-                  context,
-                  'Data belum lengkap',
-                  'Isi jumlah dan keterangan transaksi terlebih dahulu.',
-                );
-                return;
-              }
-              if ((selectedType == TransactionType.participantPayment ||
-                      selectedType == TransactionType.refund) &&
-                  participantId == null) {
-                await showInfo(
-                  context,
-                  'Peserta belum dipilih',
-                  'Pilih nama peserta untuk transaksi ini.',
-                );
-                return;
-              }
-              await controller.recordTransaction(
-                type: selectedType,
-                amount: amount,
-                description: descriptionController.text,
-                participantId: participantId,
+      builder: (dialogContext, setState) {
+        final amount = parseRupiahInput(amountController.text);
+        final needsParticipant =
+            type == TransactionType.participantPayment ||
+            type == TransactionType.refund;
+        final refundLimit = participantId == null
+            ? 0
+            : refundableAmountForParticipant(
+                controller.transactions,
+                participantId!,
               );
-              if (context.mounted) Navigator.pop(context);
-            },
-            child: const Text('Simpan transaksi'),
+        final valid =
+            type != null &&
+            amount > 0 &&
+            descriptionController.text.trim().isNotEmpty &&
+            (!needsParticipant || participantId != null) &&
+            (type != TransactionType.refund || amount <= refundLimit);
+        return AlertDialog(
+          title: const Text('Catat transaksi'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Pilih jenis transaksi',
+                  style: Theme.of(dialogContext).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 6),
+                RadioGroup<TransactionType>(
+                  groupValue: type,
+                  onChanged: (value) => setState(() {
+                    type = value;
+                    // Filters differ per type; keep the dropdown value valid.
+                    participantId = null;
+                    showValidation = true;
+                  }),
+                  child: const Column(
+                    children: [
+                      _TransactionTypeChoice(
+                        value: TransactionType.participantPayment,
+                        icon: Icons.person_add_alt_1_outlined,
+                        label: 'Pembayaran peserta',
+                      ),
+                      _TransactionTypeChoice(
+                        value: TransactionType.expense,
+                        icon: Icons.receipt_long_outlined,
+                        label: 'Pengeluaran',
+                      ),
+                      _TransactionTypeChoice(
+                        value: TransactionType.additionalContribution,
+                        icon: Icons.volunteer_activism_outlined,
+                        label: 'Kontribusi tambahan',
+                      ),
+                      _TransactionTypeChoice(
+                        value: TransactionType.refund,
+                        icon: Icons.reply_all_outlined,
+                        label: 'Refund peserta',
+                      ),
+                    ],
+                  ),
+                ),
+                if (showValidation && type == null)
+                  const _FieldError('Pilih jenis transaksi terlebih dahulu.'),
+                if (needsParticipant) ...[
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    key: const Key('transaction-participant'),
+                    initialValue: participantId,
+                    decoration: InputDecoration(
+                      labelText: 'Peserta',
+                      errorText: showValidation && participantId == null
+                          ? 'Pilih peserta untuk transaksi ini.'
+                          : null,
+                    ),
+                    hint: const Text('Pilih peserta'),
+                    items: controller.participants
+                        .where(
+                          (item) =>
+                              (type != TransactionType.participantPayment ||
+                                  item.state == ParticipantState.active) &&
+                              (type != TransactionType.refund ||
+                                  refundableAmountForParticipant(
+                                        controller.transactions,
+                                        item.id,
+                                      ) >
+                                      0),
+                        )
+                        .map(
+                          (item) => DropdownMenuItem(
+                            value: item.id,
+                            child: Text(
+                              type == TransactionType.refund
+                                  ? '${item.name} • tersedia ${rupiah(refundableAmountForParticipant(controller.transactions, item.id))}'
+                                  : item.name,
+                            ),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) => setState(() {
+                      participantId = value;
+                      showValidation = true;
+                    }),
+                  ),
+                  if (type == TransactionType.participantPayment)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 6),
+                      child: Text(
+                        'Nominal ini akan menambah total pembayaran peserta.',
+                      ),
+                    ),
+                  if (type == TransactionType.refund && participantId != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Text(
+                        'Maksimum refund peserta ini: ${rupiah(refundLimit)}.',
+                      ),
+                    ),
+                ],
+                const SizedBox(height: 12),
+                TextField(
+                  key: const Key('transaction-amount'),
+                  controller: amountController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [RupiahTextInputFormatter()],
+                  onChanged: (_) => setState(() => showValidation = true),
+                  decoration: InputDecoration(
+                    labelText: 'Jumlah (rupiah)',
+                    helperText: 'Contoh: 125.000',
+                    errorText: showValidation && amount <= 0
+                        ? 'Masukkan jumlah lebih dari Rp 0.'
+                        : type == TransactionType.refund &&
+                              participantId != null &&
+                              amount > refundLimit
+                        ? 'Refund tidak boleh melebihi ${rupiah(refundLimit)}.'
+                        : null,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  key: const Key('transaction-description'),
+                  controller: descriptionController,
+                  textCapitalization: TextCapitalization.sentences,
+                  onChanged: (_) => setState(() => showValidation = true),
+                  decoration: InputDecoration(
+                    labelText: 'Keterangan',
+                    helperText: 'Contoh: Uang muka bus',
+                    errorText:
+                        showValidation &&
+                            descriptionController.text.trim().isEmpty
+                        ? 'Isi keterangan transaksi.'
+                        : null,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ],
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Batal'),
+            ),
+            FilledButton(
+              onPressed: valid
+                  ? () => Navigator.pop(
+                      dialogContext,
+                      _TransactionDraft(
+                        type: type!,
+                        amount: amount,
+                        description: descriptionController.text,
+                        participantId: participantId,
+                      ),
+                    )
+                  : null,
+              child: const Text('Simpan transaksi'),
+            ),
+          ],
+        );
+      },
+    ),
+  );
+  if (draft == null || !context.mounted) return false;
+
+  // As with cancellation, commit after the dialog route has been removed so
+  // a refund's participant dropdown is never rebuilt while it is deactivating.
+  await controller.recordTransaction(
+    type: draft.type,
+    amount: draft.amount,
+    description: draft.description,
+    participantId: draft.participantId,
+  );
+  return true;
+}
+
+class _TransactionDraft {
+  const _TransactionDraft({
+    required this.type,
+    required this.amount,
+    required this.description,
+    required this.participantId,
+  });
+
+  final TransactionType type;
+  final int amount;
+  final String description;
+  final String? participantId;
+}
+
+class _CancellationDraft {
+  const _CancellationDraft({
+    required this.policy,
+    required this.partialRefundAmount,
+  });
+
+  final RefundPolicy policy;
+  final int partialRefundAmount;
+}
+
+class _TransactionTypeChoice extends StatelessWidget {
+  const _TransactionTypeChoice({
+    required this.value,
+    required this.icon,
+    required this.label,
+  });
+
+  final TransactionType value;
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return RadioListTile<TransactionType>(
+      value: value,
+      contentPadding: EdgeInsets.zero,
+      dense: false,
+      secondary: Icon(icon),
+      title: Text(label),
+    );
+  }
+}
+
+class _FieldError extends StatelessWidget {
+  const _FieldError(this.message);
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    liveRegion: true,
+    child: Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Text(
+        message,
+        style: TextStyle(color: Theme.of(context).colorScheme.error),
       ),
     ),
   );
-  amountController.dispose();
-  descriptionController.dispose();
+}
+
+int parseRupiahInput(String value) =>
+    int.tryParse(value.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+
+class RupiahTextInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final digits = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.isEmpty) return const TextEditingValue();
+    final formatted = digits.replaceFirst(RegExp(r'^0+'), '');
+    final value = formatted.isEmpty ? '0' : formatted;
+    final groups = <String>[];
+    for (var end = value.length; end > 0; end -= 3) {
+      groups.add(value.substring(end - 3 < 0 ? 0 : end - 3, end));
+    }
+    final text = groups.reversed.join('.');
+    return TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+  }
 }
 
 Future<void> showEventDialog(
@@ -1155,54 +1618,56 @@ Future<void> showEventDialog(
     builder: (dialogContext) => StatefulBuilder(
       builder: (dialogContext, setState) => AlertDialog(
         title: const Text('Edit acara'),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        contentPadding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+        actionsPadding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
         content: SizedBox(
           width: 480,
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TextField(
                   controller: nameController,
                   decoration: const InputDecoration(labelText: 'Nama acara'),
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () async {
-                          final picked = await showDatePicker(
-                            context: dialogContext,
-                            firstDate: DateTime(2020),
-                            lastDate: DateTime(2100),
-                            initialDate: startDate,
-                          );
-                          if (picked != null) {
-                            setState(() => startDate = picked);
-                          }
-                        },
-                        icon: const Icon(Icons.event_outlined),
-                        label: Text('Mulai ${formatDate(startDate)}'),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () async {
-                          final picked = await showDatePicker(
-                            context: dialogContext,
-                            firstDate: DateTime(2020),
-                            lastDate: DateTime(2100),
-                            initialDate: endDate,
-                          );
-                          if (picked != null) setState(() => endDate = picked);
-                        },
-                        icon: const Icon(Icons.event_available_outlined),
-                        label: Text('Selesai ${formatDate(endDate)}'),
-                      ),
-                    ),
-                  ],
+                const SizedBox(height: 16),
+                Text(
+                  'Tanggal acara',
+                  style: Theme.of(dialogContext).textTheme.titleSmall,
                 ),
+                const SizedBox(height: 8),
+                _EventDateButton(
+                  label: 'Mulai',
+                  value: startDate,
+                  icon: Icons.event_outlined,
+                  onPressed: () async {
+                    final picked = await showDatePicker(
+                      context: dialogContext,
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime(2100),
+                      initialDate: startDate,
+                    );
+                    if (picked != null) setState(() => startDate = picked);
+                  },
+                ),
+                const SizedBox(height: 8),
+                _EventDateButton(
+                  label: 'Selesai',
+                  value: endDate,
+                  icon: Icons.event_available_outlined,
+                  onPressed: () async {
+                    final picked = await showDatePicker(
+                      context: dialogContext,
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime(2100),
+                      initialDate: endDate,
+                    );
+                    if (picked != null) setState(() => endDate = picked);
+                  },
+                ),
+                const SizedBox(height: 16),
                 TextField(
                   controller: capacityController,
                   keyboardType: TextInputType.number,
@@ -1210,6 +1675,7 @@ Future<void> showEventDialog(
                     labelText: 'Kapasitas peserta',
                   ),
                 ),
+                const SizedBox(height: 12),
                 TextField(
                   controller: budgetController,
                   keyboardType: TextInputType.number,
@@ -1217,11 +1683,13 @@ Future<void> showEventDialog(
                     labelText: 'Anggaran final (Rp)',
                   ),
                 ),
+                const SizedBox(height: 12),
                 TextField(
                   controller: sponsorNameController,
                   enabled: !sponsorLocked,
                   decoration: const InputDecoration(labelText: 'Nama sponsor'),
                 ),
+                const SizedBox(height: 12),
                 TextField(
                   controller: sponsorAmountController,
                   enabled: !sponsorLocked,
@@ -1233,6 +1701,7 @@ Future<void> showEventDialog(
                         : null,
                   ),
                 ),
+                const SizedBox(height: 12),
                 TextField(
                   controller: openingController,
                   keyboardType: TextInputType.number,
@@ -1241,7 +1710,7 @@ Future<void> showEventDialog(
                   ),
                 ),
                 if (error.isNotEmpty) ...[
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
                   Text(
                     error,
                     style: TextStyle(
@@ -1330,6 +1799,56 @@ Future<void> showEventDialog(
     sponsorAmountController.dispose();
     openingController.dispose();
   });
+}
+
+class _EventDateButton extends StatelessWidget {
+  const _EventDateButton({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.onPressed,
+  });
+
+  final String label;
+  final DateTime value;
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final date = formatDate(value);
+    return Semantics(
+      button: true,
+      label: 'Pilih tanggal $label, $date',
+      child: OutlinedButton(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          alignment: Alignment.centerLeft,
+          minimumSize: const Size.fromHeight(56),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        ),
+        child: Row(
+          children: [
+            Icon(icon),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(text: '$label\n'),
+                    TextSpan(
+                      text: date,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 Future<void> showConflictDialog(
@@ -1554,7 +2073,7 @@ Future<void> showReminderDialog(
               onPressed: () async {
                 final picked = await showDatePicker(
                   context: context,
-                  firstDate: DateTime.now().subtract(const Duration(days: 1)),
+                  firstDate: DateTime.now(),
                   lastDate: DateTime(2030),
                   initialDate: dueAt,
                 );
@@ -1589,11 +2108,17 @@ Future<void> showReminderDialog(
                 );
                 return;
               }
-              await controller.addReminder(
+              final error = await controller.addReminder(
                 title: titleController.text,
                 dueAt: dueAt,
                 note: noteController.text,
               );
+              if (error != null) {
+                if (context.mounted) {
+                  await showInfo(context, 'Pengingat belum disimpan', error);
+                }
+                return;
+              }
               if (context.mounted) Navigator.pop(context);
             },
             child: const Text('Simpan pengingat'),
@@ -1691,11 +2216,31 @@ Future<void> showAccountDialog(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.person_outline),
-            title: Text(email ?? 'Akun Wargakas'),
-            subtitle: Text(roleLabel(role)),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(top: 2),
+                child: Icon(Icons.person_outline),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Email akun'),
+                    Text(
+                      email ?? 'Akun Wargakas',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(dialogContext).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(roleLabel(role)),
+                  ],
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 8),
           const Text(

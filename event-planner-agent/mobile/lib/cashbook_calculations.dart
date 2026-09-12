@@ -4,11 +4,13 @@ int participantTarget(EventRecord event) {
   final capacity = event.participantCapacity < 1
       ? 1
       : event.participantCapacity;
-  return ((event.finalBudget -
-              event.sponsorContribution -
-              event.openingBalance) /
-          capacity)
-      .round();
+  final target =
+      ((event.finalBudget -
+                  event.sponsorContribution -
+                  event.openingBalance) /
+              capacity)
+          .round();
+  return target < 0 ? 0 : target;
 }
 
 int incomeTotal(Iterable<TransactionRecord> transactions) {
@@ -106,3 +108,18 @@ int refundTotalForParticipant(
                 : transaction.amount),
       );
 }
+
+int refundableAmountForParticipant(
+  Iterable<TransactionRecord> transactions,
+  String participantId,
+) {
+  final remaining = participantNetPaid(transactions, participantId);
+  return remaining < 0 ? 0 : remaining;
+}
+
+int participantNetPaid(
+  Iterable<TransactionRecord> transactions,
+  String participantId,
+) =>
+    participantPaid(transactions, participantId) -
+    refundTotalForParticipant(transactions, participantId);
