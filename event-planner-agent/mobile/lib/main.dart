@@ -1609,9 +1609,7 @@ Future<void> showEventDialog(
   var startDate = current.startDate;
   var endDate = current.endDate;
   var error = '';
-  final sponsorLocked = controller.transactions.any(
-    (item) => item.type == TransactionType.participantPayment,
-  );
+  final sponsorLocked = !sponsorEditable(controller.transactions);
 
   await showDialog<void>(
     context: context,

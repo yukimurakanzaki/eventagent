@@ -1,13 +1,13 @@
 # QA Bug Tickets — Wargakas Mobile
 
-**STATUS: all rounds closed.** BUG-001..005, 007..011 fixed and verified.
-BUG-006 deferred — needs a product decision, do not fix silently.
+**STATUS: all rounds closed.** BUG-001..011 fixed and verified.
+BUG-006 closed in round 5 after the product call was made (see round 5).
 
-Final verification (2026-09-12): `flutter test` **105/105 pass**,
+Final verification (2026-09-15): `flutter test` **113/113 pass**,
 `flutter analyze` **No issues found!**. Baseline before this QA pass was 91 tests,
 all passing — every defect below was invisible to that suite.
 
-Regression cover lives in `mobile/test/qa_probe_test.dart` (QA-1..QA-14).
+Regression cover lives in `mobile/test/qa_probe_test.dart` (QA-1..QA-20).
 
 Round 1 — 2026-09-12. Tester: senior QA.
 Baseline: `flutter analyze` clean, `flutter test` 91/91 pass. All defects below are
@@ -147,6 +147,8 @@ desynchronises the report.
 either drop `TransactionType.sponsor` from `incomeTotal`, or make the report read
 sponsor income from transactions. Do not change this without a product call.
 
+**Resolved in round 5 (2026-09-15).** Product call made, fix verified. See round 5.
+
 
 ---
 ---
@@ -265,6 +267,110 @@ Leave `LocalReminderNotifier.schedule`'s defensive early return in place.
 
 ---
 
+# Round 5 — 2026-09-15 — BUG-006 verification
+
+Tester: senior QA (independent adversarial verification, developer report and tech
+lead review not relied on).
+Baseline at start of round: `flutter test` 107/107 pass, `flutter analyze` clean.
+After adding QA-15..QA-20: **`flutter test` 113/113 pass**, **`flutter analyze`
+`No issues found!`**.
+
+## Product call — do not re-litigate
+
+**Decision maker: tech lead. Date: 2026-09-15.**
+
+> `event.sponsorContribution` is the single source of truth for sponsor money.
+> Sponsor must never also be a ledger transaction that moves the balance.
+
+Rationale on record: the event field is validated against the final budget
+(BUG-004), is locked once participant payments begin, and feeds `participantTarget`.
+A `TransactionType.sponsor` ledger row has none of those properties, so the two can
+never be made to agree. The alternative option listed in BUG-006's fix direction
+(make the report read sponsor income from transactions) is **rejected** — it would
+have to drop the budget validation and the lock.
+
+## BUG-006 — verdict: PASS, closed
+
+Verified independently against the change, not against the developer's report.
+
+- `TransactionType.sponsor` removed from the `income` set in `incomeTotal`
+  (`lib/cashbook_calculations.dart:20`) — confirmed. `currentBalance` still adds
+  `event.sponsorContribution` exactly once (`:52`).
+- `recordTransaction` rejects `TransactionType.sponsor` unconditionally
+  (`lib/cashbook_controller.dart:212`) — confirmed.
+- `canAddSponsor` → `sponsorEditable` rename: zero stale references anywhere in
+  source or docs (only in pre-existing `.dart_tool` build artefacts). Both call
+  sites negate correctly — `lib/cashbook_controller.dart:361` and
+  `lib/main.dart:1612` are exact equivalents of the inline predicates they replaced.
+  The lock boundary is unchanged: the sponsor fields become uneditable on the first
+  `participantPayment`, and an expense or additional contribution does not lock them.
+- The enum member, `toJson`/`fromJson` and the `Sponsor` label
+  (`lib/report_service.dart:296`) are untouched, so a legacy or server-supplied
+  sponsor record still deserializes and still prints in the PDF transaction table —
+  it just contributes 0 to the balance.
+
+**Mutation checks (probes proven to have teeth, not vacuous):**
+
+1. Re-adding `TransactionType.sponsor` to the `income` set failed QA-15, QA-19 and
+   QA-20. QA-15 reproduced the original BUG-006 symptom exactly —
+   `Expected: <8450000>` (`endingBalance`) vs `Actual: <7950000>` (the sum of the
+   report's own printed rows), a gap equal to the sponsor record.
+2. Inverting `sponsorLocked` at `lib/main.dart:1612` failed QA-17 and QA-18
+   (`Expected: true / Actual: <false>` and `Expected: false / Actual: <true>`).
+
+## Transaction insertion paths — audited
+
+`recordTransaction` is **not** the only way a transaction enters state. Three paths
+exist:
+
+1. `recordTransaction` — now rejects sponsor.
+2. `cancelParticipant` — writes a refund straight through `_commitBatch`, bypassing
+   `recordTransaction`. Cannot produce a sponsor record.
+3. Deserialization — `bootstrap` (`remote ?? saved`) and
+   `resolveConflictWithRemote`. This path **can** introduce a sponsor record and
+   does not validate types.
+
+Path 3 is handled coherently: the record is kept (not dropped, no crash) and
+contributes 0. Covered by QA-20.
+
+## QA calls made during this round
+
+- **Three definitions of "income" (`lib/main.dart:1952`) — rejected as a ticket.**
+  Only one of the three is an actual duplicate. `CashbookReport`
+  (`participantIncome` / `additionalIncome`) and `MoneyPage`
+  (`lib/main.dart:678-683`) deliberately split income into the two separate rows the
+  treasurer reads — collapsing them into `incomeTotal` would undo BUG-001. The one
+  genuine duplicate is `_ConflictVersionCard`'s inline sum at `lib/main.dart:1952`,
+  which is now byte-equivalent to `incomeTotal`. It is a read-only informational card
+  in the conflict dialog, it sits one line above a `currentBalance(...)` call that
+  already uses the shared function, and any drift shows up as its own two lines
+  disagreeing on screen. Cost of a ticket exceeds the one-line substitution it would
+  ask for. Fold it into this branch if convenient; otherwise accept.
+- **The existing test `does not add a sponsor after participant payments start`
+  (`test/cashbook_test.dart:221`) is now tautological.** Sponsor is rejected
+  unconditionally, so it no longer proves anything about lock *timing*. Left in
+  place; QA-16 now covers the real boundary.
+- **The widget-level sponsor lock had zero coverage before this round.** The full
+  pre-existing suite (`cashbook_test` + `widget_test` + `report_test`, 42 tests)
+  passes with `sponsorLocked` inverted. The rename was therefore a silent-inversion
+  risk that nothing would have caught. Closed by QA-17 and QA-18.
+
+## New probes
+
+| Probe | Asserts |
+|-------|---------|
+| QA-15 | report breakdown reconciles to `endingBalance` with a sponsor record present |
+| QA-16 | sponsor lock engages on the first participant payment, not on an expense or extra contribution |
+| QA-17 | sponsor name/amount fields are enabled while no participant has paid |
+| QA-18 | sponsor name/amount fields are disabled, with the lock helper text, once a payment exists |
+| QA-19 | a stored sponsor record round-trips through JSON and keeps its `Sponsor` label |
+| QA-20 | a sponsor record arriving from the server survives conflict resolution and moves nothing |
+
+No new defects found. No lib/ changes made by QA.
+
+
+---
+
 # Closing notes
 
 ## Verified fixed
@@ -276,6 +382,7 @@ Leave `LocalReminderNotifier.schedule`'s defensive early return in place.
 | BUG-003 | Negative participant target, unpaid shown as Lunas | 1 |
 | BUG-004 | Event funding could exceed the final budget | 1 |
 | BUG-005 | Reminder body hardcoded another event's name | 1 |
+| BUG-006 | Sponsor income double-counted if a sponsor transaction existed | 1, fixed and verified in 5 |
 | BUG-007 | Participant renameable to a blank name | 2 |
 | BUG-008 | Blank rename silently discarded with no feedback | 2 |
 | BUG-009 | Dotted bank account numbers survived redaction | 2 |
@@ -294,7 +401,20 @@ Leave `LocalReminderNotifier.schedule`'s defensive early return in place.
 
 ## Still open — not defects, but not verified either
 
-- **BUG-006** (sponsor double-count) is latent and deferred pending a product call.
+- **Sponsor money that arrives after the first participant payment has no recording
+  path at all.** The event field is locked and a sponsor transaction is refused, so
+  the treasurer's only option is to log it as `Kontribusi tambahan`. This is a
+  consequence of the tech lead's round-5 product call, not a regression — the
+  pre-fix code refused it too (`canAddSponsor` was already false in that state).
+  Flagged so the limitation is a known product choice rather than a surprise. Raise
+  a product ticket if pilot treasurers hit it.
+- A legacy sponsor record makes the PDF's `Transaksi` table not sum to the printed
+  `Saldo akhir` — the row shows a rupiah amount that the balance deliberately
+  ignores. Accepted: it is the intended outcome of the product call, and only
+  reachable from server- or storage-supplied data, never from the app.
+- `CashbookReport.refunds` (`lib/report_service.dart:30`) is dead — no caller in
+  lib/ or test/. It also counts `refund` without netting `refundReversal`, unlike
+  `expenses`. Harmless while unused; delete it or fix it before anyone wires it up.
 - A dotted account number that happens to match the rupiah shape exactly
   (`123.456.789`) is preserved by the BUG-010 fix. Accepted: it is indistinguishable
   from an amount without more context.

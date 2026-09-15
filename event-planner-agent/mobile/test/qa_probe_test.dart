@@ -1,9 +1,12 @@
 // QA probe suite. Each test asserts the CORRECT behaviour; failures are bugs.
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wargakas_mobile/cashbook_calculations.dart';
 import 'package:wargakas_mobile/cashbook_controller.dart';
 import 'package:wargakas_mobile/cashbook_models.dart';
+import 'package:wargakas_mobile/cashbook_sync.dart';
 import 'package:wargakas_mobile/main.dart';
 import 'package:wargakas_mobile/reminder_notifier.dart';
 import 'package:wargakas_mobile/report_service.dart';
@@ -278,7 +281,243 @@ void main() {
       reason: 'reminder listed as open but no notification will ever fire',
     );
   });
+
+  // --- Round 5: BUG-006, sponsor as a single source of truth ---
+
+  test('QA-15 the report breakdown reconciles with a sponsor record present', () {
+    final snapshot = _snap(transactions: _mixedLedgerWithSponsor());
+    final report = CashbookReport(
+      snapshot: snapshot,
+      creatorRole: 'treasurer',
+      generatedAt: DateTime.now(),
+    );
+    expect(
+      snapshot.event.openingBalance +
+          report.sponsorIncome +
+          report.participantIncome +
+          report.additionalIncome -
+          report.expenses,
+      report.endingBalance,
+      reason: 'report rows do not sum to the ending balance it prints',
+    );
+    expect(
+      report.endingBalance,
+      currentBalance(
+        snapshot.event,
+        snapshot.transactions
+            .where((item) => item.type != TransactionType.sponsor)
+            .toList(),
+      ),
+      reason: 'the sponsor record moved the balance',
+    );
+  });
+
+  test('QA-16 the sponsor lock engages on the first participant payment, '
+      'not before', () async {
+    final controller = CashbookController.forTesting(
+      initial: _snap(transactions: const []),
+    );
+    final changed = controller.event.copyWith(
+      sponsorContribution: controller.event.sponsorContribution + 1,
+    );
+    expect(
+      controller.validateEventUpdate(changed),
+      isNull,
+      reason: 'sponsor locked before any participant payment',
+    );
+
+    await controller.recordTransaction(
+      type: TransactionType.expense,
+      amount: 100000,
+      description: 'Uang muka bus',
+    );
+    await controller.recordTransaction(
+      type: TransactionType.additionalContribution,
+      amount: 50000,
+      description: 'Iuran konsumsi',
+    );
+    expect(
+      controller.validateEventUpdate(changed),
+      isNull,
+      reason: 'an expense or extra contribution locked the sponsor early',
+    );
+
+    final active = controller.participants.firstWhere(
+      (item) => item.state == ParticipantState.active,
+    );
+    await controller.recordTransaction(
+      type: TransactionType.participantPayment,
+      amount: 100000,
+      description: 'Cicilan pertama',
+      participantId: active.id,
+    );
+    expect(
+      controller.validateEventUpdate(changed),
+      'Sponsor dikunci setelah pembayaran peserta dimulai.',
+      reason: 'sponsor stayed editable after the first participant payment',
+    );
+  });
+
+  testWidgets('QA-17 sponsor fields are editable until a participant pays', (
+    tester,
+  ) async {
+    final controller = CashbookController.forTesting(
+      initial: _snap(transactions: const []),
+    );
+    await tester.pumpWidget(WargakasApp(controller: controller));
+    await tester.tap(find.byTooltip('Edit acara'));
+    await tester.pumpAndSettle();
+
+    expect(
+      tester
+          .widget<TextField>(find.widgetWithText(TextField, 'Nama sponsor'))
+          .enabled,
+      isTrue,
+      reason: 'sponsor name disabled with no participant payment recorded',
+    );
+    expect(
+      tester
+          .widget<TextField>(
+            find.widgetWithText(TextField, 'Kontribusi sponsor (Rp)'),
+          )
+          .enabled,
+      isTrue,
+      reason: 'sponsor amount disabled with no participant payment recorded',
+    );
+    expect(
+      find.text('Dikunci karena pembayaran peserta sudah dimulai.'),
+      findsNothing,
+    );
+  });
+
+  testWidgets('QA-18 sponsor fields lock once a participant payment exists', (
+    tester,
+  ) async {
+    // The demo snapshot already carries participant payments.
+    final controller = CashbookController.forTesting();
+    await tester.pumpWidget(WargakasApp(controller: controller));
+    await tester.tap(find.byTooltip('Edit acara'));
+    await tester.pumpAndSettle();
+
+    expect(
+      tester
+          .widget<TextField>(find.widgetWithText(TextField, 'Nama sponsor'))
+          .enabled,
+      isFalse,
+      reason: 'sponsor name still editable after payments started',
+    );
+    expect(
+      tester
+          .widget<TextField>(
+            find.widgetWithText(TextField, 'Kontribusi sponsor (Rp)'),
+          )
+          .enabled,
+      isFalse,
+      reason: 'sponsor amount still editable after payments started',
+    );
+    expect(
+      find.text('Dikunci karena pembayaran peserta sudah dimulai.'),
+      findsOneWidget,
+    );
+  });
+
+  test('QA-19 a stored sponsor record still deserializes and keeps its label', () {
+    final snapshot = _snap(transactions: [_sponsorRecord()]);
+    final restored = CashbookSnapshot.fromJson(
+      Map<String, dynamic>.from(
+        jsonDecode(jsonEncode(snapshot.toJson())) as Map,
+      ),
+    );
+    expect(
+      restored.transactions.single.type,
+      TransactionType.sponsor,
+      reason: 'sponsor type no longer round-trips through storage',
+    );
+    expect(transactionTypeLabel(restored.transactions.single.type), 'Sponsor');
+    expect(
+      currentBalance(restored.event, restored.transactions),
+      currentBalance(restored.event, const []),
+      reason: 'a restored sponsor record moved the balance',
+    );
+  });
+
+  test('QA-20 a sponsor record arriving from the server is kept, not dropped, '
+      'and moves nothing', () async {
+    final controller = CashbookController.forTesting(
+      initial: _snap(transactions: const []),
+      syncAdapter: SponsorConflictAdapter(
+        _snap(transactions: [_sponsorRecord()]).copyWith(syncVersion: 2),
+      ),
+    );
+    await controller.addParticipant('Perubahan lokal');
+    expect(
+      controller.syncConflict,
+      isNotNull,
+      reason: 'fixture did not reach the conflict path',
+    );
+
+    await controller.resolveConflictWithRemote();
+    expect(
+      controller.transactions.map((item) => item.type),
+      contains(TransactionType.sponsor),
+      reason: 'the remote sponsor record was dropped instead of ignored',
+    );
+    expect(
+      controller.balance,
+      currentBalance(controller.event, const []),
+      reason: 'a remote sponsor record moved the balance',
+    );
+  });
 }
+
+class SponsorConflictAdapter implements CashbookSyncAdapter {
+  SponsorConflictAdapter(this.remote);
+
+  final CashbookSnapshot remote;
+
+  @override
+  Future<CashbookSnapshot?> load() async => null;
+
+  @override
+  Future<SyncResult> push({
+    required CashbookSnapshot snapshot,
+    required SyncOperation operation,
+  }) async => SyncResult.conflict(version: 2, remoteSnapshot: remote);
+}
+
+TransactionRecord _sponsorRecord() => TransactionRecord(
+  id: 'tx-sponsor-legacy',
+  type: TransactionType.sponsor,
+  amount: 500000,
+  description: 'Sponsor dari data lama',
+  createdAt: DateTime.now().subtract(const Duration(days: 30)),
+);
+
+List<TransactionRecord> _mixedLedgerWithSponsor() => [
+  _sponsorRecord(),
+  TransactionRecord(
+    id: 'tx-pay',
+    type: TransactionType.participantPayment,
+    amount: 1000000,
+    description: 'Cicilan pertama',
+    participantId: 'p-sari',
+    createdAt: DateTime.now().subtract(const Duration(days: 10)),
+  ),
+  TransactionRecord(
+    id: 'tx-extra',
+    type: TransactionType.additionalContribution,
+    amount: 250000,
+    description: 'Iuran konsumsi',
+    createdAt: DateTime.now().subtract(const Duration(days: 9)),
+  ),
+  TransactionRecord(
+    id: 'tx-exp',
+    type: TransactionType.expense,
+    amount: 300000,
+    description: 'Sewa bus',
+    createdAt: DateTime.now().subtract(const Duration(days: 8)),
+  ),
+];
 
 int participantPaidTotal(Iterable<TransactionRecord> transactions) =>
     transactions

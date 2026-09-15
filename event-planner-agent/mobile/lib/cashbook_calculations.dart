@@ -14,9 +14,11 @@ int participantTarget(EventRecord event) {
 }
 
 int incomeTotal(Iterable<TransactionRecord> transactions) {
+  // ponytail: sponsor money lives on event.sponsorContribution, which
+  // currentBalance already adds. Sponsor transactions contribute 0 here so a
+  // legacy persisted record still renders in the ledger without double-counting.
   const income = {
     TransactionType.participantPayment,
-    TransactionType.sponsor,
     TransactionType.additionalContribution,
   };
   return transactions
@@ -58,7 +60,8 @@ String paymentStatus(int paidAmount, int target) {
   return 'Belum bayar';
 }
 
-bool canAddSponsor(Iterable<TransactionRecord> transactions) {
+/// The sponsor field stays editable until the first participant payment.
+bool sponsorEditable(Iterable<TransactionRecord> transactions) {
   return !transactions.any(
     (transaction) => transaction.type == TransactionType.participantPayment,
   );

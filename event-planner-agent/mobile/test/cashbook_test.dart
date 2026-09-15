@@ -183,6 +183,41 @@ void main() {
     expect(controller.participants.last.replacementForId, cancelled.id);
   });
 
+  test('ignores a sponsor transaction in income and balance', () {
+    final snapshot = CashbookSnapshot.demo();
+    final transactions = [
+      ...snapshot.transactions,
+      TransactionRecord(
+        id: 'sponsor-1',
+        type: TransactionType.sponsor,
+        amount: 500000,
+        description: 'Sponsor lama',
+        createdAt: DateTime(2026, 1, 1),
+      ),
+    ];
+
+    expect(incomeTotal(transactions), incomeTotal(snapshot.transactions));
+    expect(
+      currentBalance(snapshot.event, transactions),
+      currentBalance(snapshot.event, snapshot.transactions),
+    );
+  });
+
+  test('does not add a sponsor even before participant payments', () async {
+    final controller = CashbookController.forTesting(
+      initial: CashbookSnapshot.demo().copyWith(transactions: const []),
+    );
+
+    final added = await controller.recordTransaction(
+      type: TransactionType.sponsor,
+      amount: 100000,
+      description: 'Sponsor tambahan',
+    );
+
+    expect(added, isFalse);
+    expect(controller.transactions, isEmpty);
+  });
+
   test('does not add a sponsor after participant payments start', () async {
     final controller = CashbookController.forTesting();
     final before = controller.transactions.length;

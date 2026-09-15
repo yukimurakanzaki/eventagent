@@ -208,9 +208,8 @@ class CashbookController extends ChangeNotifier {
   }) async {
     if (isReadOnly) return false;
     if (amount <= 0 || description.trim().isEmpty) return false;
-    if (type == TransactionType.sponsor && !canAddSponsor(transactions)) {
-      return false;
-    }
+    // Sponsor money is held on event.sponsorContribution, not in the ledger.
+    if (type == TransactionType.sponsor) return false;
     if (type == TransactionType.participantPayment ||
         type == TransactionType.refund) {
       final hasParticipant =
@@ -359,10 +358,7 @@ class CashbookController extends ChangeNotifier {
     if (next.sponsorContribution + next.openingBalance > next.finalBudget) {
       return 'Sponsor dan saldo awal tidak boleh melebihi anggaran final.';
     }
-    final paymentsStarted = transactions.any(
-      (item) => item.type == TransactionType.participantPayment,
-    );
-    if (paymentsStarted &&
+    if (!sponsorEditable(transactions) &&
         (next.sponsorName != event.sponsorName ||
             next.sponsorContribution != event.sponsorContribution)) {
       return 'Sponsor dikunci setelah pembayaran peserta dimulai.';
