@@ -1,4 +1,8 @@
 # Miscellaneous
+supabase.local.json
+android/key.properties
+*.jks
+*.keystore
 *.class
 *.log
 *.pyc
@@ -32,6 +36,8 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
+/android/build/
+/tmp/
 
 # Symbolication related
 app.*.symbols

@@ -1,4 +1,4 @@
-package com.example.wargakas_mobile
+package io.wargakas.mobile
 
 import io.flutter.embedding.android.FlutterActivity
 

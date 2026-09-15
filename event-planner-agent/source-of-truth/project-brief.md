@@ -32,7 +32,7 @@ Navigation is fixed as `Acara Saya → Ringkasan | Peserta | Uang | Laporan`.
 
 The prototype at `event-planner-agent/prototype` covers creating an event, adding/editing participants, final budget, sponsor contribution, opening balance/carry-over, visible automatic contribution calculation, participant payments (lunas, sebagian, belum bayar), expenses, current balance, cancellation/replacement without deleting history, additional contributions, report preview, and PDF/WhatsApp handoff states. It also includes contextual onboarding, tooltips, empty guidance, validation-oriented forms, and confirmation messages.
 
-The production mobile app must extend this with offline-first local storage, queued sync when signal returns, and local deadline reminders for collection and planning tasks. The fixed navigation remains `Acara Saya → Ringkasan | Peserta | Uang | Laporan`; reminders appear contextually in Ringkasan and the event detail rather than replacing the fixed navigation.
+The Android MVP supports one configurable event per workspace. Both treasurer and chairperson may edit the event, participants, money, reminders, and reports; only the treasurer manages workspace membership. It includes offline-first local storage, queued sync, explicit whole-version conflict resolution, local deadline reminders, offline PDF generation, and native sharing for PDF and WhatsApp-ready text. The fixed navigation remains `Acara Saya → Ringkasan | Peserta | Uang | Laporan`; reminders appear contextually in Ringkasan and the event detail rather than replacing the fixed navigation.
 
 It explicitly excludes AI, booking/accommodation integrations, maps, OCR, payment gateways, complex collaboration/permissions, and other unvalidated features.
 
@@ -41,4 +41,4 @@ It explicitly excludes AI, booking/accommodation integrations, maps, OCR, paymen
 - The exact PDF template and WhatsApp message wording still need validation with a treasurer.
 - The first production mobile stack is Flutter Android-first with Supabase Auth and hosted Postgres. Project `yytzncyxyulwqsanejcg` is linked and the first migration is deployed; publishable credentials remain build-time configuration and are not committed.
 - The prototype remains representative-data/local-browser based; the mobile slice now has local storage, queued sync, and a deployed Supabase migration/client path. Production still requires backups, authenticated multi-device smoke tests, and release hardening.
-- The sync-conflict policy, reminder ownership, quiet hours, and notification wording still need validation.
+- Conflict resolution is explicit and non-merging: the user chooses either the complete online version or the complete local version. Reminder ownership, quiet hours, and notification wording still need validation.

@@ -10,6 +10,8 @@ The migration in `migrations/202608260001_cashbook_shared_state.sql` adds the fi
 - database-triggered audit entries for every cashbook-state write
 - treasurer-approved chairperson access for an existing Supabase account
 
+Migration `202609060001_mvp_pilot_sync.sql` hardens the pilot sync RPC. It validates configurable event fields, mirrors event data from the versioned snapshot into the relational event row, enforces the sponsor lock after participant payments begin, and returns the remote actor/time needed by explicit conflict resolution.
+
 This repository is linked to project `yytzncyxyulwqsanejcg` and the migration has been applied there. For a fresh checkout or another environment:
 
 ```bash
@@ -34,3 +36,5 @@ flutter run \
 ```
 
 The first authenticated user creates a Wargakas workspace and seeds the fixed Dieng scenario through the protected RPC. The treasurer can add a chairperson by email from the mobile account controls; the chairperson must create an account first. The invitation function is server-authorized and only grants membership inside the caller's workspace.
+
+For MuMu or release-like testing, do not omit the Supabase Dart defines: without them the hosted app shows a configuration error. The local demo is an explicit separate build using `--dart-define=WARGAKAS_APP_MODE=demo`.

@@ -134,7 +134,41 @@ Decision: The mobile slice schedules future reminders as Android local notificat
 
 Reasoning: The treasurer needs deadlines to remain useful without signal. The exact production timezone behavior, quiet hours, and battery-optimization guidance remain open until tested on target phones.
 
+### 2026-08-27: Make hosted authentication explicit
+
+Decision: Hosted Supabase mode is the default for release and test builds. The local demo is available only through an explicit demo-mode build flag and must show that it is not connected to hosted data.
+
+Decision: Add a complete email/password journey with sign-in, account creation, confirmation-pending, resend, password recovery, expired-link handling, session loading, session expiry, and sign-out states. Keep the direct `io.wargakas.mobile://auth-callback/` return path.
+
+Decision: Show account access and `Keluar` in a dedicated, visible account area. Signing out requires confirmation when local changes are still waiting to sync.
+
+Decision: Local snapshots and pending sync operations are scoped to the authenticated user/workspace. Signing out must not expose the previous account's local data to another account on the same device.
+
+Decision: Treasurer remains responsible for payments, expenses, refunds, participants, reports, and access. Chairperson can access the shared event and planning/budget information; no complex permissions are introduced.
+
+Reasoning: The MuMu test exposed that a build without Dart-defined Supabase credentials silently opened the local shell, making it look as if authentication was missing. Explicit modes and a complete session gate make test results trustworthy and protect local financial data during account changes.
+
+### 2026-09-06: Define the controlled Android MVP pilot
+
+Decision: The pilot supports exactly one configurable event per workspace. Both the treasurer and chairperson may edit all event and cashbook content, while workspace membership management remains treasurer-only. This supersedes the 2026-08-27 content-permission split.
+
+Decision: Event corrections show before/after values and create an audit operation. Sponsor name and contribution remain locked after the first participant payment; capacity cannot be lower than the active participant count.
+
+Decision: Offline conflicts never merge silently. Editing stops until the user explicitly keeps the complete online version or rebases and submits the complete local version as a new audited operation.
+
+Decision: PDF and WhatsApp-ready reports are generated from the same local snapshot and use Android's native share sheet. Free-text report content redacts email addresses, phone/account-like numbers, and credential-like values.
+
+Decision: Distribute a release-signed APK outside the Play Store for the controlled pilot. Use realistic rehearsal data first; real trip data is allowed only after all P0 two-account SIT cases pass.
+
+Reasoning: This keeps the pilot narrow enough for one engineer while making financial edits explainable, conflict handling non-destructive, and handoff useful without a network connection.
+
+### 2026-09-08: Reminder recipient and timezone
+
+Decision: A reminder created by the chairperson notifies the treasurer. Production reminders follow the device timezone automatically. Quiet hours are 20:00–07:00 in the device timezone.
+
+Reasoning: The treasurer remains accountable for collections, deadlines, and financial reporting, while automatic device-timezone handling keeps deadline reminders understandable when travelling without adding timezone configuration to the MVP. The quiet-hours window prevents routine reminders from disturbing the community at night.
+
 ## Pending
 
 - Validate the PDF/WhatsApp handoff wording and cancellation refund policy with treasurers.
-- Choose a production app platform, persistence model, and authentication approach after prototype review.
+- Validate notification wording with treasurers.
