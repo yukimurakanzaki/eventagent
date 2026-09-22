@@ -53,3 +53,13 @@ If the treasurer changes phones, clears app/browser data, or loses the device be
 ## Provisional cancellation behavior
 
 The treasurer chooses no refund, partial refund, or full refund per cancelled participant. A refund is an explicit `refund` transaction. The prototype does not silently transfer money to a replacement or change event capacity.
+
+## Contested by discovery (2026-09-20)
+
+This file still describes the implemented prototype rules. Two problem-validation interviews now contradict three of them, and the model has deliberately not been rewritten while the discovery gate is open:
+
+- `targetPerPerson = finalBudget - sponsorContribution - openingBalance` divided by `participantCapacity`. Both respondents describe per-head costs, so the divisor should be the actual active headcount.
+- A replacement's payment being independent of the cancelled participant's payment. Both respondents describe the replacement settling directly with the original participant, leaving the event cash balance unchanged.
+- Sponsor contribution being locked after participant payments start. Both respondents need the sponsor figure to change after collection has begun, and respondent 2 distinguishes a revisable sponsor pledge from the money actually received.
+
+Do not treat this file as the requirement contract for those three rules until the discovery gate is reviewed.

@@ -1,6 +1,23 @@
 # Backlog
 
-## Next
+## Current Gate: Problem Validation And BRD
+
+- [x] Complete the first detailed organizer interview and extract the problem, roles, lifecycle, money rules, controls, and success outcome.
+- [x] Reframe the primary outcome as preventing suspicion of fund misuse through shared evidence, consistent calculations, and complete audit history.
+- [ ] Interview 4–6 additional community treasurers using the same last-real-event, non-leading approach. Respondent 2 completed on 2026-09-20; independence from respondent 1 is unconfirmed.
+- [ ] Confirm respondent 2 is not from respondent 1's community or social circle; both described a Dieng trip, a paper notebook, and a Word/PDF/text report.
+- [ ] Re-test with respondent 1: committee members as payers in the participant list, per-transaction report detail, the communal-money ledger boundary, and whether participant-specific charges enter the book only when the shared cash pays first.
+- [ ] Ask respondent 2 the topics not yet covered: delegation when the chairperson is unavailable, participant comprehension of the ledger, and error reporting.
+- [ ] Test willingness to move from paper to an application. Both respondents confirm the problem but neither has ever searched for a tool, so adoption is a separate and currently unsupported hypothesis.
+- [ ] Interview 2–3 chairpersons to test authority, delegation, closing-balance, replacement, charity, and deficit decisions.
+- [ ] Test the highest-risk rules: first-vendor-payment refund cutoff, reversible sponsor conversion, direct replacement settlement, immediate unapproved expenses, named advances, participant-specific charges, equal surplus distribution, and event closing/reopening.
+- [ ] Validate participant comprehension and privacy using redacted receipt, arrears-list, audit-history, PDF, DOCX, and error-reporting examples, including older participants.
+- [ ] Classify every proposed requirement as `Validated`, `Assumed`, `Rejected`, or `Needs more evidence` across respondents.
+- [ ] Revise the data model, role matrix, acceptance criteria, and implementation backlog only after the discovery gate is reviewed.
+
+Technical SIT, SMTP setup, release rehearsal, and new implementation are intentionally deferred until this gate is complete.
+
+## Existing Implementation Status
 
 - [x] Expand the mobile shell into a typed local data model and sync queue; keep hosted backend selection open until the hosted-data decision is confirmed.
 - [x] Set up Supabase Authentication and hosted event data with treasurer/chairperson access. Project `yytzncyxyulwqsanejcg` is linked and the migration is deployed; authenticated account/RLS smoke tests remain.
@@ -28,6 +45,10 @@
 - [x] Quiet hours are 20:00–07:00 in the device timezone. Notification wording still needs treasurer validation.
 - [x] Production reminders use the phone timezone automatically. Android battery-optimization guidance still needs validation with the treasurer.
 - [x] Use a simple treasurer-approved email membership action for an existing chairperson account; no complex permissions are added.
+- [x] Keep destination voting and planning discussion in WhatsApp; record committee budget drafts and the chairperson-approved result in Wargakas.
+- [x] Use the absence of unresolved suspicion of fund misuse as the primary business outcome for respondent 1.
+- [ ] Confirm whether the respondent-1 role and governance model transfers to other community groups.
+- [ ] Confirm whether automatic receipt redaction is reliable and understandable enough for participant-facing evidence.
 
 ## Later
 

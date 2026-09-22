@@ -168,7 +168,88 @@ Decision: A reminder created by the chairperson notifies the treasurer. Producti
 
 Reasoning: The treasurer remains accountable for collections, deadlines, and financial reporting, while automatic device-timezone handling keeps deadline reminders understandable when travelling without adding timezone configuration to the MVP. The quiet-hours window prevents routine reminders from disturbing the community at night.
 
+### 2026-09-19: Reframe Wargakas around financial accountability
+
+Decision: Treat Wargakas primarily as a shared financial-accountability system for community activities, not only as a cashbook. The primary business outcome is that participants do not suspect fund misuse because the ledger, evidence, decisions, and corrections are visible and traceable.
+
+Reasoning: The first detailed BRD interview identified reputational harm and loss of trust as the most serious consequence. Manual paper records, retyping reports, missing history, personal advances, and inconsistent participant-payment evidence make accusations difficult to resolve and can cause the committee to stop organizing future activities.
+
+### 2026-09-19: Keep trip discovery outside the first product boundary
+
+Decision: Continue destination voting, vendor research discussion, and itinerary coordination in WhatsApp. Wargakas stores committee-entered budget drafts and the chairperson-approved final plan, budget, capacity, and itinerary summary.
+
+Reasoning: This captures the information needed for financial planning without expanding the first product into chat, polling, booking, maps, or itinerary automation.
+
+### 2026-09-19: Treat the first BRD interview as provisional product evidence
+
+Decision: Use the respondent's rules as requirements for that community and as hypotheses for the broader product. Do not treat implemented behavior as proof of user validation, and do not generalize the interview until the highest-risk rules are repeated with additional treasurers and chairpersons.
+
+Provisional rules include:
+
+- The chairperson is final authority and holds treasurer authority; an optional vice-chairperson receives chairperson authority only during explicit delegation.
+- Committee members may edit shared records with before/after audit history. Transactions use reversible soft deletion and remain visible as cancelled history.
+- Participants have read-only ledger access, may upload transfer evidence, and may report errors while an event remains open. Only the treasurer or acting chairperson confirms participant payments.
+- Expenses apply immediately. Receipt is optional only with a mandatory no-receipt reason. If cash is insufficient, the shortfall becomes a named person's advance rather than a negative balance.
+- Advances must be repaid before closing or may be converted to sponsorship by the funder. Sponsor withdrawal is allowed only before the first vendor payment.
+- The first vendor payment is the global refund cutoff. After it, an unavailable participant must transfer the slot to a replacement, who pays the original participant directly; only the chairperson approves the replacement.
+- Sponsor funds and overpayments remain in the event balance. The chairperson decides after the event whether the balance is carried forward, used for documented charity/additional costs, or distributed equally to all participants who travelled.
+- Committee members may revise budget drafts, but only a chairperson-finalized version changes the target. Recalculation may create shared additional contributions or participant-specific charges.
+- Receipts shown to participants must be automatically redacted and then approved by the uploader; original receipts remain committee-only.
+- PDF and DOCX reports are generated on demand from the same ledger, embed redacted receipt images and authenticated links, and may be downloaded by participants.
+- An event cannot be locked while disputes, unverified payment evidence, unresolved advances, or incomplete required data remain. The chairperson may reopen a locked event with an audited reason.
+
+Reasoning: These rules resolve concrete scenarios from the respondent's most recent workflow, but their frequency, comprehension, and transferability remain untested.
+
+### 2026-09-20: Record respondent-2 evidence and keep conflicting rules separate
+
+Decision: Record the second interview as independent evidence and classify every affected rule rather than merging respondent 2 into respondent 1. Where the two respondents disagree, both positions stay recorded as conflicting evidence and neither becomes the product rule yet.
+
+Decision: Do not confirm any finding as `Validated` until respondent 2 is shown to come from a different community and social circle than respondent 1. Both described a Dieng trip, a paper notebook, and a Word/PDF/text report, so the apparent agreement may be one community counted twice.
+
+Converging across both respondents (`Needs more evidence` until 4–6 treasurers, but strongest candidates):
+
+- Financial suspicion is a real and recurring problem triggered by detail and evidence that were never shared.
+- The chairperson sets and changes the participant contribution target.
+- Sponsors pledge a fixed rupiah amount, not a share of the cost.
+- A replacement settles directly with the original participant and the event cash balance does not move.
+- Committee personal money is an advance repaid from event cash.
+- Participants are entitled to see expense evidence.
+- The remaining balance is announced and carried into the next activity.
+- Planning stays in WhatsApp; the report is retyped by hand and shared as PDF plus plain text.
+
+Conflicting evidence, recorded and unresolved:
+
+- First-vendor-payment refund cut-off: respondent 1 closes refunds after it; respondent 2 has no vendor and still refunds when no replacement is found. The refund cut-off must not be hard-coded as a product rule.
+- Receipt redaction: respondent 1 requires automatic redaction and uploader approval; respondent 2 photographs original receipts into the group. Respondent 2 collects cash only, so no transfer slips exist. Redaction may depend on payment method rather than being universal.
+- Event locking and reopening: respondent 1 defines blocking conditions and audited reopening; respondent 2 has no closing step at all, only an announced remaining balance.
+- Participant-specific charges: respondent 1 records them in the ledger; respondent 2 keeps them entirely outside it because the book holds communal money only. Possible reconciliation, untested: money enters the book when it passes through the shared cash, not according to who benefits.
+- Surplus used for charity: respondent 1 lists it as an option; respondent 2 never mentions it.
+
+Respondent-2 findings not previously recorded (`Assumed`, n=1):
+
+- The accusation targets the committee for not paying its own contribution, so committee members must appear as payers in the same participant list.
+- An aggregate-only report triggers suspicion even when a report exists; per-transaction detail is required.
+- Dispute resolution happened by phone and left no trace; answers must attach to the transaction and be visible to everyone.
+- The underlying records really are incomplete, so capture must happen when the money is spent, and an incomplete ledger must label its own gaps or exposing it can increase suspicion.
+- A sponsor pledge and a sponsor receipt are two different objects: the pledge drives the target and may be reduced or cancelled, while only received money enters the book and the balance.
+- The ledger boundary is communal money only.
+- The contribution target divides by the actual active headcount, not by fixed capacity.
+- Participants need read access after the event has ended.
+
+Rules whose priority drops, with no respondent-2 support and no observed failure case: advance-to-sponsorship conversion, advances blocking event closure, equal distribution of the surplus, charity use of the surplus, automatic receipt redaction, and the locking/reopening machinery.
+
+Implementation conflicts now supported by two respondents, recorded as requirement gaps and not as authorization to change code: sponsor locking after the first participant payment, independent replacement payments, and `targetPerPerson = need / participantCapacity`.
+
+Adoption: neither respondent has ever searched for or used an app or spreadsheet for event finances. Respondent 2 gave availability and phone-only working as the reason. The problem is confirmed twice; willingness to switch tools has no supporting evidence. These remain two separate hypotheses and the second one is currently unsupported.
+
+Reasoning: The second interview strengthens a small set of rules, contradicts several respondent-1 rules outright, and removes the justification for some of the heavier machinery. Recording the disagreement keeps the requirement set honest and prevents one community's governance model from being treated as the product.
+
 ## Pending
 
-- Validate the PDF/WhatsApp handoff wording and cancellation refund policy with treasurers.
-- Validate notification wording with treasurers.
+- Repeat the problem interview with 4–6 additional treasurers and 2–3 chairpersons.
+- Validate the provisional role hierarchy, first-vendor-payment refund cutoff, replacement settlement, sponsor reversibility, advances, participant-specific charges, charity, and event-locking rules.
+- Validate automatic receipt redaction and the PDF/DOCX/WhatsApp handoff with older participants.
+- Validate reminder wording with treasurers; respondent 1 prefers a shareable arrears list instead of automatic daily participant reminders.
+- Confirm that respondent 2 belongs to a different community and social circle than respondent 1 before counting any finding as two independent sources.
+- Re-test with respondent 1: committee members appearing as payers, per-transaction report detail, the communal-money ledger boundary, and whether participant-specific charges enter the book only when the shared cash pays first.
+- Test willingness to move from paper to an application. Two respondents have never searched for any tool, so the problem evidence does not yet imply adoption.
