@@ -1,16 +1,42 @@
 import 'cashbook_models.dart';
 
-int participantTarget(EventRecord event) {
-  final capacity = event.participantCapacity < 1
-      ? 1
-      : event.participantCapacity;
+/// Costs are per head, so the need is split across active participants, not
+/// capacity. Capacity only caps how many can join.
+int participantTarget(EventRecord event, int activeCount) {
+  final divisor = activeCount < 1 ? 1 : activeCount;
   final target =
       ((event.finalBudget -
                   event.sponsorContribution -
                   event.openingBalance) /
-              capacity)
+              divisor)
           .round();
   return target < 0 ? 0 : target;
+}
+
+int activeParticipantCount(Iterable<ParticipantRecord> participants) =>
+    participants.where((item) => item.state == ParticipantState.active).length;
+
+Set<String> correctedTransactionIds(Iterable<TransactionRecord> transactions) =>
+    {
+      for (final transaction in transactions)
+        if (transaction.type == TransactionType.correction &&
+            transaction.relatedTransactionId != null)
+          transaction.relatedTransactionId!,
+    };
+
+/// Transactions that still move money: corrected originals and the correction
+/// rows themselves are kept for the audit trail but count for nothing.
+List<TransactionRecord> effectiveTransactions(
+  Iterable<TransactionRecord> transactions,
+) {
+  final corrected = correctedTransactionIds(transactions);
+  return transactions
+      .where(
+        (transaction) =>
+            transaction.type != TransactionType.correction &&
+            !corrected.contains(transaction.id),
+      )
+      .toList();
 }
 
 int incomeTotal(Iterable<TransactionRecord> transactions) {
@@ -21,7 +47,7 @@ int incomeTotal(Iterable<TransactionRecord> transactions) {
     TransactionType.participantPayment,
     TransactionType.additionalContribution,
   };
-  return transactions
+  return effectiveTransactions(transactions)
       .where((transaction) => income.contains(transaction.type))
       .fold(0, (sum, transaction) => sum + transaction.amount);
 }
@@ -32,7 +58,7 @@ int expenseTotal(Iterable<TransactionRecord> transactions) {
     TransactionType.refund,
     TransactionType.refundReversal,
   };
-  return transactions
+  return effectiveTransactions(transactions)
       .where((transaction) => expenses.contains(transaction.type))
       .fold(
         0,
@@ -83,7 +109,7 @@ int participantPaid(
   Iterable<TransactionRecord> transactions,
   String participantId,
 ) {
-  return transactions
+  return effectiveTransactions(transactions)
       .where(
         (transaction) =>
             transaction.type == TransactionType.participantPayment &&
@@ -96,7 +122,7 @@ int refundTotalForParticipant(
   Iterable<TransactionRecord> transactions,
   String participantId,
 ) {
-  return transactions
+  return effectiveTransactions(transactions)
       .where((transaction) {
         return transaction.participantId == participantId &&
             (transaction.type == TransactionType.refund ||

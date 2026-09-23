@@ -138,7 +138,7 @@ void main() {
       sponsorContribution: 4000000,
       openingBalance: 3000000,
     );
-    final target = participantTarget(event);
+    final target = participantTarget(event, 3);
     expect(target, greaterThanOrEqualTo(0), reason: 'negative target: $target');
   });
 

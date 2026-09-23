@@ -20,17 +20,18 @@ class CashbookReport {
   final String creatorRole;
   final DateTime generatedAt;
 
-  int get participantIncome => snapshot.transactions
+  int get participantIncome => effectiveTransactions(snapshot.transactions)
       .where((item) => item.type == TransactionType.participantPayment)
       .fold(0, (sum, item) => sum + item.amount);
   int get sponsorIncome => snapshot.event.sponsorContribution;
-  int get additionalIncome => snapshot.transactions
+  int get additionalIncome => effectiveTransactions(snapshot.transactions)
       .where((item) => item.type == TransactionType.additionalContribution)
       .fold(0, (sum, item) => sum + item.amount);
-  int get refunds => snapshot.transactions
-      .where((item) => item.type == TransactionType.refund)
-      .fold(0, (sum, item) => sum + item.amount);
   int get expenses => expenseTotal(snapshot.transactions);
+  int get target => participantTarget(
+    snapshot.event,
+    activeParticipantCount(snapshot.participants),
+  );
   int get endingBalance =>
       currentBalance(snapshot.event, snapshot.transactions);
 
@@ -59,7 +60,7 @@ class CashbookReport {
       final netPaid = grossPaid - refunds;
       final status = participant.state == ParticipantState.cancelled
           ? 'Dibatalkan - ${refundPolicyLabelForReport(participant.refundPolicy)}'
-          : paymentStatus(netPaid, participantTarget(event));
+          : paymentStatus(netPaid, target);
       buffer.writeln(
         '- ${sanitizeReportText(participant.name)}: $status, ${formatReportRupiah(netPaid)}${refunds == 0 ? '' : ' (bayar ${formatReportRupiah(grossPaid)}, refund ${formatReportRupiah(refunds)})'}',
       );
@@ -74,6 +75,13 @@ class CashbookReport {
       );
     return buffer.toString().trimRight();
   }
+
+  String _describe(String? transactionId) =>
+      snapshot.transactions
+          .where((item) => item.id == transactionId)
+          .firstOrNull
+          ?.description ??
+      'transaksi';
 
   Future<Uint8List> buildPdf() async {
     final document = pw.Document(
@@ -90,7 +98,7 @@ class CashbookReport {
       final netPaid = grossPaid - refunds;
       final status = participant.state == ParticipantState.cancelled
           ? 'Dibatalkan - ${refundPolicyLabelForReport(participant.refundPolicy)}'
-          : paymentStatus(netPaid, participantTarget(event));
+          : paymentStatus(netPaid, target);
       return [
         sanitizeReportText(participant.name),
         status,
@@ -99,12 +107,20 @@ class CashbookReport {
             : '${formatReportRupiah(netPaid)}\nBayar ${formatReportRupiah(grossPaid)} • Refund ${formatReportRupiah(refunds)}',
       ];
     }).toList();
+    final corrected = correctedTransactionIds(snapshot.transactions);
     final transactionRows = snapshot.transactions.map((transaction) {
+      final voided =
+          corrected.contains(transaction.id) ||
+          transaction.type == TransactionType.correction;
       return [
         formatReportDate(transaction.createdAt),
         transactionTypeLabel(transaction.type),
-        sanitizeReportText(transaction.description),
-        formatReportRupiah(transaction.amount),
+        transaction.type == TransactionType.correction
+            ? 'Membatalkan ${sanitizeReportText(_describe(transaction.relatedTransactionId))}. Alasan: ${sanitizeReportText(transaction.description)}'
+            : '${sanitizeReportText(transaction.description)}${corrected.contains(transaction.id) ? ' (dikoreksi)' : ''}',
+        voided
+            ? '(${formatReportRupiah(transaction.amount)}) tidak dihitung'
+            : formatReportRupiah(transaction.amount),
       ];
     }).toList();
 
@@ -298,6 +314,7 @@ String transactionTypeLabel(TransactionType type) => switch (type) {
   TransactionType.expense => 'Pengeluaran',
   TransactionType.refund => 'Refund',
   TransactionType.refundReversal => 'Koreksi refund',
+  TransactionType.correction => 'Koreksi',
 };
 
 String refundPolicyLabelForReport(RefundPolicy policy) => switch (policy) {

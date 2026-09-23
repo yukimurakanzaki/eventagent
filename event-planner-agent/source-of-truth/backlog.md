@@ -1,6 +1,17 @@
 # Backlog
 
-## Current Gate: Problem Validation And BRD
+## Current Gate: Respondent-3 Usage Pilot (starts week of 2026-09-28)
+
+- [x] Divide the contribution target by active participants instead of capacity.
+- [x] Add transaction correction (void with reason, nothing deleted) and a transaction history in the Uang tab.
+- [x] Start new hosted accounts from an empty event instead of the Dieng demo data.
+- [ ] Pre-create respondent 3's account in the Supabase dashboard and sign in once on her phone.
+- [ ] Build the hosted release APK and install it on her phone.
+- [ ] Minimum SIT on a real device before real money is entered: SIT-AUTH-003 (sign in), SIT-ROLE-001 (hosted event bootstrap, now empty), SIT-DATA-001 treasurer half (payment syncs and survives reinstall/relogin).
+- [ ] Dummy-trip rehearsal: create event, add participants, payments, expenses, one correction, one cancellation, share PDF and WhatsApp text; then reset to an empty event before handover.
+- [ ] Observe during use: late sponsor money, replacement paying the original participant, committee members as payers, receipt photos, and whether she keeps using the app instead of the notebook.
+
+## Problem Validation And BRD (continues through the pilot)
 
 - [x] Complete the first detailed organizer interview and extract the problem, roles, lifecycle, money rules, controls, and success outcome.
 - [x] Reframe the primary outcome as preventing suspicion of fund misuse through shared evidence, consistent calculations, and complete audit history.
@@ -15,7 +26,7 @@
 - [ ] Classify every proposed requirement as `Validated`, `Assumed`, `Rejected`, or `Needs more evidence` across respondents.
 - [ ] Revise the data model, role matrix, acceptance criteria, and implementation backlog only after the discovery gate is reviewed.
 
-Technical SIT, SMTP setup, release rehearsal, and new implementation are intentionally deferred until this gate is complete.
+SMTP setup, chairperson access, and new features beyond the pilot gate stay deferred.
 
 ## Existing Implementation Status
 

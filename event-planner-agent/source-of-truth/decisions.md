@@ -244,6 +244,19 @@ Adoption: neither respondent has ever searched for or used an app or spreadsheet
 
 Reasoning: The second interview strengthens a small set of rules, contradicts several respondent-1 rules outright, and removes the justification for some of the heavier machinery. Recording the disagreement keeps the requirement set honest and prevents one community's governance model from being treated as the product.
 
+### 2026-09-23: Open a treasurer-only usage pilot with respondent 3 next week
+
+Decision: Respondent 3 (a family member of the product owner) uses the Android app on a real event starting next week, and the interview happens while she uses it. This replaces the plan to finish separate problem interviews before any further implementation.
+
+- Account: pre-created by hand in the Supabase dashboard; custom SMTP stays deferred. The product owner installs the sideloaded APK on her phone directly.
+- Scope: treasurer only, one device. No chairperson account in the pilot.
+- `targetPerPerson` now divides the participant need by the active participant count; capacity only caps how many can join. Supported by both respondents.
+- A mistaken transaction is fixed with a `correction` entry that voids the original. Nothing is deleted; the original stays visible, struck through, in the Uang history and the PDF, with the reason on the correction row.
+- A new hosted account starts from an empty event instead of the Dieng demo data.
+- Sponsor locking and replacement settlement stay as implemented, with workarounds: late sponsor money is recorded as `Kontribusi tambahan`, and a replacement who paid the original participant directly is handled by cancelling without refund. The pilot observes whether she hits either.
+
+Reasoning: Observing real use answers the adoption question that two interviews could not, and a week is enough for the two fixes without which the ledger could not stay correct.
+
 ## Pending
 
 - Repeat the problem interview with 4–6 additional treasurers and 2–3 chairpersons.

@@ -9,6 +9,8 @@ enum TransactionType {
   expense,
   refund,
   refundReversal,
+  // Voids the transaction named by relatedTransactionId; moves no money itself.
+  correction,
 }
 
 class EventRecord {
@@ -424,6 +426,31 @@ class CashbookSnapshot {
           : SyncConflict.fromJson(
               Map<String, dynamic>.from(json['syncConflict'] as Map),
             ),
+    );
+  }
+
+  /// Starting point for a real account: no demo people or money. The
+  /// treasurer fills in the event details from the event dialog.
+  factory CashbookSnapshot.blank() {
+    final today = DateTime.now();
+    final date = DateTime(today.year, today.month, today.day);
+    return CashbookSnapshot(
+      event: EventRecord(
+        id: 'event-new',
+        name: 'Acara baru',
+        startDate: date,
+        endDate: date,
+        participantCapacity: 20,
+        finalBudget: 0,
+        sponsorName: '',
+        sponsorContribution: 0,
+        openingBalance: 0,
+      ),
+      participants: const [],
+      transactions: const [],
+      reminders: const [],
+      pendingOperations: const [],
+      syncVersion: 0,
     );
   }
 

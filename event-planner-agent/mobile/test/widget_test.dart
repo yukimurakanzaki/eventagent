@@ -190,6 +190,29 @@ void main() {
     expect(controller.transactions.last.amount, 125000);
   });
 
+  testWidgets('corrects a mistaken transaction from the Uang history', (
+    tester,
+  ) async {
+    final controller = CashbookController.forTesting();
+    final balanceBefore = controller.balance;
+    await tester.pumpWidget(WargakasApp(controller: controller));
+
+    await tester.tap(find.text('Uang'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('Uang muka bus'), 200);
+    await tester.tap(find.text('Uang muka bus'));
+    await tester.pumpAndSettle();
+    expect(find.text('Koreksi transaksi'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField).last, 'Salah ketik nominal');
+    await tester.tap(find.text('Simpan koreksi'));
+    await tester.pumpAndSettle();
+
+    expect(controller.balance, balanceBefore + 9950000);
+    expect(controller.transactions.last.type, TransactionType.correction);
+    expect(find.textContaining('Dikoreksi, tidak dihitung'), findsOneWidget);
+  });
+
   testWidgets('transaction form reveals a participant only when needed', (
     tester,
   ) async {

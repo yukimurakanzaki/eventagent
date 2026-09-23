@@ -77,11 +77,106 @@ class ConflictThenSyncAdapter implements CashbookSyncAdapter {
 }
 
 void main() {
-  test('keeps the Dieng contribution rule visible and fixed to capacity', () {
-    final event = CashbookSnapshot.demo().event;
+  test('splits the participant need across active participants, not capacity', () {
+    final demo = CashbookSnapshot.demo();
+    final active = activeParticipantCount(demo.participants);
 
-    expect(participantTarget(event), 1850000);
-    expect(event.participantCapacity, 18);
+    // (40.3M - 5M sponsor - 2M saldo awal) / 3 active; Ibu Rina is cancelled.
+    expect(active, 3);
+    expect(participantTarget(demo.event, active), 11100000);
+    expect(participantTarget(demo.event, 0), 33300000);
+    expect(demo.event.participantCapacity, 18);
+  });
+
+  test('a correction voids the original without deleting it', () async {
+    final controller = CashbookController.forTesting();
+    final balanceBefore = controller.balance;
+    await controller.recordTransaction(
+      type: TransactionType.expense,
+      amount: 5000000,
+      description: 'Makan siang (salah ketik)',
+    );
+    final mistake = controller.transactions.last;
+    expect(controller.balance, balanceBefore - 5000000);
+
+    expect(
+      await controller.correctTransaction(mistake.id, '  '),
+      'Alasan koreksi wajib diisi.',
+    );
+    expect(
+      await controller.correctTransaction(mistake.id, 'Salah ketik nominal'),
+      isNull,
+    );
+
+    expect(controller.balance, balanceBefore);
+    expect(controller.transactions.map((item) => item.id), contains(mistake.id));
+    final correction = controller.transactions.last;
+    expect(correction.type, TransactionType.correction);
+    expect(correction.relatedTransactionId, mistake.id);
+    expect(correction.description, 'Salah ketik nominal');
+    expect(controller.pendingOperations.last.entityId, correction.id);
+
+    expect(
+      await controller.correctTransaction(mistake.id, 'lagi'),
+      'Transaksi ini sudah dikoreksi.',
+    );
+    expect(
+      await controller.correctTransaction(correction.id, 'lagi'),
+      'Koreksi tidak bisa dikoreksi lagi.',
+    );
+    expect(
+      await controller.recordTransaction(
+        type: TransactionType.correction,
+        amount: 1,
+        description: 'bypass',
+      ),
+      isFalse,
+    );
+  });
+
+  test('a corrected payment no longer counts toward the participant', () async {
+    final controller = CashbookController.forTesting();
+    expect(participantPaid(controller.transactions, 'p-budi'), 1000000);
+
+    await controller.correctTransaction('tx-budi', 'Dicatat ke orang yang salah');
+
+    expect(participantPaid(controller.transactions, 'p-budi'), 0);
+    expect(incomeTotal(controller.transactions), 1850000 + 1850000);
+  });
+
+  test('a refunded payment cannot be corrected before its refund', () async {
+    final controller = CashbookController.forTesting();
+    final rina = controller.participants.firstWhere((p) => p.id == 'p-rina');
+    // Rina is cancelled; give her a full refund first.
+    await controller.recordTransaction(
+      type: TransactionType.refund,
+      amount: 1850000,
+      description: 'Refund Rina',
+      participantId: rina.id,
+    );
+    final refund = controller.transactions.last;
+
+    expect(
+      await controller.correctTransaction('tx-rina', 'salah'),
+      'Pembayaran ini sudah direfund. Koreksi refund-nya dulu.',
+    );
+    expect(await controller.correctTransaction(refund.id, 'salah'), isNull);
+    expect(await controller.correctTransaction('tx-rina', 'salah'), isNull);
+    expect(participantNetPaid(controller.transactions, rina.id), 0);
+  });
+
+  test('a real account starts empty, without demo people or money', () {
+    final blank = CashbookSnapshot.blank();
+
+    expect(blank.participants, isEmpty);
+    expect(blank.transactions, isEmpty);
+    expect(blank.reminders, isEmpty);
+    expect(currentBalance(blank.event, blank.transactions), 0);
+    expect(blank.event.participantCapacity, greaterThan(0));
+    expect(
+      CashbookSnapshot.fromJson(blank.toJson()).event.name,
+      blank.event.name,
+    );
   });
 
   test('calculates balance with refunds and refund reversals exactly once', () {

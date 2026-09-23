@@ -9,7 +9,7 @@ This is the smallest model needed to move the cashbook prototype toward a persis
 Derived values:
 
 - `participantNeed = finalBudget - sponsorContribution - openingBalance`
-- `targetPerPerson = participantNeed / participantCapacity`
+- `targetPerPerson = participantNeed / activeParticipantCount` (at least 1). Capacity only caps how many participants can be active.
 - `currentBalance = openingBalance + sponsorContribution + participantPayments + otherIncome - expenses`
 
 ## Participant
@@ -20,7 +20,9 @@ Cancellation never deletes the participant or their transactions. A replacement 
 
 ## Transaction
 
-`id`, `eventId`, `type` (`participant_payment`, `sponsor`, `opening_balance`, `expense`, `additional_contribution`, `refund`), `participantId`, `label`, `category`, `amount`, `date`, `notes`, `createdAt`.
+`id`, `eventId`, `type` (`participant_payment`, `sponsor`, `opening_balance`, `expense`, `additional_contribution`, `refund`, `refund_reversal`, `correction`), `relatedTransactionId`, `participantId`, `label`, `category`, `amount`, `date`, `notes`, `createdAt`.
+
+A `correction` voids the transaction named by `relatedTransactionId`. It moves no money itself, carries the reason in its description, and cannot itself be corrected. The voided original is kept and shown as corrected; every total ignores both rows. A participant payment that has already been refunded must have its refund corrected first.
 
 ## Audit entry
 
@@ -58,7 +60,7 @@ The treasurer chooses no refund, partial refund, or full refund per cancelled pa
 
 This file still describes the implemented prototype rules. Two problem-validation interviews now contradict three of them, and the model has deliberately not been rewritten while the discovery gate is open:
 
-- `targetPerPerson = finalBudget - sponsorContribution - openingBalance` divided by `participantCapacity`. Both respondents describe per-head costs, so the divisor should be the actual active headcount.
+- ~~Target divided by `participantCapacity`.~~ Changed on 2026-09-23 to the active participant count for the respondent-3 pilot.
 - A replacement's payment being independent of the cancelled participant's payment. Both respondents describe the replacement settling directly with the original participant, leaving the event cash balance unchanged.
 - Sponsor contribution being locked after participant payments start. Both respondents need the sponsor figure to change after collection has begun, and respondent 2 distinguishes a revisable sponsor pledge from the money actually received.
 
