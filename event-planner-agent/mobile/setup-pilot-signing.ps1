@@ -1,5 +1,8 @@
 param(
-  [string]$KeystorePath = (Join-Path $env:LOCALAPPDATA 'Wargakas\pilot-upload.jks')
+  [string]$KeystorePath = (Join-Path $env:LOCALAPPDATA 'Wargakas\pilot-upload.jks'),
+  # Required when key.properties survives but its keystore is gone. A new key
+  # cannot upgrade APKs signed with the lost one; those need a reinstall.
+  [switch]$ReplaceMissingKeystore
 )
 
 $ErrorActionPreference = 'Stop'
@@ -10,6 +13,14 @@ if ((Test-Path -LiteralPath $KeystorePath) -and (Test-Path -LiteralPath $propert
 }
 if (Test-Path -LiteralPath $KeystorePath) {
   throw 'The keystore exists but key.properties is missing. Restore its original credentials instead of replacing the key.'
+}
+if (Test-Path -LiteralPath $propertiesPath) {
+  if (-not $ReplaceMissingKeystore) {
+    throw "key.properties points to a keystore that is missing ($KeystorePath). Restore that keystore, or rerun with -ReplaceMissingKeystore to create a new key. Installed APKs signed with the old key must then be reinstalled."
+  }
+  $backupPath = "$propertiesPath.bak-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
+  Copy-Item -LiteralPath $propertiesPath -Destination $backupPath
+  Write-Output "Previous key.properties backed up to $backupPath."
 }
 
 $keytool = Get-Command keytool -ErrorAction SilentlyContinue
@@ -39,12 +50,18 @@ $alias = 'wargakas-pilot'
 if ($LASTEXITCODE -ne 0) { throw "keytool failed with exit code $LASTEXITCODE." }
 
 $escapedPath = $KeystorePath.Replace('\', '/')
-@(
+$lines = @(
   "storeFile=$escapedPath"
   "storePassword=$password"
   "keyAlias=$alias"
   "keyPassword=$password"
-) | Set-Content -LiteralPath $propertiesPath -Encoding utf8NoBOM
+)
+# Windows PowerShell 5.1 has no utf8NoBOM encoding; write BOM-free UTF-8 directly.
+[System.IO.File]::WriteAllLines(
+  [System.IO.Path]::GetFullPath($propertiesPath),
+  [string[]]$lines,
+  (New-Object System.Text.UTF8Encoding($false))
+)
 
 Write-Output "Pilot keystore created at $KeystorePath."
 Write-Output 'The ignored android/key.properties file contains the credentials; back up both files securely.'
