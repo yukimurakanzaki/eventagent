@@ -466,7 +466,7 @@ class SummaryPage extends StatelessWidget {
           balance: rupiah(controller.balance),
           contribution: rupiah(controller.contributionTarget),
           helper:
-              '(Anggaran − sponsor − saldo awal) ÷ kapasitas ${controller.event.participantCapacity} • $activeCount aktif',
+              '(Anggaran − sponsor − saldo awal) ÷ $activeCount peserta aktif',
         ),
         const SizedBox(height: 16),
         Row(
@@ -675,10 +675,11 @@ class MoneyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final participantIncome = controller.transactions
+    final counted = effectiveTransactions(controller.transactions);
+    final participantIncome = counted
         .where((item) => item.type == TransactionType.participantPayment)
         .fold(0, (sum, item) => sum + item.amount);
-    final additionalIncome = controller.transactions
+    final additionalIncome = counted
         .where((item) => item.type == TransactionType.additionalContribution)
         .fold(0, (sum, item) => sum + item.amount);
     final expense = expenseTotal(controller.transactions);
@@ -719,6 +720,13 @@ class MoneyPage extends StatelessWidget {
         ),
         const Divider(height: 24),
         _MoneyRow(label: 'Pengeluaran bersih', value: rupiah(expense)),
+        const SizedBox(height: 16),
+        Text('Riwayat transaksi', style: Theme.of(context).textTheme.titleMedium),
+        const Text('Salah catat? Ketuk transaksinya untuk koreksi.'),
+        if (controller.transactions.isEmpty)
+          const ListTile(title: Text('Belum ada transaksi.')),
+        for (final transaction in controller.transactions.reversed)
+          _TransactionTile(controller: controller, transaction: transaction),
         const SizedBox(height: 12),
         Card(
           color: Theme.of(context).colorScheme.errorContainer,
@@ -976,6 +984,110 @@ class _ParticipantTile extends StatelessWidget {
       onTap: onTap,
     );
   }
+}
+
+class _TransactionTile extends StatelessWidget {
+  const _TransactionTile({required this.controller, required this.transaction});
+
+  final CashbookController controller;
+  final TransactionRecord transaction;
+
+  @override
+  Widget build(BuildContext context) {
+    final isCorrection = transaction.type == TransactionType.correction;
+    final corrected = correctedTransactionIds(
+      controller.transactions,
+    ).contains(transaction.id);
+    final participant = controller.participants
+        .where((item) => item.id == transaction.participantId)
+        .firstOrNull;
+    final original = controller.transactions
+        .where((item) => item.id == transaction.relatedTransactionId)
+        .firstOrNull;
+    final title = isCorrection
+        ? 'Koreksi: ${original?.description ?? 'transaksi'}'
+        : transaction.description;
+    final detail = [
+      transactionTypeLabel(transaction.type),
+      if (participant != null) participant.name,
+      formatDate(transaction.createdAt),
+      if (isCorrection) 'Alasan: ${transaction.description}',
+      if (corrected) 'Dikoreksi, tidak dihitung',
+    ].join(' • ');
+    final struck = corrected
+        ? const TextStyle(decoration: TextDecoration.lineThrough)
+        : null;
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text(title, style: struck),
+      subtitle: Text(detail),
+      trailing: Text(
+        isCorrection ? '-' : rupiah(transaction.amount),
+        style: struck,
+      ),
+      onTap: isCorrection || corrected || controller.isReadOnly
+          ? null
+          : () => showCorrectTransactionDialog(context, controller, transaction),
+    );
+  }
+}
+
+Future<void> showCorrectTransactionDialog(
+  BuildContext context,
+  CashbookController controller,
+  TransactionRecord transaction,
+) async {
+  // ponytail: no TextEditingController, so nothing is disposed while the
+  // dialog is still animating out over a rebuilding list.
+  var reason = '';
+  await showDialog<void>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Koreksi transaksi'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('${transaction.description} • ${rupiah(transaction.amount)}'),
+          const SizedBox(height: 8),
+          const Text(
+            'Transaksi ini tidak dihapus. Ia tetap terlihat dicoret di riwayat '
+            'dan laporan, dan tidak dihitung lagi. Setelah itu catat ulang '
+            'transaksi yang benar.',
+          ),
+          TextField(
+            onChanged: (value) => reason = value,
+            decoration: const InputDecoration(
+              labelText: 'Alasan koreksi',
+              hintText: 'Contoh: salah ketik nominal',
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Batal'),
+        ),
+        FilledButton(
+          onPressed: () async {
+            final error = await controller.correctTransaction(
+              transaction.id,
+              reason,
+            );
+            if (error != null) {
+              if (context.mounted) {
+                await showInfo(context, 'Koreksi belum disimpan', error);
+              }
+              return;
+            }
+            if (context.mounted) Navigator.pop(context);
+          },
+          child: const Text('Simpan koreksi'),
+        ),
+      ],
+    ),
+  );
 }
 
 class _MoneyRow extends StatelessWidget {
@@ -1949,13 +2061,7 @@ class _ConflictVersionCard extends StatelessWidget {
     final active = snapshot.participants
         .where((item) => item.state == ParticipantState.active)
         .length;
-    final income = snapshot.transactions
-        .where(
-          (item) =>
-              item.type == TransactionType.participantPayment ||
-              item.type == TransactionType.additionalContribution,
-        )
-        .fold(0, (sum, item) => sum + item.amount);
+    final income = incomeTotal(snapshot.transactions);
     final expenses = expenseTotal(snapshot.transactions);
     final openReminders = snapshot.reminders
         .where((item) => !item.isDone)

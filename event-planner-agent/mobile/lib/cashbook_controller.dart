@@ -33,7 +33,8 @@ class CashbookController extends ChangeNotifier {
   bool get isReadOnly => syncConflict != null;
   String? get syncError => _syncError;
 
-  int get contributionTarget => participantTarget(event);
+  int get contributionTarget =>
+      participantTarget(event, activeParticipantCount(participants));
   int get balance => currentBalance(event, transactions);
 
   static Future<CashbookController> bootstrap({
@@ -210,6 +211,8 @@ class CashbookController extends ChangeNotifier {
     if (amount <= 0 || description.trim().isEmpty) return false;
     // Sponsor money is held on event.sponsorContribution, not in the ledger.
     if (type == TransactionType.sponsor) return false;
+    // Corrections carry a reason and a target; only correctTransaction makes them.
+    if (type == TransactionType.correction) return false;
     if (type == TransactionType.participantPayment ||
         type == TransactionType.refund) {
       final hasParticipant =
@@ -246,6 +249,47 @@ class CashbookController extends ChangeNotifier {
       payload: transaction.toJson(),
     );
     return true;
+  }
+
+  /// Voids a mistaken entry without deleting it. The original stays visible,
+  /// marked as corrected, and the correction row records why.
+  Future<String?> correctTransaction(String transactionId, String reason) async {
+    if (isReadOnly) return 'Selesaikan konflik data sebelum koreksi.';
+    final trimmedReason = reason.trim();
+    if (trimmedReason.isEmpty) return 'Alasan koreksi wajib diisi.';
+    final original = transactions
+        .where((item) => item.id == transactionId)
+        .firstOrNull;
+    if (original == null) return 'Transaksi tidak ditemukan.';
+    if (original.type == TransactionType.correction) {
+      return 'Koreksi tidak bisa dikoreksi lagi.';
+    }
+    if (correctedTransactionIds(transactions).contains(original.id)) {
+      return 'Transaksi ini sudah dikoreksi.';
+    }
+    if (original.type == TransactionType.participantPayment &&
+        original.participantId != null &&
+        participantNetPaid(transactions, original.participantId!) <
+            original.amount) {
+      return 'Pembayaran ini sudah direfund. Koreksi refund-nya dulu.';
+    }
+    final correction = TransactionRecord(
+      id: _newId('transaction'),
+      type: TransactionType.correction,
+      amount: original.amount,
+      description: trimmedReason,
+      createdAt: DateTime.now(),
+      participantId: original.participantId,
+      relatedTransactionId: original.id,
+    );
+    await _commit(
+      _snapshot.copyWith(transactions: [...transactions, correction]),
+      entity: 'transaction',
+      entityId: correction.id,
+      action: 'create',
+      payload: correction.toJson(),
+    );
+    return null;
   }
 
   Future<String?> addReminder({

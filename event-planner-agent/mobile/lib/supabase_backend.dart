@@ -91,7 +91,7 @@ class SupabaseBackend {
   Future<OpenedCashbook> loadCashbook() async {
     final userId = user?.id;
     if (userId == null) throw AuthSessionMissingException();
-    final adapter = await openCashbook(CashbookSnapshot.demo());
+    final adapter = await openCashbook(CashbookSnapshot.blank());
     if (user?.id != userId) throw AuthSessionMissingException();
     final controller = await CashbookController.bootstrap(
       syncAdapter: adapter,
