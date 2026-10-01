@@ -1,5 +1,47 @@
 # Supabase Two-Account SIT Test Cases
 
+## Pilot minimum SIT (treasurer only, one device)
+
+Added 2026-10-01 for the respondent-3 pilot. These replace the full-suite versions of the three cases below for the pilot gate only. The cases further down assume the Dieng demo event, a target based on capacity 18, and a chairperson device C1. The pilot starts from an empty event, divides the target by active participants, and has one treasurer device.
+
+Preconditions: the pilot account exists in the Supabase dashboard; the signed hosted release APK is installed; the Supabase dashboard is open on Auth users and the Table editor. Never record or paste the account password. Any failure means stop and fix before real money is entered. Do not wipe the account's data until all three pass.
+
+| Case | Result | Date | Notes |
+|---|---|---|---|
+| SIT-AUTH-003 (pilot) | | | |
+| SIT-ROLE-001 (pilot) | | | |
+| SIT-DATA-001 (pilot) | | | |
+
+#### SIT-AUTH-003 (pilot) — Sign in
+
+- [ ] Install the APK, open it, choose `Masuk`, and sign in with the pilot account.
+- [ ] The user reaches `Acara Saya` with `Ringkasan | Peserta | Uang | Laporan` visible.
+- [ ] No second or nested app shell appears during loading.
+- [ ] Closing and reopening the app keeps the session.
+- Evidence: screenshot of `Acara Saya`.
+
+#### SIT-ROLE-001 (pilot) — Empty hosted event
+
+- [ ] The event loads without any manual database action.
+- [ ] The event is empty, with no Wisata Dieng data.
+- [ ] The treasurer can set name, dates, capacity, and budget.
+- [ ] All four tabs open; take a screenshot of each.
+- [ ] After the first load, with airplane mode on, the app stays usable from cache.
+- Evidence: the dashboard shows one workspace and one treasurer membership for the user; record workspace ID and event ID.
+
+#### SIT-DATA-001 (pilot) — Payment syncs and survives reinstall
+
+- [ ] Add two participants.
+- [ ] Record one payment for one participant; note amount and time.
+- [ ] Target per person equals the participant need divided by active participants, not by capacity.
+- [ ] The dashboard has exactly one transaction row, linked to the correct participant.
+- [ ] Force-close and reopen the app; the payment is not duplicated.
+- [ ] With airplane mode on, record a second payment, then restore the network; it syncs exactly once.
+- [ ] Uninstall, reinstall with `adb install`, and sign in; both payments return with the same balance.
+- [ ] Sign out and sign in again; the data is still present.
+
+After the three pass: dummy-trip rehearsal (correction, cancellation, PDF and WhatsApp share), then reset to an empty event before handover.
+
 ## Purpose
 
 Validate the hosted mobile slice with real Supabase accounts before wider treasurer usability testing or Play Store testing.
