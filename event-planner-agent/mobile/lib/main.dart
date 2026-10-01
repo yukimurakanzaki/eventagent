@@ -1572,7 +1572,7 @@ Future<bool> showTransactionDialog(
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
+              onPressed: () => Navigator.pop(dialogContext),
               child: const Text('Batal'),
             ),
             FilledButton(

@@ -190,6 +190,25 @@ void main() {
     expect(controller.transactions.last.amount, 125000);
   });
 
+  testWidgets('transaction form closes on Batal without saving', (
+    tester,
+  ) async {
+    final controller = CashbookController.forTesting();
+    final countBefore = controller.transactions.length;
+    await tester.pumpWidget(WargakasApp(controller: controller));
+
+    await tester.tap(find.byKey(const Key('global-transaction-shortcut')));
+    await tester.pumpAndSettle();
+    expect(find.text('Simpan transaksi'), findsOneWidget);
+
+    await tester.tap(find.text('Batal'));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Simpan transaksi'), findsNothing);
+    expect(controller.transactions.length, countBefore);
+  });
+
   testWidgets('corrects a mistaken transaction from the Uang history', (
     tester,
   ) async {
