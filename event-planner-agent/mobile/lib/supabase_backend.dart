@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'cashbook_models.dart';
 import 'cashbook_controller.dart';
 import 'cashbook_sync.dart';
+import 'event_directory.dart';
 
 class SupabaseBackend {
   SupabaseBackend(this.client);
@@ -88,25 +89,34 @@ class SupabaseBackend {
 
   Future<void> signOut() => client.auth.signOut();
 
-  Future<OpenedCashbook> loadCashbook() async {
+  Future<OpenedCashbook> loadCashbook({String? preferredEventId}) async {
     final userId = user?.id;
     if (userId == null) throw AuthSessionMissingException();
-    final adapter = await openCashbook(CashbookSnapshot.blank());
+    final adapter = await openCashbook(
+      CashbookSnapshot.blank(),
+      preferredEventId: preferredEventId,
+    );
     if (user?.id != userId) throw AuthSessionMissingException();
     final controller = await CashbookController.bootstrap(
       syncAdapter: adapter,
-      storageNamespace: '$userId-${adapter.workspaceId}',
+      storageNamespace: '$userId-${adapter.workspaceId}-${adapter.eventId}',
     );
     if (user?.id != userId) {
       controller.dispose();
       throw AuthSessionMissingException();
     }
-    return OpenedCashbook(controller, adapter.workspaceId, adapter.role);
+    return OpenedCashbook(
+      controller,
+      adapter.workspaceId,
+      adapter.role,
+      adapter.eventId,
+    );
   }
 
   Future<SupabaseCashbookSyncAdapter> openCashbook(
-    CashbookSnapshot seed,
-  ) async {
+    CashbookSnapshot seed, {
+    String? preferredEventId,
+  }) async {
     final userId = user?.id;
     if (userId == null) throw AuthSessionMissingException();
     final membership = await client
@@ -133,23 +143,61 @@ class SupabaseBackend {
     }
 
     final workspaceId = membership['workspace_id'] as String;
-    final event = await client
-        .from('events')
-        .select('id')
-        .eq('workspace_id', workspaceId)
-        .order('created_at')
-        .limit(1)
-        .maybeSingle();
-    if (event == null) {
+    final events = await listEvents(workspaceId);
+    if (events.isEmpty) {
       throw StateError(
         'Akun belum memiliki acara. Buat acara pertama melalui dashboard Supabase.',
       );
     }
+    final event = events.firstWhere(
+      (item) => item.id == preferredEventId,
+      orElse: () => events.firstWhere(
+        (item) => !item.archived,
+        orElse: () => events.first,
+      ),
+    );
     return SupabaseCashbookSyncAdapter(
       client: client,
       workspaceId: workspaceId,
-      eventId: event['id'] as String,
+      eventId: event.id,
       role: membership['role'] as String? ?? 'chairperson',
+    );
+  }
+
+  /// Oldest first, so the fallback event matches the pre-archive behaviour.
+  Future<List<EventSummary>> listEvents(String workspaceId) async {
+    final rows = await client
+        .from('events')
+        .select('id, name, start_date, end_date, archived_at')
+        .eq('workspace_id', workspaceId)
+        .order('created_at');
+    return [
+      for (final row in rows)
+        EventSummary(
+          id: row['id'] as String,
+          name: row['name'] as String,
+          startDate: DateTime.parse(row['start_date'] as String),
+          endDate: DateTime.parse(row['end_date'] as String),
+          archived: row['archived_at'] != null,
+        ),
+    ];
+  }
+
+  Future<String> createEvent(String workspaceId, NewEventDraft draft) async {
+    final created = await client.rpc(
+      'create_event',
+      params: {
+        'p_workspace_id': workspaceId,
+        'p_snapshot': draft.toSnapshot().toJson(),
+      },
+    );
+    return (created as Map)['event_id'] as String;
+  }
+
+  Future<void> setEventArchived(String eventId, bool archived) async {
+    await client.rpc(
+      'set_event_archived',
+      params: {'p_event_id': eventId, 'p_archived': archived},
     );
   }
 
@@ -169,10 +217,16 @@ class SupabaseBackend {
 }
 
 class OpenedCashbook {
-  const OpenedCashbook(this.controller, this.workspaceId, this.role);
+  const OpenedCashbook(
+    this.controller,
+    this.workspaceId,
+    this.role,
+    this.eventId,
+  );
   final CashbookController controller;
   final String workspaceId;
   final String role;
+  final String eventId;
 }
 
 class SupabaseCashbookSyncAdapter implements CashbookSyncAdapter {

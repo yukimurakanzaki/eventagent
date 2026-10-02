@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:wargakas_mobile/auth_support.dart';
 import 'package:wargakas_mobile/cashbook_controller.dart';
@@ -82,7 +83,7 @@ class FakeBackend implements SupabaseBackend {
   }
 
   @override
-  Future<OpenedCashbook> loadCashbook() async {
+  Future<OpenedCashbook> loadCashbook({String? preferredEventId}) async {
     loads++;
     return onLoad != null
         ? onLoad!()
@@ -90,6 +91,7 @@ class FakeBackend implements SupabaseBackend {
             CashbookController.forTesting(),
             'workspace-${user?.id}',
             'treasurer',
+            'event-1',
           );
   }
 
@@ -131,6 +133,8 @@ Future<void> credentials(
 }
 
 void main() {
+  setUp(() => SharedPreferences.setMockInitialValues({}));
+
   testWidgets('recovery input survives a network banner and dismiss', (
     tester,
   ) async {
@@ -226,7 +230,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Acara Saya'), findsOneWidget);
     delayed.complete(
-      OpenedCashbook(CashbookController.forTesting(), 'stale', 'chairperson'),
+      OpenedCashbook(
+        CashbookController.forTesting(),
+        'stale',
+        'chairperson',
+        'event-1',
+      ),
     );
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
@@ -681,6 +690,7 @@ void main() {
           CashbookController.forTesting(),
           'old-space',
           'chairperson',
+          'event-1',
         ),
       );
       await tester.pump();
@@ -690,6 +700,7 @@ void main() {
           CashbookController.forTesting(),
           'new-space',
           'treasurer',
+          'event-1',
         ),
       );
       await tester.pumpAndSettle();

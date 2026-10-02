@@ -1,6 +1,6 @@
 begin;
 
-select plan(9);
+select plan(12);
 
 select has_schema('private');
 select has_table('public', 'workspaces');
@@ -19,6 +19,9 @@ select has_function(
   array['uuid', 'text', 'text']
 );
 select col_is_pk('public', 'cashbook_states', 'event_id');
+select has_column('public', 'events', 'archived_at');
+select has_function('public', 'create_event', array['uuid', 'jsonb']);
+select has_function('public', 'set_event_archived', array['text', 'boolean']);
 
 select * from finish();
 rollback;

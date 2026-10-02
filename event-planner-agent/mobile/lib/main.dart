@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'cashbook_calculations.dart';
 import 'cashbook_controller.dart';
 import 'cashbook_models.dart';
+import 'event_directory.dart';
+import 'event_picker.dart';
 import 'report_service.dart';
 import 'supabase_app.dart';
 import 'supabase_backend.dart';
@@ -83,10 +85,12 @@ class WargakasApp extends StatelessWidget {
     this.onInviteChairperson,
     this.accountEmail,
     this.accountRole,
+    this.eventDirectory,
     this.reportShareGateway = const PlatformReportShareGateway(),
     super.key,
   });
 
+  final EventDirectory? eventDirectory;
   final CashbookController controller;
   final Future<void> Function()? onSignOut;
   final Future<void> Function(String email)? onInviteChairperson;
@@ -106,6 +110,7 @@ class WargakasApp extends StatelessWidget {
         onInviteChairperson: onInviteChairperson,
         accountEmail: accountEmail,
         accountRole: accountRole,
+        eventDirectory: eventDirectory,
         reportShareGateway: reportShareGateway,
       ),
     );
@@ -143,10 +148,12 @@ class EventHomePage extends StatefulWidget {
     this.onInviteChairperson,
     this.accountEmail,
     this.accountRole,
+    this.eventDirectory,
     this.reportShareGateway = const PlatformReportShareGateway(),
     super.key,
   });
 
+  final EventDirectory? eventDirectory;
   final CashbookController controller;
   final Future<void> Function()? onSignOut;
   final Future<void> Function(String email)? onInviteChairperson;
@@ -216,6 +223,9 @@ class _EventHomePageState extends State<EventHomePage> {
                             participant.state == ParticipantState.active,
                       )
                       .length,
+                  onSwitch: widget.eventDirectory == null
+                      ? null
+                      : () => showEventPicker(context, widget.eventDirectory!),
                   onEdit: widget.controller.isReadOnly
                       ? null
                       : () => showEventDialog(context, widget.controller),
@@ -311,9 +321,11 @@ class _EventHeader extends StatelessWidget {
   const _EventHeader({
     required this.event,
     required this.activeCount,
+    this.onSwitch,
     this.onEdit,
   });
 
+  final VoidCallback? onSwitch;
   final EventRecord event;
   final int activeCount;
   final VoidCallback? onEdit;
@@ -339,28 +351,41 @@ class _EventHeader extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  event.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${formatDate(event.startDate)}–${formatDate(event.endDate)}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  '$activeCount/${event.participantCapacity} peserta aktif',
-                  style: Theme.of(context).textTheme.labelLarge
-                      ?.copyWith(color: Theme.of(context).colorScheme.primary),
-                ),
-              ],
+            child: InkWell(
+              onTap: onSwitch,
+              borderRadius: BorderRadius.circular(8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          event.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${formatDate(event.startDate)}–${formatDate(event.endDate)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          '$activeCount/${event.participantCapacity} peserta aktif',
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (onSwitch != null) const Icon(Icons.unfold_more),
+                ],
+              ),
             ),
           ),
           Tooltip(
@@ -721,7 +746,10 @@ class MoneyPage extends StatelessWidget {
         const Divider(height: 24),
         _MoneyRow(label: 'Pengeluaran bersih', value: rupiah(expense)),
         const SizedBox(height: 16),
-        Text('Riwayat transaksi', style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          'Riwayat transaksi',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         const Text('Salah catat? Ketuk transaksinya untuk koreksi.'),
         if (controller.transactions.isEmpty)
           const ListTile(title: Text('Belum ada transaksi.')),
@@ -995,9 +1023,8 @@ class _TransactionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isCorrection = transaction.type == TransactionType.correction;
-    final corrected = correctedTransactionIds(
-      controller.transactions,
-    ).contains(transaction.id);
+    final corrected = correctedTransactionIds(controller.transactions)
+        .contains(transaction.id);
     final participant = controller.participants
         .where((item) => item.id == transaction.participantId)
         .firstOrNull;
@@ -1027,7 +1054,8 @@ class _TransactionTile extends StatelessWidget {
       ),
       onTap: isCorrection || corrected || controller.isReadOnly
           ? null
-          : () => showCorrectTransactionDialog(context, controller, transaction),
+          : () =>
+                showCorrectTransactionDialog(context, controller, transaction),
     );
   }
 }
