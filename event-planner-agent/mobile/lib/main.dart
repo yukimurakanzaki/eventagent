@@ -1210,7 +1210,8 @@ Future<void> showParticipantDialog(
       ],
     ),
   );
-  nameController.dispose();
+  // ponytail: no dispose; route still animates out when showDialog returns,
+  // and disposing now throws _dependents.isEmpty. GC reclaims the controller.
 }
 
 Future<void> showParticipantActions(
@@ -1290,7 +1291,6 @@ Future<void> showEditParticipantDialog(
       ],
     ),
   );
-  nameController.dispose();
 }
 
 Future<void> showCancelParticipantDialog(
@@ -1388,7 +1388,6 @@ Future<void> showCancelParticipantDialog(
       },
     ),
   );
-  partialRefundController.dispose();
   if (draft == null || !context.mounted) return;
 
   // Pop the route before notifying the cashbook listeners. Updating while the
@@ -1901,14 +1900,6 @@ Future<void> showEventDialog(
       ),
     ),
   );
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    nameController.dispose();
-    capacityController.dispose();
-    budgetController.dispose();
-    sponsorNameController.dispose();
-    sponsorAmountController.dispose();
-    openingController.dispose();
-  });
 }
 
 class _EventDateButton extends StatelessWidget {
@@ -2231,8 +2222,6 @@ Future<void> showReminderDialog(
       ),
     ),
   );
-  titleController.dispose();
-  noteController.dispose();
 }
 
 Future<void> showInviteChairpersonDialog(
@@ -2302,7 +2291,6 @@ Future<void> showInviteChairpersonDialog(
       ),
     ),
   );
-  emailController.dispose();
 }
 
 Future<void> showAccountDialog(
