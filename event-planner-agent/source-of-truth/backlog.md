@@ -5,6 +5,8 @@
 - [x] Divide the contribution target by active participants instead of capacity.
 - [x] Add transaction correction (void with reason, nothing deleted) and a transaction history in the Uang tab.
 - [x] Start new hosted accounts from an empty event instead of the Dieng demo data.
+- [ ] BLOCKER for 1.1.0: apply `supabase/migrations/202610020001_multi_event.sql` to project `yytzncyxyulwqsanejcg` and confirm `events.archived_at` exists (the app cannot open an event without it); then verify hosted switch/create/archive/restore on a device.
+- [ ] Make the event-load error screen show the real failure instead of always saying to check the internet.
 - [ ] Pre-create respondent 3's account in the Supabase dashboard and sign in once on her phone.
 - [ ] Build the hosted release APK and install it on her phone.
 - [ ] Minimum SIT on a real device before real money is entered: SIT-AUTH-003 (sign in), SIT-ROLE-001 (hosted event bootstrap, now empty), SIT-DATA-001 treasurer half (payment syncs and survives reinstall/relogin).
