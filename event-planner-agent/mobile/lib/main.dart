@@ -805,10 +805,16 @@ class _ReportPageState extends State<ReportPage> {
     });
     try {
       final report = _report();
+      String? note;
       if (pdf) {
-        await widget.shareGateway.sharePdf(report);
+        final saved = await widget.shareGateway.sharePdf(report);
+        if (saved != null) note = 'Salinan PDF tersimpan di: $saved';
       } else {
         await widget.shareGateway.shareWhatsAppText(report);
+        note = 'Teks laporan disalin. Jika WhatsApp tidak muncul, tempel manual.';
+      }
+      if (note != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(note)));
       }
     } catch (_) {
       if (mounted) {
