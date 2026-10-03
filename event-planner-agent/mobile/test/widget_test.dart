@@ -71,6 +71,29 @@ void main() {
     expect(find.text('Dibatalkan • Tidak ada refund'), findsOneWidget);
   });
 
+  testWidgets('adding a participant closes its form without throwing', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      WargakasApp(controller: CashbookController.forTesting()),
+    );
+
+    await tester.tap(find.text('Peserta'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Tambah peserta'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'Dewi');
+    await tester.tap(find.text('Simpan'));
+    // Step through the exit animation; disposing the controller early threw here.
+    for (var i = 0; i < 20; i++) {
+      await tester.pump(const Duration(milliseconds: 20));
+    }
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Dewi'), findsOneWidget);
+  });
+
   testWidgets('opens participant edit from the action sheet', (tester) async {
     await tester.pumpWidget(
       WargakasApp(controller: CashbookController.forTesting()),

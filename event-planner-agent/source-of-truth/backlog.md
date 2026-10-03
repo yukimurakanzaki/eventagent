@@ -38,6 +38,7 @@ SMTP setup, chairperson access, and new features beyond the pilot gate stay defe
 - [x] Add persisted explicit conflict resolution that blocks edits and lets the user keep the online or local whole snapshot.
 - [x] Add offline PDF generation and WhatsApp-ready native sharing with shared totals and privacy redaction.
 - [x] Add permanent Android application identity, stable local pilot signing, configured release builds, and repository CI.
+- [x] Multiple events per account: switch the open event, create a new event, archive and restore (treasurer only). Needs migration `202610020001_multi_event.sql` deployed (`supabase db push`) before the build is used; hosted create/archive/switch is not yet exercised on a real device. Unsynced edits from before this version are stored under the old per-workspace key and are not carried over.
 - [ ] Execute the two-account Supabase SIT in `source-of-truth/supabase-sit-test-cases.md`, including an optional non-member RLS check.
 - [ ] Finish live hosted authentication SIT on real inboxes/devices. Login/session restore and account area are verified on MuMu; registration, delivery, confirmation callback, recovery callback, and logout still require deliberate live execution without exposing passwords.
 - [ ] Run the realistic-data rehearsal and approve the gate before entering any real trip financial data.

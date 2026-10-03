@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'auth_forms.dart';
 import 'auth_support.dart';
 import 'cashbook_controller.dart';
+import 'event_directory.dart';
 import 'main.dart' show EventHomePage, wargakasTheme;
 import 'supabase_backend.dart';
 
@@ -21,12 +23,14 @@ class SupabaseApp extends StatefulWidget {
   State<SupabaseApp> createState() => _SupabaseAppState();
 }
 
-class _SupabaseAppState extends State<SupabaseApp> {
+class _SupabaseAppState extends State<SupabaseApp> implements EventDirectory {
   Session? _session;
   Future<CashbookController>? _controllerFuture;
   StreamSubscription<AuthState>? _authSubscription;
   String? _workspaceId;
   String? _role;
+  String? _eventId;
+  CashbookController? _controller;
   String? _authError;
   bool _passwordRecovery = false;
   int _loadGeneration = 0;
@@ -86,11 +90,25 @@ class _SupabaseAppState extends State<SupabaseApp> {
     super.dispose();
   }
 
-  Future<CashbookController> _loadController() {
+  String _selectionKey(String? userId) => 'wargakas.selectedEvent.$userId';
+
+  Future<String?> _savedEventId(String? userId) async {
+    try {
+      return (await SharedPreferences.getInstance()).getString(
+        _selectionKey(userId),
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<CashbookController> _loadController({String? eventId}) {
     final generation = ++_loadGeneration;
     final userId = _session?.user.id;
     Future<CashbookController> load() async {
-      final opened = await widget.backend.loadCashbook();
+      final opened = await widget.backend.loadCashbook(
+        preferredEventId: eventId ?? await _savedEventId(userId),
+      );
       if (!mounted ||
           generation != _loadGeneration ||
           _session?.user.id != userId) {
@@ -99,6 +117,14 @@ class _SupabaseAppState extends State<SupabaseApp> {
       }
       _workspaceId = opened.workspaceId;
       _role = opened.role;
+      _eventId = opened.eventId;
+      _controller = opened.controller;
+      try {
+        await (await SharedPreferences.getInstance()).setString(
+          _selectionKey(userId),
+          opened.eventId,
+        );
+      } catch (_) {}
       return opened.controller;
     }
 
@@ -115,7 +141,47 @@ class _SupabaseAppState extends State<SupabaseApp> {
     _loadGeneration++;
     _workspaceId = null;
     _role = null;
+    _eventId = null;
+    _controller = null;
     _controllerFuture = null;
+  }
+
+  @override
+  String get currentEventId => _eventId ?? '';
+
+  @override
+  bool get canManage => _role == 'treasurer';
+
+  @override
+  Future<List<EventSummary>> list() {
+    final workspaceId = _workspaceId;
+    if (workspaceId == null) throw StateError('workspace belum siap');
+    return widget.backend.listEvents(workspaceId);
+  }
+
+  @override
+  Future<void> select(String eventId) async {
+    if (eventId == _eventId) return;
+    // Unsynced edits stay in the local store and resume when the event reopens.
+    final previous = _controller;
+    setState(() => _controllerFuture = _loadController(eventId: eventId));
+    WidgetsBinding.instance.addPostFrameCallback((_) => previous?.dispose());
+  }
+
+  @override
+  Future<void> create(NewEventDraft draft) async {
+    final workspaceId = _workspaceId;
+    if (workspaceId == null) throw StateError('workspace belum siap');
+    final eventId = await widget.backend.createEvent(workspaceId, draft);
+    await select(eventId);
+  }
+
+  @override
+  Future<void> setArchived(String eventId, bool archived) async {
+    await widget.backend.setEventArchived(eventId, archived);
+    if (!archived || eventId != _eventId) return;
+    final active = (await list()).where((item) => !item.archived);
+    if (active.isNotEmpty) await select(active.last.id);
   }
 
   void _finishRecovery() {
@@ -203,10 +269,11 @@ class _SupabaseAppState extends State<SupabaseApp> {
           );
         }
         return EventHomePage(
-          key: ValueKey(_session!.user.id),
+          key: ValueKey('${_session!.user.id}-$_eventId'),
           controller: snapshot.data!,
           onSignOut: widget.backend.signOut,
           onInviteChairperson: _role == 'treasurer' ? _inviteChairperson : null,
+          eventDirectory: this,
           accountEmail: widget.backend.user?.email,
           accountRole: _role,
         );
