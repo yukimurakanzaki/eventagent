@@ -236,3 +236,12 @@ Next steps, in order:
 3. Re-test with respondent 1: committee members as payers, per-transaction report detail, the communal-money ledger boundary, and whether participant-specific charges enter the book only when the shared cash pays first.
 4. Interview treasurers 3 and 4 from unrelated communities, then build the `Validated` / `Assumed` / `Rejected` / `Needs more evidence` classification across respondents.
 5. Keep Supabase SIT, SMTP, release work, and all new feature implementation deferred until the discovery gate is reviewed.
+
+## 2026-10-03 Session: QA sweep, multi-event, release 1.1.0+3
+
+- QA by driving the demo build on the emulator found one crash: saving a dialog that owns a `TextEditingController` threw `_dependents.isEmpty` because the controller was disposed while the route was still animating out. Fixed in six dialogs (participant add/edit/cancel, reminder, event edit, share access); regression test added. Rule: do not dispose controllers right after `showDialog` returns.
+- Multi-event support added: the event header opens a picker sheet to switch, create, archive and restore events. Treasurer manages; chairperson only switches. The selected event is remembered per user. Local cache key is now per event, so unsynced edits written by 1.0.x under the old per-workspace key are not carried over; sync before upgrading.
+- Backend: migration `202610020001_multi_event.sql` adds `events.archived_at`, `create_event(uuid, jsonb)` and `set_event_archived(text, boolean)`, both treasurer-only.
+- PRs #4 (crash fix + multi-event) and #5 (version 1.1.0+3) merged to `main`. Release APK built with pilot signing (`mobile/build/app/outputs/flutter-apk/app-release.apk`, versionName 1.1.0, versionCode 3) and installs only over builds with the same signing key; a debug build must be uninstalled first.
+- OPEN PROBLEM: the 1.1.0 build showed "Acara bersama belum dapat dibuka... Periksa koneksi internet". Device internet was fine. Querying the hosted project `yytzncyxyulwqsanejcg` returned `column events.archived_at does not exist` and `set_event_archived` returned 404, so the multi-event migration was not live on that project. 1.1.0 reads `archived_at` on startup and cannot open any event until it is. The error screen hides the real cause behind a generic connectivity message.
+- Not yet verified on a device: hosted switch, create, archive, restore.
