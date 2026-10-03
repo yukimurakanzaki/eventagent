@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show SocketException;
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -255,7 +256,7 @@ class _SupabaseAppState extends State<SupabaseApp> implements EventDirectory {
         }
         if (snapshot.hasError) {
           return SetupErrorPage(
-            message: 'Periksa koneksi internet lalu coba lagi. Jika tetap gagal, hubungi pengelola Wargakas.',
+            message: loadErrorMessage(snapshot.error!),
             onSignOut: widget.backend.signOut,
             onRetry: () => setState(() {
               _controllerFuture = _loadController();
@@ -280,6 +281,24 @@ class _SupabaseAppState extends State<SupabaseApp> implements EventDirectory {
       },
     );
   }
+}
+
+/// Says "check your internet" only for real connectivity failures. Anything
+/// else (missing column, denied access) shows what went wrong so it can be
+/// reported; the pilot treasurer is the audience, not the public.
+String loadErrorMessage(Object error) {
+  if (error is TimeoutException || error is SocketException) {
+    return 'Periksa koneksi internet lalu coba lagi. Jika tetap gagal, hubungi pengelola Wargakas.';
+  }
+  final detail = switch (error) {
+    PostgrestException(:final code, :final message) =>
+      '${code == null ? '' : '$code: '}$message',
+    _ => error.toString(),
+  };
+  final shortened = detail.length > 160
+      ? '${detail.substring(0, 160)}…'
+      : detail;
+  return 'Terjadi kesalahan saat membuka acara. Hubungi pengelola Wargakas dan kirim pesan ini:\n$shortened';
 }
 
 class SetupErrorPage extends StatefulWidget {
