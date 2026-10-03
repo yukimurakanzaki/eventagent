@@ -14,9 +14,10 @@ class RecordingReportGateway implements ReportShareGateway {
   bool shouldFail = false;
 
   @override
-  Future<void> sharePdf(CashbookReport report) async {
+  Future<String?> sharePdf(CashbookReport report) async {
     pdfCalled = true;
     if (shouldFail) throw StateError('share failed');
+    return null;
   }
 
   @override

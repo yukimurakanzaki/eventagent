@@ -1,6 +1,6 @@
 import 'dart:io';
-import 'dart:typed_data';
 
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -260,7 +260,8 @@ class CashbookReport {
 }
 
 abstract interface class ReportShareGateway {
-  Future<void> sharePdf(CashbookReport report);
+  /// Returns the path of a saved copy, or null if none could be written.
+  Future<String?> sharePdf(CashbookReport report);
   Future<void> shareWhatsAppText(CashbookReport report);
 }
 
@@ -268,7 +269,7 @@ class PlatformReportShareGateway implements ReportShareGateway {
   const PlatformReportShareGateway();
 
   @override
-  Future<void> sharePdf(CashbookReport report) async {
+  Future<String?> sharePdf(CashbookReport report) async {
     final bytes = await report.buildPdf();
     final directory = await getTemporaryDirectory();
     final slug = report.snapshot.event.name
@@ -279,16 +280,28 @@ class PlatformReportShareGateway implements ReportShareGateway {
       '${directory.path}/wargakas-${slug.isEmpty ? 'laporan' : slug}.pdf',
     );
     await file.writeAsBytes(bytes, flush: true);
+    // Android cannot tell us when the share sheet has no target apps, so
+    // always keep a copy the user can reach without sharing.
+    String? savedPath;
+    try {
+      final external = await getExternalStorageDirectory();
+      if (external != null) {
+        savedPath = (await file.copy('${external.path}/${file.uri.pathSegments.last}')).path;
+      }
+    } catch (_) {}
     await SharePlus.instance.share(
       ShareParams(
         files: [XFile(file.path, mimeType: 'application/pdf')],
         subject: 'Laporan Wargakas - ${report.snapshot.event.name}',
       ),
     );
+    return savedPath;
   }
 
   @override
   Future<void> shareWhatsAppText(CashbookReport report) async {
+    // Copy first so the text can be pasted if no share target exists.
+    await Clipboard.setData(ClipboardData(text: report.whatsappText));
     await SharePlus.instance.share(ShareParams(text: report.whatsappText));
   }
 }
