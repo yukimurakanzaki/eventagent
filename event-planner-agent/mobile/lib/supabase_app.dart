@@ -208,6 +208,7 @@ class _SupabaseAppState extends State<SupabaseApp> implements EventDirectory {
       title: 'Wargakas',
       debugShowCheckedModeBanner: false,
       theme: wargakasTheme(),
+      darkTheme: wargakasTheme(brightness: Brightness.dark),
       home: Scaffold(
         body: SafeArea(
           child: Column(

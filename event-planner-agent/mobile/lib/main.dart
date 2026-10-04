@@ -7,6 +7,7 @@ import 'cashbook_models.dart';
 import 'event_directory.dart';
 import 'event_picker.dart';
 import 'report_service.dart';
+import 'status_colors.dart';
 import 'supabase_app.dart';
 import 'supabase_backend.dart';
 
@@ -54,6 +55,7 @@ class ConfigurationErrorApp extends StatelessWidget {
       title: 'Wargakas',
       debugShowCheckedModeBanner: false,
       theme: wargakasTheme(),
+      darkTheme: wargakasTheme(brightness: Brightness.dark),
       home: Scaffold(
         appBar: AppBar(title: const Text('Wargakas')),
         body: Padding(
@@ -104,6 +106,7 @@ class WargakasApp extends StatelessWidget {
       title: 'Wargakas',
       debugShowCheckedModeBanner: false,
       theme: wargakasTheme(),
+      darkTheme: wargakasTheme(brightness: Brightness.dark),
       home: EventHomePage(
         controller: controller,
         onSignOut: onSignOut,
@@ -117,25 +120,95 @@ class WargakasApp extends StatelessWidget {
   }
 }
 
-ThemeData wargakasTheme() {
+/// Lexend for headings/amounts, Source Sans 3 for body (bundled fonts, offline
+/// safe). Body is 16sp+ for the 50+ treasurer; see design-system/wargakas.
+TextTheme _wargakasTextTheme(TextTheme base) {
+  const body = 'SourceSans3';
+  const display = 'Lexend';
+  TextStyle? b(TextStyle? s, {double? size}) =>
+      s?.copyWith(fontFamily: body, fontSize: size, height: 1.5);
+  TextStyle? d(TextStyle? s, {double? size, FontWeight? weight}) => s?.copyWith(
+    fontFamily: display,
+    fontSize: size,
+    fontWeight: weight ?? FontWeight.w600,
+    fontFeatures: const [FontFeature.tabularFigures()],
+  );
+  return base.copyWith(
+    displayLarge: d(base.displayLarge),
+    displayMedium: d(base.displayMedium),
+    displaySmall: d(base.displaySmall),
+    headlineLarge: d(base.headlineLarge),
+    headlineMedium: d(base.headlineMedium),
+    headlineSmall: d(base.headlineSmall, size: 28),
+    titleLarge: d(base.titleLarge, size: 20),
+    titleMedium: d(base.titleMedium, size: 17),
+    titleSmall: d(base.titleSmall, size: 15),
+    bodyLarge: b(base.bodyLarge, size: 18),
+    bodyMedium: b(base.bodyMedium, size: 16),
+    bodySmall: b(base.bodySmall, size: 14),
+    labelLarge: b(
+      base.labelLarge,
+      size: 16,
+    )?.copyWith(fontWeight: FontWeight.w600),
+    labelMedium: b(base.labelMedium, size: 14),
+    labelSmall: b(base.labelSmall, size: 13),
+  );
+}
+
+ThemeData wargakasTheme({Brightness brightness = Brightness.light}) {
   const primary = Color(0xff006b5b);
+  final dark = brightness == Brightness.dark;
+  final scheme = ColorScheme.fromSeed(
+    seedColor: primary,
+    brightness: brightness,
+  );
+  final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(12));
   return ThemeData(
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: primary,
-      brightness: Brightness.light,
-    ),
+    colorScheme: scheme,
     useMaterial3: true,
-    scaffoldBackgroundColor: const Color(0xfff8faf8),
-    cardTheme: const CardThemeData(
+    textTheme: _wargakasTextTheme(
+      ThemeData(brightness: brightness, useMaterial3: true).textTheme,
+    ),
+    extensions: [dark ? StatusColors.dark : StatusColors.light],
+    scaffoldBackgroundColor: dark
+        ? const Color(0xff0f1715)
+        : const Color(0xfff8faf8),
+    cardTheme: CardThemeData(
       elevation: 0,
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
+      color: dark ? const Color(0xff16211e) : Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: scheme.outlineVariant),
+      ),
     ),
-    inputDecorationTheme: const InputDecorationTheme(
-      border: OutlineInputBorder(),
-      enabledBorder: OutlineInputBorder(),
-      focusedBorder: OutlineInputBorder(),
-      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    inputDecorationTheme: InputDecorationTheme(
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: scheme.primary, width: 2),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        minimumSize: const Size(64, 52),
+        shape: shape,
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size(64, 52),
+        shape: shape,
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(minimumSize: const Size(64, 48)),
+    ),
+    navigationBarTheme: NavigationBarThemeData(
+      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
     ),
     listTileTheme: const ListTileThemeData(minVerticalPadding: 12),
   );
@@ -175,8 +248,15 @@ class _EventHomePageState extends State<EventHomePage> {
     ('Laporan', Icons.description_outlined),
   ];
 
+  /// Material "expanded" width: side rail instead of bottom bar.
+  static const _railBreakpoint = 840.0;
+
+  /// Reading width for content on wide screens (tablet / web).
+  static const _contentMaxWidth = 720.0;
+
   @override
   Widget build(BuildContext context) {
+    final useRail = MediaQuery.sizeOf(context).width >= _railBreakpoint;
     return AnimatedBuilder(
       animation: widget.controller,
       builder: (context, child) {
@@ -213,26 +293,61 @@ class _EventHomePageState extends State<EventHomePage> {
             ],
           ),
           body: SafeArea(
-            child: Column(
+            child: Row(
               children: [
-                _EventHeader(
-                  event: widget.controller.event,
-                  activeCount: widget.controller.participants
-                      .where(
-                        (participant) =>
-                            participant.state == ParticipantState.active,
-                      )
-                      .length,
-                  onSwitch: widget.eventDirectory == null
-                      ? null
-                      : () => showEventPicker(context, widget.eventDirectory!),
-                  onEdit: widget.controller.isReadOnly
-                      ? null
-                      : () => showEventDialog(context, widget.controller),
+                if (useRail)
+                  NavigationRail(
+                    selectedIndex: _selectedIndex,
+                    labelType: NavigationRailLabelType.all,
+                    onDestinationSelected: (index) =>
+                        setState(() => _selectedIndex = index),
+                    destinations: [
+                      for (final destination in _destinations)
+                        NavigationRailDestination(
+                          icon: Icon(destination.$2),
+                          label: Text(destination.$1),
+                        ),
+                    ],
+                  ),
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxWidth: _contentMaxWidth,
+                      ),
+                      child: Column(
+                        children: [
+                          _EventHeader(
+                            event: widget.controller.event,
+                            activeCount: widget.controller.participants
+                                .where(
+                                  (participant) =>
+                                      participant.state ==
+                                      ParticipantState.active,
+                                )
+                                .length,
+                            onSwitch: widget.eventDirectory == null
+                                ? null
+                                : () => showEventPicker(
+                                    context,
+                                    widget.eventDirectory!,
+                                  ),
+                            onEdit: widget.controller.isReadOnly
+                                ? null
+                                : () => showEventDialog(
+                                    context,
+                                    widget.controller,
+                                  ),
+                          ),
+                          if (widget.controller.syncConflict != null)
+                            _ConflictNotice(controller: widget.controller),
+                          Expanded(child: _buildPage()),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
-                if (widget.controller.syncConflict != null)
-                  _ConflictNotice(controller: widget.controller),
-                Expanded(child: _buildPage()),
               ],
             ),
           ),
@@ -241,19 +356,21 @@ class _EventHomePageState extends State<EventHomePage> {
             onPressed: () => _openTransactionEntry(context),
           ),
           floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-          bottomNavigationBar: NavigationBar(
-            selectedIndex: _selectedIndex,
-            onDestinationSelected: (index) {
-              setState(() => _selectedIndex = index);
-            },
-            destinations: [
-              for (final destination in _destinations)
-                NavigationDestination(
-                  icon: Icon(destination.$2),
-                  label: destination.$1,
+          bottomNavigationBar: useRail
+              ? null
+              : NavigationBar(
+                  selectedIndex: _selectedIndex,
+                  onDestinationSelected: (index) {
+                    setState(() => _selectedIndex = index);
+                  },
+                  destinations: [
+                    for (final destination in _destinations)
+                      NavigationDestination(
+                        icon: Icon(destination.$2),
+                        label: destination.$1,
+                      ),
+                  ],
                 ),
-            ],
-          ),
         );
       },
     );
@@ -301,10 +418,13 @@ class _EventHomePageState extends State<EventHomePage> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
+        scrollable: true,
         title: const Text('Bantuan singkat'),
-        content: const Text(
-          'Gunakan empat menu di bawah untuk mengelola peserta, uang, dan laporan. '
-          'Perubahan disimpan di perangkat dan masuk antrean sinkronisasi saat offline.',
+        content: const SingleChildScrollView(
+          child: Text(
+            'Gunakan empat menu di bawah untuk mengelola peserta, uang, dan laporan. '
+            'Perubahan disimpan di perangkat dan masuk antrean sinkronisasi saat offline.',
+          ),
         ),
         actions: [
           TextButton(
@@ -351,40 +471,45 @@ class _EventHeader extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: InkWell(
-              onTap: onSwitch,
-              borderRadius: BorderRadius.circular(8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          event.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${formatDate(event.startDate)}–${formatDate(event.endDate)}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          '$activeCount/${event.participantCapacity} peserta aktif',
-                          style: Theme.of(context).textTheme.labelLarge
-                              ?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                        ),
-                      ],
+            child: Semantics(
+              button: onSwitch != null,
+              hint: onSwitch == null ? null : 'Ganti acara',
+              child: InkWell(
+                onTap: onSwitch,
+                borderRadius: BorderRadius.circular(8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            event.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${formatDate(event.startDate)}–${formatDate(event.endDate)}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            '$activeCount/${event.participantCapacity} peserta aktif',
+                            style: Theme.of(context).textTheme.labelLarge
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  if (onSwitch != null) const Icon(Icons.unfold_more),
-                ],
+                    if (onSwitch != null)
+                      const ExcludeSemantics(child: Icon(Icons.unfold_more)),
+                  ],
+                ),
               ),
             ),
           ),
@@ -392,11 +517,17 @@ class _EventHeader extends StatelessWidget {
             message: onEdit == null
                 ? 'Selesaikan konflik sebelum mengedit acara'
                 : 'Edit acara',
-            child: TextButton.icon(
-              onPressed: onEdit,
-              icon: const Icon(Icons.edit_calendar_outlined),
-              label: const Text('Edit'),
-            ),
+            // Icon-only at large text so the event name keeps its width.
+            child: MediaQuery.textScalerOf(context).scale(1) > 1.3
+                ? IconButton(
+                    onPressed: onEdit,
+                    icon: const Icon(Icons.edit_calendar_outlined),
+                  )
+                : TextButton.icon(
+                    onPressed: onEdit,
+                    icon: const Icon(Icons.edit_calendar_outlined),
+                    label: const Text('Edit'),
+                  ),
           ),
         ],
       ),
@@ -411,18 +542,21 @@ class _ConflictNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-      color: Theme.of(context).colorScheme.errorContainer,
-      child: ListTile(
-        leading: const Icon(Icons.compare_arrows_outlined),
-        title: const Text('Pilih versi data sebelum melanjutkan'),
-        subtitle: const Text(
-          'Pengeditan dihentikan agar perubahan dari dua perangkat tidak saling menimpa.',
-        ),
-        trailing: FilledButton(
-          onPressed: () => showConflictDialog(context, controller),
-          child: const Text('Bandingkan'),
+    return Semantics(
+      liveRegion: true,
+      child: Card(
+        margin: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+        color: Theme.of(context).colorScheme.errorContainer,
+        child: ListTile(
+          leading: const Icon(Icons.compare_arrows_outlined),
+          title: const Text('Pilih versi data sebelum melanjutkan'),
+          subtitle: const Text(
+            'Pengeditan dihentikan agar perubahan dari dua perangkat tidak saling menimpa.',
+          ),
+          trailing: FilledButton(
+            onPressed: () => showConflictDialog(context, controller),
+            child: const Text('Bandingkan'),
+          ),
         ),
       ),
     );
@@ -441,20 +575,16 @@ class _TransactionShortcut extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final label = hasConflict ? 'Selesaikan konflik' : 'Catat transaksi';
-    return Semantics(
-      button: true,
-      label: label,
-      child: FloatingActionButton.extended(
-        key: const Key('global-transaction-shortcut'),
-        tooltip: label,
-        onPressed: onPressed,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-        icon: Icon(
-          hasConflict ? Icons.compare_arrows_outlined : Icons.add_card_outlined,
-        ),
-        label: Text(label),
+    return FloatingActionButton.extended(
+      key: const Key('global-transaction-shortcut'),
+      tooltip: label,
+      onPressed: onPressed,
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+      icon: Icon(
+        hasConflict ? Icons.compare_arrows_outlined : Icons.add_card_outlined,
       ),
+      label: Text(label),
     );
   }
 }
@@ -477,12 +607,15 @@ class SummaryPage extends StatelessWidget {
         _SyncStatusBanner(pendingCount: controller.pendingOperations.length),
         if (controller.syncError != null) ...[
           const SizedBox(height: 8),
-          Card(
-            color: Theme.of(context).colorScheme.errorContainer,
-            child: ListTile(
-              leading: const Icon(Icons.sync_problem_outlined),
-              title: const Text('Sinkronisasi perlu diperiksa'),
-              subtitle: Text(controller.syncError!),
+          Semantics(
+            liveRegion: true,
+            child: Card(
+              color: Theme.of(context).colorScheme.errorContainer,
+              child: ListTile(
+                leading: const Icon(Icons.sync_problem_outlined),
+                title: const Text('Sinkronisasi perlu diperiksa'),
+                subtitle: Text(controller.syncError!),
+              ),
             ),
           ),
         ],
@@ -545,23 +678,27 @@ class _SyncStatusBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Theme.of(context).colorScheme.surfaceContainerLow,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        child: Row(
-          children: [
-            const Icon(Icons.wifi_off_outlined),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                pendingCount == 0
-                    ? 'Tersimpan di perangkat • tidak ada perubahan menunggu sinkronisasi.'
-                    : '$pendingCount perubahan tersimpan dan menunggu sinkronisasi.',
+    return Semantics(
+      container: true,
+      liveRegion: true,
+      child: Material(
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            children: [
+              const ExcludeSemantics(child: Icon(Icons.wifi_off_outlined)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  pendingCount == 0
+                      ? 'Tersimpan di perangkat • tidak ada perubahan menunggu sinkronisasi.'
+                      : '$pendingCount perubahan tersimpan dan menunggu sinkronisasi.',
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -620,20 +757,22 @@ class _SummaryAmount extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 28),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(label),
-              Text(value, style: Theme.of(context).textTheme.headlineSmall),
-            ],
+    return MergeSemantics(
+      child: Row(
+        children: [
+          ExcludeSemantics(child: Icon(icon, size: 28)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label),
+                Text(value, style: Theme.of(context).textTheme.headlineSmall),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -811,10 +950,12 @@ class _ReportPageState extends State<ReportPage> {
         if (saved != null) note = 'Salinan PDF tersimpan di: $saved';
       } else {
         await widget.shareGateway.shareWhatsAppText(report);
-        note = 'Teks laporan disalin. Jika WhatsApp tidak muncul, tempel manual.';
+        note =
+            'Teks laporan disalin. Jika WhatsApp tidak muncul, tempel manual.';
       }
       if (note != null && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(note)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(note)));
       }
     } catch (_) {
       if (mounted) {
@@ -986,11 +1127,17 @@ class _ParticipantTile extends StatelessWidget {
     final status = cancelled
         ? 'Dibatalkan • ${refundPolicyLabel(participant.refundPolicy)}'
         : paymentStatus(netPaidAmount, target);
-    final tone = cancelled
-        ? Theme.of(context).colorScheme.surfaceContainerHighest
+    final colors = Theme.of(context).extension<StatusColors>()!;
+    final (tone, onTone) = cancelled
+        ? (
+            Theme.of(context).colorScheme.surfaceContainerHighest,
+            Theme.of(context).colorScheme.onSurfaceVariant,
+          )
         : netPaidAmount >= target
-        ? Theme.of(context).colorScheme.primaryContainer
-        : Theme.of(context).colorScheme.secondaryContainer;
+        ? (colors.success, colors.onSuccess)
+        : netPaidAmount > 0
+        ? (colors.warning, colors.onWarning)
+        : (colors.danger, colors.onDanger);
     return ListTile(
       minVerticalPadding: 10,
       leading: CircleAvatar(
@@ -1012,7 +1159,8 @@ class _ParticipantTile extends StatelessWidget {
         child: Text(
           status,
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.labelMedium,
+          style: Theme.of(context).textTheme.labelMedium
+              ?.copyWith(color: onTone),
         ),
       ),
       onTap: onTap,
@@ -1050,13 +1198,37 @@ class _TransactionTile extends StatelessWidget {
     final struck = corrected
         ? const TextStyle(decoration: TextDecoration.lineThrough)
         : null;
+    final colors = Theme.of(context).extension<StatusColors>()!;
+    final outflow =
+        transaction.type == TransactionType.expense ||
+        transaction.type == TransactionType.refund;
+    // Direction is carried by the sign and icon, color only reinforces it.
+    final amountColor = corrected || isCorrection
+        ? Theme.of(context).colorScheme.onSurfaceVariant
+        : outflow
+        ? colors.onDanger
+        : colors.onSuccess;
     return ListTile(
       contentPadding: EdgeInsets.zero,
+      leading: ExcludeSemantics(
+        child: Icon(
+          isCorrection || corrected
+              ? Icons.undo
+              : outflow
+              ? Icons.arrow_upward
+              : Icons.arrow_downward,
+          color: amountColor,
+        ),
+      ),
       title: Text(title, style: struck),
       subtitle: Text(detail),
       trailing: Text(
-        isCorrection ? '-' : rupiah(transaction.amount),
-        style: struck,
+        isCorrection
+            ? '-'
+            : '${outflow ? '−' : '+'}${rupiah(transaction.amount)}',
+        style: Theme.of(context).textTheme.titleSmall
+            ?.copyWith(color: amountColor)
+            .merge(struck),
       ),
       onTap: isCorrection || corrected || controller.isReadOnly
           ? null
@@ -1077,6 +1249,7 @@ Future<void> showCorrectTransactionDialog(
   await showDialog<void>(
     context: context,
     builder: (context) => AlertDialog(
+      scrollable: true,
       title: const Text('Koreksi transaksi'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1156,14 +1329,16 @@ class _EmptyState extends StatelessWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            Icon(icon, size: 40),
-            const SizedBox(height: 8),
-            Text(title, style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 4),
-            Text(message, textAlign: TextAlign.center),
-          ],
+        child: MergeSemantics(
+          child: Column(
+            children: [
+              ExcludeSemantics(child: Icon(icon, size: 40)),
+              const SizedBox(height: 8),
+              Text(title, style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 4),
+              Text(message, textAlign: TextAlign.center),
+            ],
+          ),
         ),
       ),
     );
@@ -1181,37 +1356,41 @@ Future<void> showParticipantDialog(
     builder: (context) => AlertDialog(
       title: const Text('Tambah peserta'),
       content: StatefulBuilder(
-        builder: (dialogContext, setState) => Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              autofocus: true,
-              textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(labelText: 'Nama peserta'),
-            ),
-            if (controller.participants.any(
-              (item) => item.state == ParticipantState.cancelled,
-            )) ...[
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                initialValue: replacementForId,
-                decoration: const InputDecoration(
-                  labelText: 'Menggantikan peserta (opsional)',
-                ),
-                items: controller.participants
-                    .where((item) => item.state == ParticipantState.cancelled)
-                    .map(
-                      (item) => DropdownMenuItem(
-                        value: item.id,
-                        child: Text(item.name),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (value) => setState(() => replacementForId = value),
+        builder: (dialogContext, setState) => SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                autofocus: true,
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(labelText: 'Nama peserta'),
               ),
+              if (controller.participants.any(
+                (item) => item.state == ParticipantState.cancelled,
+              )) ...[
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  isExpanded: true,
+                  initialValue: replacementForId,
+                  decoration: const InputDecoration(
+                    labelText: 'Menggantikan peserta (opsional)',
+                  ),
+                  items: controller.participants
+                      .where((item) => item.state == ParticipantState.cancelled)
+                      .map(
+                        (item) => DropdownMenuItem(
+                          value: item.id,
+                          child: Text(item.name),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) =>
+                      setState(() => replacementForId = value),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
       actions: [
@@ -1290,6 +1469,7 @@ Future<void> showEditParticipantDialog(
   await showDialog<void>(
     context: context,
     builder: (context) => AlertDialog(
+      scrollable: true,
       title: const Text('Edit peserta'),
       content: TextField(
         controller: nameController,
@@ -1760,6 +1940,7 @@ Future<void> showEventDialog(
     context: context,
     builder: (dialogContext) => StatefulBuilder(
       builder: (dialogContext, setState) => AlertDialog(
+        scrollable: true,
         title: const Text('Edit acara'),
         insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         contentPadding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
@@ -1903,6 +2084,7 @@ Future<void> showEventDialog(
               final confirmed = await showDialog<bool>(
                 context: dialogContext,
                 builder: (confirmContext) => AlertDialog(
+                  scrollable: true,
                   title: const Text('Simpan perubahan acara?'),
                   content: Text(
                     '${changes.join('\n')}\n\nPerubahan akan dicatat dalam riwayat audit.',
@@ -2044,6 +2226,7 @@ Future<void> showConflictDialog(
   final confirmed = await showDialog<bool>(
     context: context,
     builder: (confirmContext) => AlertDialog(
+      scrollable: true,
       title: const Text('Konfirmasi pilihan'),
       content: Text(
         choice == 'remote'
@@ -2181,6 +2364,7 @@ Future<void> showReminderDialog(
     context: context,
     builder: (context) => StatefulBuilder(
       builder: (context, setState) => AlertDialog(
+        scrollable: true,
         title: const Text('Tambah pengingat'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -2268,6 +2452,7 @@ Future<void> showInviteChairpersonDialog(
     context: context,
     builder: (dialogContext) => StatefulBuilder(
       builder: (dialogContext, setState) => AlertDialog(
+        scrollable: true,
         title: const Text('Tambah ketua acara'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -2337,6 +2522,7 @@ Future<void> showAccountDialog(
   final action = await showDialog<String>(
     context: context,
     builder: (dialogContext) => AlertDialog(
+      scrollable: true,
       title: const Text('Akun'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -2394,6 +2580,7 @@ Future<void> showAccountDialog(
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
+        scrollable: true,
         title: const Text('Perubahan belum tersinkron'),
         content: Text(
           '$pendingCount perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.',
@@ -2426,6 +2613,7 @@ Future<void> showInfo(BuildContext context, String title, String message) {
   return showDialog<void>(
     context: context,
     builder: (context) => AlertDialog(
+      scrollable: true,
       title: Text(title),
       content: Text(message),
       actions: [
