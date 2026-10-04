@@ -67,6 +67,15 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  # Bundled (not runtime-fetched) so first launch works offline.
+  fonts:
+    - family: Lexend
+      fonts:
+        - asset: assets/fonts/Lexend.ttf
+    - family: SourceSans3
+      fonts:
+        - asset: assets/fonts/SourceSans3.ttf
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

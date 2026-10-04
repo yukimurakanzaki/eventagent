@@ -243,7 +243,8 @@ void main() {
     await tester.tap(find.text('Uang'));
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(find.text('Uang muka bus'), 200);
-    await tester.tap(find.text('Uang muka bus'));
+    // Tap the row's left edge: the floating action button overlays its right.
+    await tester.tapAt(tester.getTopLeft(find.text('Uang muka bus')));
     await tester.pumpAndSettle();
     expect(find.text('Koreksi transaksi'), findsOneWidget);
 
