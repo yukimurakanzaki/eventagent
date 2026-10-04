@@ -157,11 +157,11 @@ class CashbookReport {
           children: [
             pw.Text(
               'Dibuat ${formatReportDateTime(generatedAt)}',
-              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700),
+              style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
             ),
             pw.Text(
               'Halaman ${context.pageNumber} dari ${context.pagesCount}',
-              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700),
+              style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
             ),
           ],
         ),
@@ -181,10 +181,10 @@ class CashbookReport {
           pw.TableHelper.fromTextArray(
             headerDecoration: const pw.BoxDecoration(color: PdfColors.teal50),
             headerStyle: pw.TextStyle(
-              fontSize: 9,
+              fontSize: 11,
               fontWeight: pw.FontWeight.bold,
             ),
-            cellStyle: const pw.TextStyle(fontSize: 9),
+            cellStyle: const pw.TextStyle(fontSize: 11),
             cellPadding: const pw.EdgeInsets.symmetric(
               horizontal: 4,
               vertical: 3,
@@ -207,10 +207,10 @@ class CashbookReport {
             pw.TableHelper.fromTextArray(
               headerDecoration: const pw.BoxDecoration(color: PdfColors.teal50),
               headerStyle: pw.TextStyle(
-                fontSize: 9,
+                fontSize: 11,
                 fontWeight: pw.FontWeight.bold,
               ),
-              cellStyle: const pw.TextStyle(fontSize: 9),
+              cellStyle: const pw.TextStyle(fontSize: 11),
               cellPadding: const pw.EdgeInsets.symmetric(
                 horizontal: 4,
                 vertical: 3,
@@ -226,10 +226,10 @@ class CashbookReport {
             pw.TableHelper.fromTextArray(
               headerDecoration: const pw.BoxDecoration(color: PdfColors.teal50),
               headerStyle: pw.TextStyle(
-                fontSize: 9,
+                fontSize: 11,
                 fontWeight: pw.FontWeight.bold,
               ),
-              cellStyle: const pw.TextStyle(fontSize: 9),
+              cellStyle: const pw.TextStyle(fontSize: 11),
               cellPadding: const pw.EdgeInsets.symmetric(
                 horizontal: 4,
                 vertical: 3,
@@ -249,7 +249,7 @@ class CashbookReport {
             color: PdfColors.grey200,
             child: pw.Text(
               'Privasi: laporan ini tidak memuat nomor rekening, kredensial, nomor telepon, token, atau dokumen identitas. Periksa penerima sebelum membagikan laporan.',
-              style: const pw.TextStyle(fontSize: 9),
+              style: const pw.TextStyle(fontSize: 11),
             ),
           ),
         ],
