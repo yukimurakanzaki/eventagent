@@ -10,6 +10,7 @@ import 'report_service.dart';
 import 'status_colors.dart';
 import 'supabase_app.dart';
 import 'supabase_backend.dart';
+import 'transaction_log_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -402,7 +403,11 @@ class _EventHomePageState extends State<EventHomePage> {
       case 1:
         return ParticipantsPage(controller: widget.controller);
       case 2:
-        return MoneyPage(controller: widget.controller);
+        return MoneyPage(
+          controller: widget.controller,
+          creatorRole: widget.accountRole ?? 'treasurer',
+          shareGateway: widget.reportShareGateway,
+        );
       case 3:
         return ReportPage(
           controller: widget.controller,
@@ -833,9 +838,16 @@ class ParticipantsPage extends StatelessWidget {
 }
 
 class MoneyPage extends StatelessWidget {
-  const MoneyPage({required this.controller, super.key});
+  const MoneyPage({
+    required this.controller,
+    required this.creatorRole,
+    required this.shareGateway,
+    super.key,
+  });
 
   final CashbookController controller;
+  final String creatorRole;
+  final ReportShareGateway shareGateway;
 
   @override
   Widget build(BuildContext context) {
@@ -890,6 +902,22 @@ class MoneyPage extends StatelessWidget {
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const Text('Salah catat? Ketuk transaksinya untuk koreksi.'),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => TransactionLogPage(
+                  controller: controller,
+                  creatorRole: creatorRole,
+                  shareGateway: shareGateway,
+                ),
+              ),
+            ),
+            icon: const Icon(Icons.filter_list),
+            label: const Text('Filter & laporan rinci'),
+          ),
+        ),
         if (controller.transactions.isEmpty)
           const ListTile(title: Text('Belum ada transaksi.')),
         for (final transaction in controller.transactions.reversed)
@@ -930,20 +958,25 @@ class _ReportPageState extends State<ReportPage> {
   bool _busy = false;
   String? _error;
 
-  CashbookReport _report() => CashbookReport(
-    snapshot: widget.controller.snapshot,
-    creatorRole: widget.creatorRole,
-    generatedAt: DateTime.now(),
-  );
+  CashbookReport _report([ReportKind kind = ReportKind.summary]) =>
+      CashbookReport(
+        snapshot: widget.controller.snapshot,
+        creatorRole: widget.creatorRole,
+        generatedAt: DateTime.now(),
+        kind: kind,
+      );
 
-  Future<void> _share({required bool pdf}) async {
+  Future<void> _share({
+    required bool pdf,
+    ReportKind kind = ReportKind.summary,
+  }) async {
     if (_busy) return;
     setState(() {
       _busy = true;
       _error = null;
     });
     try {
-      final report = _report();
+      final report = _report(kind);
       String? note;
       if (pdf) {
         final saved = await widget.shareGateway.sharePdf(report);
@@ -997,6 +1030,14 @@ class _ReportPageState extends State<ReportPage> {
           onPressed: _busy ? null : () => _share(pdf: true),
           icon: const Icon(Icons.picture_as_pdf_outlined),
           label: Text(_busy ? 'Menyiapkan...' : 'Buat dan bagikan PDF'),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: _busy
+              ? null
+              : () => _share(pdf: true, kind: ReportKind.portfolio),
+          icon: const Icon(Icons.auto_stories_outlined),
+          label: const Text('Portofolio acara lengkap (PDF)'),
         ),
         const SizedBox(height: 8),
         OutlinedButton.icon(

@@ -8,13 +8,23 @@ import 'package:share_plus/share_plus.dart';
 
 import 'cashbook_calculations.dart';
 import 'cashbook_models.dart';
+import 'ledger_pdf.dart';
+import 'transaction_log.dart';
+
+enum ReportKind { summary, log, portfolio }
 
 class CashbookReport {
   const CashbookReport({
     required this.snapshot,
     required this.creatorRole,
     required this.generatedAt,
+    this.kind = ReportKind.summary,
+    this.filter = const TransactionFilter(),
   });
+
+  /// [filter] only applies to [ReportKind.log].
+  final ReportKind kind;
+  final TransactionFilter filter;
 
   final CashbookSnapshot snapshot;
   final String creatorRole;
@@ -84,6 +94,7 @@ class CashbookReport {
       'transaksi';
 
   Future<Uint8List> buildPdf() async {
+    if (kind != ReportKind.summary) return buildLedgerPdf(this);
     final document = pw.Document(
       title: 'Laporan Wargakas - ${snapshot.event.name}',
       author: reportRoleLabel(creatorRole),
@@ -277,7 +288,7 @@ class PlatformReportShareGateway implements ReportShareGateway {
         .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
         .replaceAll(RegExp(r'^-|-$'), '');
     final file = File(
-      '${directory.path}/wargakas-${slug.isEmpty ? 'laporan' : slug}.pdf',
+      '${directory.path}/wargakas-${report.kind.name}-${slug.isEmpty ? 'laporan' : slug}.pdf',
     );
     await file.writeAsBytes(bytes, flush: true);
     // Android cannot tell us when the share sheet has no target apps, so
