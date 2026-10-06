@@ -553,12 +553,9 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
                       child: const Text('Lanjut ke acara'),
                     ),
                   ] else ...[
-                    const Text(
+                    Text(
                       'Buat kata sandi baru',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     if (widget.backend.user?.email != null)
                       Text(widget.backend.user!.email!),
