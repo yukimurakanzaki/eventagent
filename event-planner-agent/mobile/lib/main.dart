@@ -7,9 +7,11 @@ import 'cashbook_models.dart';
 import 'event_directory.dart';
 import 'event_picker.dart';
 import 'report_service.dart';
+import 'status_chip.dart';
 import 'status_colors.dart';
 import 'supabase_app.dart';
 import 'supabase_backend.dart';
+import 'transaction_log_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -240,6 +242,12 @@ class EventHomePage extends StatefulWidget {
 
 class _EventHomePageState extends State<EventHomePage> {
   int _selectedIndex = 0;
+  PayState? _participantFilter;
+
+  void _showParticipants([PayState? filter]) => setState(() {
+    _participantFilter = filter;
+    _selectedIndex = 1;
+  });
 
   static const _destinations = [
     ('Ringkasan', Icons.dashboard_outlined),
@@ -299,8 +307,10 @@ class _EventHomePageState extends State<EventHomePage> {
                   NavigationRail(
                     selectedIndex: _selectedIndex,
                     labelType: NavigationRailLabelType.all,
-                    onDestinationSelected: (index) =>
-                        setState(() => _selectedIndex = index),
+                    onDestinationSelected: (index) => setState(() {
+                      _selectedIndex = index;
+                      if (index != 1) _participantFilter = null;
+                    }),
                     destinations: [
                       for (final destination in _destinations)
                         NavigationRailDestination(
@@ -361,7 +371,10 @@ class _EventHomePageState extends State<EventHomePage> {
               : NavigationBar(
                   selectedIndex: _selectedIndex,
                   onDestinationSelected: (index) {
-                    setState(() => _selectedIndex = index);
+                    setState(() {
+                      _selectedIndex = index;
+                      if (index != 1) _participantFilter = null;
+                    });
                   },
                   destinations: [
                     for (final destination in _destinations)
@@ -400,9 +413,19 @@ class _EventHomePageState extends State<EventHomePage> {
   Widget _buildPage() {
     switch (_selectedIndex) {
       case 1:
-        return ParticipantsPage(controller: widget.controller);
+        return ParticipantsPage(
+          controller: widget.controller,
+          filter: _participantFilter,
+          onFilterChanged: (filter) =>
+              setState(() => _participantFilter = filter),
+        );
       case 2:
-        return MoneyPage(controller: widget.controller);
+        return MoneyPage(
+          controller: widget.controller,
+          onShowUnpaid: () => _showParticipants(PayState.unpaid),
+          creatorRole: widget.accountRole ?? 'treasurer',
+          shareGateway: widget.reportShareGateway,
+        );
       case 3:
         return ReportPage(
           controller: widget.controller,
@@ -410,7 +433,11 @@ class _EventHomePageState extends State<EventHomePage> {
           shareGateway: widget.reportShareGateway,
         );
       default:
-        return SummaryPage(controller: widget.controller);
+        return SummaryPage(
+          controller: widget.controller,
+          onShowParticipants: _showParticipants,
+          onShowMoney: () => setState(() => _selectedIndex = 2),
+        );
     }
   }
 
@@ -452,85 +479,75 @@ class _EventHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-            child: Icon(
-              Icons.landscape_outlined,
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Semantics(
-              button: onSwitch != null,
-              hint: onSwitch == null ? null : 'Ganti acara',
-              child: InkWell(
-                onTap: onSwitch,
-                borderRadius: BorderRadius.circular(8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+    final theme = Theme.of(context);
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 8, 0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Semantics(
+                  button: onSwitch != null,
+                  hint: onSwitch == null ? null : 'Ganti acara',
+                  child: InkWell(
+                    onTap: onSwitch,
+                    borderRadius: BorderRadius.circular(8),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Row(
                         children: [
-                          Text(
-                            event.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '${formatDate(event.startDate)}–${formatDate(event.endDate)}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            '$activeCount/${event.participantCapacity} peserta aktif',
-                            style: Theme.of(context).textTheme.labelLarge
-                                ?.copyWith(
-                                  color: Theme.of(context).colorScheme.primary,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  event.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.titleLarge,
                                 ),
+                                Text(
+                                  '${formatDateRange(event.startDate, event.endDate)}'
+                                  ' • $activeCount/${event.participantCapacity} peserta',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
+                          if (onSwitch != null)
+                            const ExcludeSemantics(
+                              child: Icon(Icons.unfold_more),
+                            ),
                         ],
                       ),
                     ),
-                    if (onSwitch != null)
-                      const ExcludeSemantics(child: Icon(Icons.unfold_more)),
-                  ],
+                  ),
                 ),
               ),
-            ),
+              Tooltip(
+                message: onEdit == null
+                    ? 'Selesaikan konflik sebelum mengedit acara'
+                    : 'Edit acara',
+                // Icon-only at large text so the event name keeps its width.
+                child: MediaQuery.textScalerOf(context).scale(1) > 1.3
+                    ? IconButton(
+                        onPressed: onEdit,
+                        icon: const Icon(Icons.edit_calendar_outlined),
+                      )
+                    : TextButton.icon(
+                        onPressed: onEdit,
+                        icon: const Icon(Icons.edit_calendar_outlined),
+                        label: const Text('Edit'),
+                      ),
+              ),
+            ],
           ),
-          Tooltip(
-            message: onEdit == null
-                ? 'Selesaikan konflik sebelum mengedit acara'
-                : 'Edit acara',
-            // Icon-only at large text so the event name keeps its width.
-            child: MediaQuery.textScalerOf(context).scale(1) > 1.3
-                ? IconButton(
-                    onPressed: onEdit,
-                    icon: const Icon(Icons.edit_calendar_outlined),
-                  )
-                : TextButton.icon(
-                    onPressed: onEdit,
-                    icon: const Icon(Icons.edit_calendar_outlined),
-                    label: const Text('Edit'),
-                  ),
-          ),
-        ],
-      ),
+        ),
+        const Divider(height: 1),
+      ],
     );
   }
 }
@@ -590,19 +607,31 @@ class _TransactionShortcut extends StatelessWidget {
 }
 
 class SummaryPage extends StatelessWidget {
-  const SummaryPage({required this.controller, super.key});
+  const SummaryPage({
+    required this.controller,
+    this.onShowParticipants,
+    this.onShowMoney,
+    super.key,
+  });
 
   final CashbookController controller;
+  final void Function(PayState? filter)? onShowParticipants;
+  final VoidCallback? onShowMoney;
 
   @override
   Widget build(BuildContext context) {
-    final activeCount = controller.participants
-        .where((participant) => participant.state == ParticipantState.active)
-        .length;
+    final theme = Theme.of(context);
+    final progress = collectionProgress(
+      controller.participants,
+      controller.transactions,
+      controller.contributionTarget,
+    );
+    final activeCount = progress.paid + progress.partial + progress.unpaid;
     final reminders = [...controller.reminders]
       ..sort((a, b) => a.dueAt.compareTo(b.dueAt));
+    final recent = controller.transactions.reversed.take(3).toList();
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
       children: [
         _SyncStatusBanner(pendingCount: controller.pendingOperations.length),
         if (controller.syncError != null) ...[
@@ -610,7 +639,7 @@ class SummaryPage extends StatelessWidget {
           Semantics(
             liveRegion: true,
             child: Card(
-              color: Theme.of(context).colorScheme.errorContainer,
+              color: theme.colorScheme.errorContainer,
               child: ListTile(
                 leading: const Icon(Icons.sync_problem_outlined),
                 title: const Text('Sinkronisasi perlu diperiksa'),
@@ -620,25 +649,76 @@ class SummaryPage extends StatelessWidget {
           ),
         ],
         const SizedBox(height: 12),
-        _FinancialSummary(
+        _BalanceHero(
           balance: rupiah(controller.balance),
           contribution: rupiah(controller.contributionTarget),
           helper:
               '(Anggaran − sponsor − saldo awal) ÷ $activeCount peserta aktif',
+          progress: progress,
         ),
-        const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Pengingat', style: Theme.of(context).textTheme.titleMedium),
-            TextButton.icon(
-              onPressed: controller.isReadOnly
-                  ? null
-                  : () => showReminderDialog(context, controller),
-              icon: const Icon(Icons.add_alert_outlined),
-              label: const Text('Tambah'),
+        const SizedBox(height: 12),
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (final state in PayState.values) ...[
+                if (state != PayState.paid) const SizedBox(width: 8),
+                Expanded(
+                  child: _CountTile(
+                    state: state,
+                    count: switch (state) {
+                      PayState.paid => progress.paid,
+                      PayState.partial => progress.partial,
+                      PayState.unpaid => progress.unpaid,
+                    },
+                    onTap: onShowParticipants == null
+                        ? null
+                        : () => onShowParticipants!(state),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+        _SectionHeader(
+          title: 'Aktivitas terakhir',
+          actionLabel: recent.isEmpty ? null : 'Lihat semua',
+          onAction: onShowMoney,
+        ),
+        if (recent.isEmpty)
+          const _EmptyState(
+            icon: Icons.receipt_long_outlined,
+            title: 'Belum ada transaksi',
+            message:
+                'Ketuk Catat transaksi untuk mencatat uang masuk atau keluar.',
+          )
+        else
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                children: [
+                  for (var i = 0; i < recent.length; i++) ...[
+                    if (i > 0) const Divider(height: 1),
+                    _TransactionTile(
+                      controller: controller,
+                      transaction: recent[i],
+                      correctable: false,
+                    ),
+                  ],
+                ],
+              ),
             ),
-          ],
+          ),
+        const SizedBox(height: 24),
+        _SectionHeader(
+          title: 'Pengingat',
+          actionLabel: 'Tambah',
+          actionIcon: Icons.add_alert_outlined,
+          onAction: controller.isReadOnly
+              ? null
+              : () => showReminderDialog(context, controller),
         ),
         if (reminders.isEmpty)
           const _EmptyState(
@@ -671,6 +751,48 @@ class SummaryPage extends StatelessWidget {
   }
 }
 
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({
+    required this.title,
+    this.actionLabel,
+    this.actionIcon,
+    this.onAction,
+  });
+
+  final String title;
+  final String? actionLabel;
+  final IconData? actionIcon;
+  final VoidCallback? onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          Expanded(
+            child: Semantics(
+              header: true,
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+          ),
+          if (actionLabel != null)
+            actionIcon == null
+                ? TextButton(onPressed: onAction, child: Text(actionLabel!))
+                : TextButton.icon(
+                    onPressed: onAction,
+                    icon: Icon(actionIcon),
+                    label: Text(actionLabel!),
+                  ),
+        ],
+      ),
+    );
+  }
+}
+
 class _SyncStatusBanner extends StatelessWidget {
   const _SyncStatusBanner({required this.pendingCount});
 
@@ -678,23 +800,35 @@ class _SyncStatusBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.extension<StatusColors>()!;
+    final synced = pendingCount == 0;
+    final onTone = synced ? theme.colorScheme.onSurfaceVariant : colors.onInfo;
     return Semantics(
       container: true,
       liveRegion: true,
       child: Material(
-        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        color: synced ? theme.colorScheme.surfaceContainerLow : colors.info,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           child: Row(
             children: [
-              const ExcludeSemantics(child: Icon(Icons.wifi_off_outlined)),
+              ExcludeSemantics(
+                child: Icon(
+                  synced
+                      ? Icons.cloud_done_outlined
+                      : Icons.cloud_upload_outlined,
+                  color: onTone,
+                ),
+              ),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  pendingCount == 0
+                  synced
                       ? 'Tersimpan di perangkat • tidak ada perubahan menunggu sinkronisasi.'
                       : '$pendingCount perubahan tersimpan dan menunggu sinkronisasi.',
+                  style: TextStyle(color: onTone),
                 ),
               ),
             ],
@@ -705,39 +839,126 @@ class _SyncStatusBanner extends StatelessWidget {
   }
 }
 
-class _FinancialSummary extends StatelessWidget {
-  const _FinancialSummary({
+/// The one-glance answer for a treasurer: how much cash is in hand, and how
+/// much of what the group owes has actually been collected.
+class _BalanceHero extends StatelessWidget {
+  const _BalanceHero({
     required this.balance,
     required this.contribution,
     required this.helper,
+    required this.progress,
   });
 
   final String balance;
   final String contribution;
   final String helper;
+  final CollectionProgress progress;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final percent = (progress.fraction * 100).floor();
+    final summary =
+        'Iuran terkumpul ${rupiah(progress.collected)} dari ${rupiah(progress.expected)} ($percent%)';
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _SummaryAmount(
-              icon: Icons.account_balance_wallet_outlined,
-              label: 'Saldo saat ini',
-              value: balance,
+      color: theme.colorScheme.primaryContainer,
+      child: DefaultTextStyle.merge(
+        style: TextStyle(color: theme.colorScheme.onPrimaryContainer),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _SummaryAmount(
+                icon: Icons.account_balance_wallet_outlined,
+                label: 'Saldo saat ini',
+                value: balance,
+              ),
+              const SizedBox(height: 16),
+              Semantics(
+                label: summary,
+                excludeSemantics: true,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: LinearProgressIndicator(
+                        value: progress.fraction,
+                        minHeight: 12,
+                        backgroundColor: theme.colorScheme.surface.withValues(
+                          alpha: 0.5,
+                        ),
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(summary),
+                  ],
+                ),
+              ),
+              const Divider(height: 32),
+              _SummaryAmount(
+                icon: Icons.calculate_outlined,
+                label: 'Iuran per peserta',
+                value: contribution,
+              ),
+              const SizedBox(height: 6),
+              Text(helper, style: theme.textTheme.bodySmall),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CountTile extends StatelessWidget {
+  const _CountTile({required this.state, required this.count, this.onTap});
+
+  final PayState state;
+  final int count;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.extension<StatusColors>()!;
+    final (tone, onTone) = switch (state) {
+      PayState.paid => (colors.success, colors.onSuccess),
+      PayState.partial => (colors.warning, colors.onWarning),
+      PayState.unpaid => (colors.danger, colors.onDanger),
+    };
+    final label = PayStateChip.textFor(state);
+    return Semantics(
+      button: onTap != null,
+      label: '$label: $count peserta',
+      hint: onTap == null ? null : 'Ketuk untuk melihat daftar',
+      excludeSemantics: true,
+      child: Material(
+        color: tone,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+            child: Column(
+              children: [
+                Icon(PayStateChip.iconFor(state), color: onTone),
+                const SizedBox(height: 4),
+                Text(
+                  '$count',
+                  style: theme.textTheme.headlineSmall?.copyWith(color: onTone),
+                ),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.labelMedium?.copyWith(color: onTone),
+                ),
+              ],
             ),
-            const Divider(height: 28),
-            _SummaryAmount(
-              icon: Icons.calculate_outlined,
-              label: 'Iuran per peserta',
-              value: contribution,
-            ),
-            const SizedBox(height: 6),
-            Text(helper),
-          ],
+          ),
         ),
       ),
     );
@@ -778,9 +999,23 @@ class _SummaryAmount extends StatelessWidget {
 }
 
 class ParticipantsPage extends StatelessWidget {
-  const ParticipantsPage({required this.controller, super.key});
+  const ParticipantsPage({
+    required this.controller,
+    this.filter,
+    this.onFilterChanged,
+    super.key,
+  });
 
   final CashbookController controller;
+
+  /// Pay-state filter for the active list; null shows everyone.
+  final PayState? filter;
+  final ValueChanged<PayState?>? onFilterChanged;
+
+  PayState _stateOf(ParticipantRecord participant) => payState(
+    participantNetPaid(controller.transactions, participant.id),
+    controller.contributionTarget,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -790,8 +1025,22 @@ class ParticipantsPage extends StatelessWidget {
     final cancelled = controller.participants
         .where((item) => item.state == ParticipantState.cancelled)
         .toList();
+    final progress = collectionProgress(
+      controller.participants,
+      controller.transactions,
+      controller.contributionTarget,
+    );
+    final shown = filter == null
+        ? active
+        : active.where((item) => _stateOf(item) == filter).toList();
+    int countOf(PayState? state) => switch (state) {
+      null => active.length,
+      PayState.paid => progress.paid,
+      PayState.partial => progress.partial,
+      PayState.unpaid => progress.unpaid,
+    };
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
       children: [
         FilledButton.icon(
           onPressed: controller.isReadOnly
@@ -800,10 +1049,36 @@ class ParticipantsPage extends StatelessWidget {
           icon: const Icon(Icons.person_add_alt_1),
           label: const Text('Tambah peserta'),
         ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          children: [
+            for (final state in <PayState?>[null, ...PayState.values])
+              ChoiceChip(
+                avatar: Icon(
+                  filter == state
+                      ? Icons.check
+                      : state == null
+                      ? Icons.groups_outlined
+                      : PayStateChip.iconFor(state),
+                ),
+                label: Text(
+                  '${state == null ? 'Semua' : PayStateChip.textFor(state)} (${countOf(state)})',
+                ),
+                selected: filter == state,
+                showCheckmark: false,
+                onSelected: onFilterChanged == null
+                    ? null
+                    : (_) => onFilterChanged!(state),
+              ),
+          ],
+        ),
         const SizedBox(height: 8),
         Text(
-          '${active.length} peserta aktif • kapasitas tetap ${controller.event.participantCapacity}',
-          style: Theme.of(context).textTheme.bodyLarge,
+          '${active.length} peserta aktif • kapasitas ${controller.event.participantCapacity}',
+          style: Theme.of(context).textTheme.bodyMedium
+              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: 8),
         if (controller.participants.isEmpty)
@@ -813,12 +1088,26 @@ class ParticipantsPage extends StatelessWidget {
             message: 'Tambahkan nama peserta untuk mulai mencatat pembayaran.',
           )
         else ...[
-          _ParticipantSection(
-            title: 'Peserta aktif',
-            participants: active,
-            controller: controller,
-          ),
-          if (cancelled.isNotEmpty) ...[
+          if (shown.isEmpty && filter != null)
+            _EmptyState(
+              icon: Icons.filter_alt_off_outlined,
+              title:
+                  'Tidak ada peserta ${PayStateChip.textFor(filter!).toLowerCase()}',
+              message: 'Ubah filter untuk melihat peserta lain.',
+              actionLabel: 'Tampilkan semua',
+              onAction: onFilterChanged == null
+                  ? null
+                  : () => onFilterChanged!(null),
+            )
+          else
+            _ParticipantSection(
+              title: filter == null
+                  ? 'Peserta aktif'
+                  : 'Peserta ${PayStateChip.textFor(filter!).toLowerCase()}',
+              participants: shown,
+              controller: controller,
+            ),
+          if (cancelled.isNotEmpty && filter == null) ...[
             const SizedBox(height: 16),
             _ParticipantSection(
               title: 'Dibatalkan',
@@ -833,12 +1122,36 @@ class ParticipantsPage extends StatelessWidget {
 }
 
 class MoneyPage extends StatelessWidget {
-  const MoneyPage({required this.controller, super.key});
+  const MoneyPage({
+    required this.controller,
+    required this.creatorRole,
+    required this.shareGateway,
+    this.onShowUnpaid,
+    super.key,
+  });
 
   final CashbookController controller;
+  final String creatorRole;
+  final ReportShareGateway shareGateway;
+  final VoidCallback? onShowUnpaid;
+
+  /// Inline history stays short; the log page owns the full, filterable list.
+  static const _inlineLimit = 15;
+
+  void _openLog(BuildContext context) => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => TransactionLogPage(
+        controller: controller,
+        creatorRole: creatorRole,
+        shareGateway: shareGateway,
+      ),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.extension<StatusColors>()!;
     final counted = effectiveTransactions(controller.transactions);
     final participantIncome = counted
         .where((item) => item.type == TransactionType.participantPayment)
@@ -847,65 +1160,229 @@ class MoneyPage extends StatelessWidget {
         .where((item) => item.type == TransactionType.additionalContribution)
         .fold(0, (sum, item) => sum + item.amount);
     final expense = expenseTotal(controller.transactions);
+    final unpaid = collectionProgress(
+      controller.participants,
+      controller.transactions,
+      controller.contributionTarget,
+    ).unpaid;
+    final history = controller.transactions.reversed.toList();
+    final shown = history.take(_inlineLimit).toList();
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
       children: [
         Card(
-          color: Theme.of(context).colorScheme.primaryContainer,
-          child: ListTile(
-            leading: const Icon(Icons.account_balance_wallet_outlined),
-            title: const Text('Saldo saat ini'),
-            subtitle: Text(
-              rupiah(controller.balance),
-              style: Theme.of(context).textTheme.headlineSmall,
+          color: theme.colorScheme.primaryContainer,
+          child: DefaultTextStyle.merge(
+            style: TextStyle(color: theme.colorScheme.onPrimaryContainer),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _SummaryAmount(
+                    icon: Icons.account_balance_wallet_outlined,
+                    label: 'Saldo saat ini',
+                    value: rupiah(controller.balance),
+                  ),
+                  const Divider(height: 28),
+                  _FlowRow(
+                    icon: Icons.arrow_downward,
+                    label: 'Pembayaran peserta',
+                    value: '+${rupiah(participantIncome)}',
+                  ),
+                  _FlowRow(
+                    icon: Icons.arrow_downward,
+                    label: 'Kontribusi tambahan',
+                    value: '+${rupiah(additionalIncome)}',
+                  ),
+                  _FlowRow(
+                    icon: Icons.arrow_upward,
+                    label: 'Pengeluaran bersih',
+                    value: '−${rupiah(expense)}',
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-        const SizedBox(height: 12),
-        _MoneyRow(
-          label: 'Anggaran final',
-          value: rupiah(controller.event.finalBudget),
-        ),
-        _MoneyRow(
-          label: 'Sponsor',
-          value: rupiah(controller.event.sponsorContribution),
-        ),
-        _MoneyRow(
-          label: 'Saldo awal',
-          value: rupiah(controller.event.openingBalance),
-        ),
-        _MoneyRow(
-          label: 'Pembayaran peserta',
-          value: rupiah(participantIncome),
-        ),
-        _MoneyRow(
-          label: 'Kontribusi tambahan',
-          value: rupiah(additionalIncome),
-        ),
-        const Divider(height: 24),
-        _MoneyRow(label: 'Pengeluaran bersih', value: rupiah(expense)),
-        const SizedBox(height: 16),
-        Text(
-          'Riwayat transaksi',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const Text('Salah catat? Ketuk transaksinya untuk koreksi.'),
-        if (controller.transactions.isEmpty)
-          const ListTile(title: Text('Belum ada transaksi.')),
-        for (final transaction in controller.transactions.reversed)
-          _TransactionTile(controller: controller, transaction: transaction),
-        const SizedBox(height: 12),
+        if (unpaid > 0 && onShowUnpaid != null) ...[
+          const SizedBox(height: 8),
+          Card(
+            color: colors.info,
+            child: ListTile(
+              onTap: onShowUnpaid,
+              leading: Icon(Icons.groups_outlined, color: colors.onInfo),
+              title: Text(
+                '$unpaid peserta belum bayar',
+                style: TextStyle(color: colors.onInfo),
+              ),
+              subtitle: Text(
+                'Lihat daftar sebelum mengirim pengingat.',
+                style: TextStyle(color: colors.onInfo),
+              ),
+              trailing: Icon(Icons.chevron_right, color: colors.onInfo),
+            ),
+          ),
+        ],
+        const SizedBox(height: 8),
         Card(
-          color: Theme.of(context).colorScheme.errorContainer,
-          child: const ListTile(
-            leading: Icon(Icons.warning_amber_outlined),
-            title: Text('Periksa peserta yang belum lunas'),
-            subtitle: Text(
-              'Gunakan status pembayaran sebelum mengirim pengingat.',
-            ),
+          child: ExpansionTile(
+            shape: const Border(),
+            collapsedShape: const Border(),
+            title: const Text('Anggaran dan dana awal'),
+            childrenPadding: const EdgeInsets.symmetric(horizontal: 16),
+            children: [
+              _MoneyRow(
+                label: 'Anggaran final',
+                value: rupiah(controller.event.finalBudget),
+              ),
+              _MoneyRow(
+                label: 'Sponsor',
+                value: rupiah(controller.event.sponsorContribution),
+              ),
+              _MoneyRow(
+                label: 'Saldo awal',
+                value: rupiah(controller.event.openingBalance),
+              ),
+            ],
           ),
         ),
+        const SizedBox(height: 16),
+        _SectionHeader(
+          title: 'Riwayat transaksi',
+          actionLabel: 'Filter & laporan rinci',
+          actionIcon: Icons.filter_list,
+          onAction: () => _openLog(context),
+        ),
+        Text(
+          'Salah catat? Ketuk transaksinya untuk koreksi.',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (history.isEmpty)
+          const _EmptyState(
+            icon: Icons.receipt_long_outlined,
+            title: 'Belum ada transaksi',
+            message:
+                'Ketuk Catat transaksi untuk mencatat uang masuk atau keluar.',
+          ),
+        for (var i = 0; i < shown.length; i++) ...[
+          if (i == 0 || !_sameDay(shown[i - 1].createdAt, shown[i].createdAt))
+            Padding(
+              padding: EdgeInsets.only(top: i == 0 ? 0 : 12, bottom: 4),
+              child: Semantics(
+                header: true,
+                child: Text(
+                  formatDateLong(shown[i].createdAt),
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ),
+          Card(
+            margin: const EdgeInsets.only(bottom: 4),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: _TransactionTile(
+                controller: controller,
+                transaction: shown[i],
+                showDate: false,
+              ),
+            ),
+          ),
+        ],
+        if (history.length > shown.length)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: OutlinedButton(
+              onPressed: () => _openLog(context),
+              child: Text('Lihat semua ${history.length} transaksi'),
+            ),
+          ),
       ],
+    );
+  }
+
+  static bool _sameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
+}
+
+/// Label on the left, amount on the right; stacked at large text so neither
+/// gets squeezed on a narrow phone.
+class _LabelValueRow extends StatelessWidget {
+  const _LabelValueRow({
+    required this.label,
+    required this.value,
+    this.icon,
+    this.labelStyle,
+    this.valueStyle,
+  });
+
+  final String label;
+  final String value;
+  final IconData? icon;
+  final TextStyle? labelStyle;
+  final TextStyle? valueStyle;
+
+  @override
+  Widget build(BuildContext context) {
+    final stacked = MediaQuery.textScalerOf(context).scale(1) > 1.3;
+    final text = stacked
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: labelStyle),
+              Text(value, style: valueStyle),
+            ],
+          )
+        : Row(
+            children: [
+              Expanded(child: Text(label, style: labelStyle)),
+              const SizedBox(width: 8),
+              Text(value, style: valueStyle),
+            ],
+          );
+    return MergeSemantics(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (icon != null) ...[
+            ExcludeSemantics(child: Icon(icon, size: 20)),
+            const SizedBox(width: 8),
+          ],
+          Expanded(child: text),
+        ],
+      ),
+    );
+  }
+}
+
+class _FlowRow extends StatelessWidget {
+  const _FlowRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: _LabelValueRow(
+        icon: icon,
+        label: label,
+        value: value,
+        labelStyle: theme.textTheme.bodyLarge,
+        valueStyle: theme.textTheme.titleMedium,
+      ),
     );
   }
 }
@@ -930,20 +1407,25 @@ class _ReportPageState extends State<ReportPage> {
   bool _busy = false;
   String? _error;
 
-  CashbookReport _report() => CashbookReport(
-    snapshot: widget.controller.snapshot,
-    creatorRole: widget.creatorRole,
-    generatedAt: DateTime.now(),
-  );
+  CashbookReport _report([ReportKind kind = ReportKind.summary]) =>
+      CashbookReport(
+        snapshot: widget.controller.snapshot,
+        creatorRole: widget.creatorRole,
+        generatedAt: DateTime.now(),
+        kind: kind,
+      );
 
-  Future<void> _share({required bool pdf}) async {
+  Future<void> _share({
+    required bool pdf,
+    ReportKind kind = ReportKind.summary,
+  }) async {
     if (_busy) return;
     setState(() {
       _busy = true;
       _error = null;
     });
     try {
-      final report = _report();
+      final report = _report(kind);
       String? note;
       if (pdf) {
         final saved = await widget.shareGateway.sharePdf(report);
@@ -973,23 +1455,30 @@ class _ReportPageState extends State<ReportPage> {
   @override
   Widget build(BuildContext context) {
     final controller = widget.controller;
+    final theme = Theme.of(context);
     final report = _report();
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
       children: [
-        const Text(
-          'Preview laporan',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+        Semantics(
+          header: true,
+          child: Text('Preview laporan', style: theme.textTheme.titleLarge),
         ),
-        const SizedBox(height: 8),
-        const Text(
+        const SizedBox(height: 4),
+        Text(
           'Periksa nama, status, transaksi, dan saldo sebelum membagikan laporan.',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
         ),
         if (_error != null) ...[
           const SizedBox(height: 8),
-          Text(
-            _error!,
-            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          Semantics(
+            liveRegion: true,
+            child: Text(
+              _error!,
+              style: TextStyle(color: theme.colorScheme.error),
+            ),
           ),
         ],
         const SizedBox(height: 12),
@@ -999,15 +1488,26 @@ class _ReportPageState extends State<ReportPage> {
           label: Text(_busy ? 'Menyiapkan...' : 'Buat dan bagikan PDF'),
         ),
         const SizedBox(height: 8),
-        OutlinedButton.icon(
+        FilledButton.tonalIcon(
           onPressed: _busy ? null : () => _share(pdf: false),
           icon: const Icon(Icons.chat_outlined),
           label: const Text('Bagikan pesan WhatsApp'),
         ),
         const SizedBox(height: 8),
-        const Text(
+        OutlinedButton.icon(
+          onPressed: _busy
+              ? null
+              : () => _share(pdf: true, kind: ReportKind.portfolio),
+          icon: const Icon(Icons.auto_stories_outlined),
+          label: const Text('Portofolio acara lengkap (PDF)'),
+        ),
+        const SizedBox(height: 8),
+        Text(
           'Periksa penerima sebelum mengirim.',
           textAlign: TextAlign.center,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 16),
         Card(
@@ -1016,37 +1516,131 @@ class _ReportPageState extends State<ReportPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(controller.event.name, style: theme.textTheme.titleLarge),
+                const SizedBox(height: 4),
                 Text(
-                  controller.event.name,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Periode ${formatDate(controller.event.startDate)}-${formatDate(controller.event.endDate)}',
+                  'Periode ${formatDateRange(controller.event.startDate, controller.event.endDate)}',
                 ),
                 Text('Dibuat oleh: ${reportRoleLabel(widget.creatorRole)}'),
-                const Divider(height: 24),
-                Text('Saldo awal: ${rupiah(controller.event.openingBalance)}'),
-                Text('Pemasukan peserta: ${rupiah(report.participantIncome)}'),
-                Text('Iuran tambahan: ${rupiah(report.additionalIncome)}'),
-                Text('Refund dan pengeluaran: ${rupiah(report.expenses)}'),
                 Text(
-                  'Saldo akhir: ${rupiah(controller.balance)}',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  'Disusun ${formatDateTime(report.generatedAt)}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 const Divider(height: 24),
+                _ReportRow(
+                  'Saldo awal',
+                  rupiah(controller.event.openingBalance),
+                ),
+                _ReportRow(
+                  'Pemasukan peserta',
+                  rupiah(report.participantIncome),
+                ),
+                _ReportRow('Iuran tambahan', rupiah(report.additionalIncome)),
+                _ReportRow('Refund dan pengeluaran', rupiah(report.expenses)),
+                const Divider(height: 16),
+                _ReportRow(
+                  'Saldo akhir',
+                  rupiah(controller.balance),
+                  bold: true,
+                ),
+                const Divider(height: 24),
+                Text('Status peserta', style: theme.textTheme.titleSmall),
+                const SizedBox(height: 8),
                 for (final participant in controller.participants)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: Text(
-                      '${participant.name}: ${participant.state == ParticipantState.cancelled ? 'Dibatalkan - ${refundPolicyLabelForReport(participant.refundPolicy)}' : paymentStatus(participantNetPaid(controller.transactions, participant.id), controller.contributionTarget)}',
+                  _ReportParticipantRow(
+                    participant: participant,
+                    netPaid: participantNetPaid(
+                      controller.transactions,
+                      participant.id,
                     ),
+                    target: controller.contributionTarget,
                   ),
               ],
             ),
           ),
         ),
       ],
+    );
+  }
+}
+
+class _ReportRow extends StatelessWidget {
+  const _ReportRow(this.label, this.value, {this.bold = false});
+
+  final String label;
+  final String value;
+  final bool bold;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = bold
+        ? Theme.of(context).textTheme.titleMedium
+        : Theme.of(context).textTheme.bodyLarge;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: _LabelValueRow(
+        label: label,
+        value: value,
+        labelStyle: style,
+        valueStyle: style?.copyWith(
+          fontWeight: FontWeight.w600,
+          fontFeatures: const [FontFeature.tabularFigures()],
+        ),
+      ),
+    );
+  }
+}
+
+class _ReportParticipantRow extends StatelessWidget {
+  const _ReportParticipantRow({
+    required this.participant,
+    required this.netPaid,
+    required this.target,
+  });
+
+  final ParticipantRecord participant;
+  final int netPaid;
+  final int target;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cancelled = participant.state == ParticipantState.cancelled;
+    final state = payState(netPaid, target);
+    final remaining = target - netPaid;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: MergeSemantics(
+        child: Wrap(
+          spacing: 12,
+          runSpacing: 4,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 120),
+              child: Text(participant.name, style: theme.textTheme.bodyLarge),
+            ),
+            if (cancelled)
+              StatusPill(
+                label:
+                    'Dibatalkan - ${refundPolicyLabelForReport(participant.refundPolicy)}',
+                icon: Icons.history,
+                tone: theme.colorScheme.surfaceContainerHighest,
+                onTone: theme.colorScheme.onSurfaceVariant,
+              )
+            else ...[
+              PayStateChip(state),
+              if (state != PayState.paid)
+                Text(
+                  'kurang ${rupiah(remaining)}',
+                  style: theme.textTheme.bodyMedium,
+                ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }
@@ -1062,14 +1656,41 @@ class _ParticipantSection extends StatelessWidget {
   final List<ParticipantRecord> participants;
   final CashbookController controller;
 
+  Future<void> _quickPay(
+    BuildContext context,
+    ParticipantRecord participant,
+    int remaining,
+  ) async {
+    final saved = await showTransactionDialog(
+      context,
+      controller,
+      initialType: TransactionType.participantPayment,
+      initialParticipantId: participant.id,
+      initialAmount: remaining,
+      initialDescription: 'Iuran peserta',
+    );
+    if (!saved || !context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Semantics(
+          liveRegion: true,
+          child: Text('Pembayaran ${participant.name} disimpan.'),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '$title (${participants.length})',
-          style: Theme.of(context).textTheme.titleMedium,
+        Semantics(
+          header: true,
+          child: Text(
+            '$title (${participants.length})',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
         ),
         const SizedBox(height: 8),
         Card(
@@ -1094,6 +1715,10 @@ class _ParticipantSection extends StatelessWidget {
                           controller,
                           participants[index],
                         ),
+                  onPay: controller.isReadOnly
+                      ? null
+                      : (remaining) =>
+                            _quickPay(context, participants[index], remaining),
                 ),
                 if (index < participants.length - 1) const Divider(height: 1),
               ],
@@ -1112,6 +1737,7 @@ class _ParticipantTile extends StatelessWidget {
     required this.refundAmount,
     required this.target,
     required this.onTap,
+    required this.onPay,
   });
 
   final ParticipantRecord participant;
@@ -1119,60 +1745,118 @@ class _ParticipantTile extends StatelessWidget {
   final int refundAmount;
   final int target;
   final VoidCallback? onTap;
+  final void Function(int remaining)? onPay;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final cancelled = participant.state == ParticipantState.cancelled;
     final netPaidAmount = grossPaidAmount - refundAmount;
-    final status = cancelled
-        ? 'Dibatalkan • ${refundPolicyLabel(participant.refundPolicy)}'
-        : paymentStatus(netPaidAmount, target);
-    final colors = Theme.of(context).extension<StatusColors>()!;
-    final (tone, onTone) = cancelled
-        ? (
-            Theme.of(context).colorScheme.surfaceContainerHighest,
-            Theme.of(context).colorScheme.onSurfaceVariant,
-          )
-        : netPaidAmount >= target
-        ? (colors.success, colors.onSuccess)
-        : netPaidAmount > 0
-        ? (colors.warning, colors.onWarning)
-        : (colors.danger, colors.onDanger);
-    return ListTile(
-      minVerticalPadding: 10,
-      leading: CircleAvatar(
-        child: Icon(cancelled ? Icons.history : Icons.person_outline),
-      ),
-      title: Text(participant.name),
-      subtitle: Text(
-        refundAmount == 0
-            ? rupiah(grossPaidAmount)
-            : 'Bayar ${rupiah(grossPaidAmount)} • Refund ${rupiah(refundAmount)}\nBersih ${rupiah(netPaidAmount)}',
-      ),
-      trailing: Container(
-        constraints: const BoxConstraints(maxWidth: 120),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        decoration: BoxDecoration(
-          color: tone,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Text(
-          status,
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.labelMedium
-              ?.copyWith(color: onTone),
-        ),
-      ),
+    final state = payState(netPaidAmount, target);
+    final remaining = target - netPaidAmount;
+    final initial = participant.name.trim().isEmpty
+        ? '?'
+        : participant.name.trim().characters.first.toUpperCase();
+    final muted = theme.textTheme.bodyMedium?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+    return InkWell(
       onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ExcludeSemantics(
+              child: CircleAvatar(
+                backgroundColor: cancelled
+                    ? theme.colorScheme.surfaceContainerHighest
+                    : theme.colorScheme.primaryContainer,
+                foregroundColor: cancelled
+                    ? theme.colorScheme.onSurfaceVariant
+                    : theme.colorScheme.onPrimaryContainer,
+                child: cancelled ? const Icon(Icons.history) : Text(initial),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(participant.name, style: theme.textTheme.bodyLarge),
+                  if (cancelled)
+                    Text(
+                      refundAmount == 0
+                          ? 'Dibayar ${rupiah(grossPaidAmount)}'
+                          : 'Bayar ${rupiah(grossPaidAmount)} • Refund ${rupiah(refundAmount)}',
+                      style: muted,
+                    )
+                  else ...[
+                    Text(
+                      '${refundAmount == 0 ? 'Dibayar' : 'Bersih'} ${rupiah(netPaidAmount)} dari ${rupiah(target)}',
+                      style: muted,
+                    ),
+                    if (refundAmount > 0)
+                      Text(
+                        'Bayar ${rupiah(grossPaidAmount)} • Refund ${rupiah(refundAmount)}',
+                        style: muted,
+                      ),
+                    if (remaining > 0)
+                      Text(
+                        'Kurang ${rupiah(remaining)}',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                  ],
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      if (cancelled)
+                        StatusPill(
+                          label:
+                              'Dibatalkan • ${refundPolicyLabel(participant.refundPolicy)}',
+                          icon: Icons.history,
+                          tone: theme.colorScheme.surfaceContainerHighest,
+                          onTone: theme.colorScheme.onSurfaceVariant,
+                        )
+                      else
+                        PayStateChip(state),
+                      if (!cancelled && remaining > 0 && onPay != null)
+                        TextButton.icon(
+                          onPressed: () => onPay!(remaining),
+                          icon: const Icon(Icons.add_card_outlined),
+                          label: const Text('Catat bayar'),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
 
 class _TransactionTile extends StatelessWidget {
-  const _TransactionTile({required this.controller, required this.transaction});
+  const _TransactionTile({
+    required this.controller,
+    required this.transaction,
+    this.correctable = true,
+    this.showDate = true,
+  });
 
   final CashbookController controller;
   final TransactionRecord transaction;
+
+  /// Tap-to-correct is only offered where the full history is shown.
+  final bool correctable;
+  final bool showDate;
 
   @override
   Widget build(BuildContext context) {
@@ -1191,7 +1875,7 @@ class _TransactionTile extends StatelessWidget {
     final detail = [
       transactionTypeLabel(transaction.type),
       if (participant != null) participant.name,
-      formatDate(transaction.createdAt),
+      if (showDate) formatDate(transaction.createdAt),
       if (isCorrection) 'Alasan: ${transaction.description}',
       if (corrected) 'Dikoreksi, tidak dihitung',
     ].join(' • ');
@@ -1230,7 +1914,7 @@ class _TransactionTile extends StatelessWidget {
             ?.copyWith(color: amountColor)
             .merge(struck),
       ),
-      onTap: isCorrection || corrected || controller.isReadOnly
+      onTap: !correctable || isCorrection || corrected || controller.isReadOnly
           ? null
           : () =>
                 showCorrectTransactionDialog(context, controller, transaction),
@@ -1318,11 +2002,15 @@ class _EmptyState extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.message,
+    this.actionLabel,
+    this.onAction,
   });
 
   final IconData icon;
   final String title;
   final String message;
+  final String? actionLabel;
+  final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) {
@@ -1337,6 +2025,14 @@ class _EmptyState extends StatelessWidget {
               Text(title, style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 4),
               Text(message, textAlign: TextAlign.center),
+              if (actionLabel != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: OutlinedButton(
+                    onPressed: onAction,
+                    child: Text(actionLabel!),
+                  ),
+                ),
             ],
           ),
         ),
@@ -1437,6 +2133,12 @@ Future<void> showParticipantActions(
     builder: (sheetContext) => SafeArea(
       child: Wrap(
         children: [
+          if (participant.state == ParticipantState.active)
+            ListTile(
+              leading: const Icon(Icons.add_card_outlined),
+              title: const Text('Catat pembayaran'),
+              onTap: () => Navigator.pop(sheetContext, 'pay'),
+            ),
           ListTile(
             leading: const Icon(Icons.edit_outlined),
             title: const Text('Edit nama'),
@@ -1453,7 +2155,19 @@ Future<void> showParticipantActions(
     ),
   );
   if (!context.mounted) return;
-  if (action == 'edit') {
+  if (action == 'pay') {
+    final remaining =
+        controller.contributionTarget -
+        participantNetPaid(controller.transactions, participant.id);
+    await showTransactionDialog(
+      context,
+      controller,
+      initialType: TransactionType.participantPayment,
+      initialParticipantId: participant.id,
+      initialAmount: remaining > 0 ? remaining : 0,
+      initialDescription: 'Iuran peserta',
+    );
+  } else if (action == 'edit') {
     await showEditParticipantDialog(context, controller, participant);
   } else if (action == 'cancel') {
     await showCancelParticipantDialog(context, controller, participant);
@@ -1616,12 +2330,18 @@ Future<void> showCancelParticipantDialog(
 
 Future<bool> showTransactionDialog(
   BuildContext context,
-  CashbookController controller,
-) async {
-  TransactionType? type;
-  String? participantId;
-  final amountController = TextEditingController();
-  final descriptionController = TextEditingController();
+  CashbookController controller, {
+  TransactionType? initialType,
+  String? initialParticipantId,
+  int initialAmount = 0,
+  String initialDescription = '',
+}) async {
+  TransactionType? type = initialType;
+  String? participantId = initialParticipantId;
+  final amountController = TextEditingController(
+    text: initialAmount > 0 ? rupiah(initialAmount).substring(3) : '',
+  );
+  final descriptionController = TextEditingController(text: initialDescription);
   var showValidation = false;
   final draft = await showDialog<_TransactionDraft>(
     context: context,
@@ -1644,52 +2364,59 @@ Future<bool> showTransactionDialog(
             (!needsParticipant || participantId != null) &&
             (type != TransactionType.refund || amount <= refundLimit);
         return AlertDialog(
-          title: const Text('Catat transaksi'),
+          title: Text(
+            initialType == TransactionType.participantPayment
+                ? 'Catat pembayaran'
+                : 'Catat transaksi',
+          ),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'Pilih jenis transaksi',
-                  style: Theme.of(dialogContext).textTheme.titleSmall,
-                ),
-                const SizedBox(height: 6),
-                RadioGroup<TransactionType>(
-                  groupValue: type,
-                  onChanged: (value) => setState(() {
-                    type = value;
-                    // Filters differ per type; keep the dropdown value valid.
-                    participantId = null;
-                    showValidation = true;
-                  }),
-                  child: const Column(
-                    children: [
-                      _TransactionTypeChoice(
-                        value: TransactionType.participantPayment,
-                        icon: Icons.person_add_alt_1_outlined,
-                        label: 'Pembayaran peserta',
-                      ),
-                      _TransactionTypeChoice(
-                        value: TransactionType.expense,
-                        icon: Icons.receipt_long_outlined,
-                        label: 'Pengeluaran',
-                      ),
-                      _TransactionTypeChoice(
-                        value: TransactionType.additionalContribution,
-                        icon: Icons.volunteer_activism_outlined,
-                        label: 'Kontribusi tambahan',
-                      ),
-                      _TransactionTypeChoice(
-                        value: TransactionType.refund,
-                        icon: Icons.reply_all_outlined,
-                        label: 'Refund peserta',
-                      ),
-                    ],
+                // A preset type (quick "Catat bayar") needs no type picker.
+                if (initialType == null) ...[
+                  Text(
+                    'Pilih jenis transaksi',
+                    style: Theme.of(dialogContext).textTheme.titleSmall,
                   ),
-                ),
-                if (showValidation && type == null)
-                  const _FieldError('Pilih jenis transaksi terlebih dahulu.'),
+                  const SizedBox(height: 6),
+                  RadioGroup<TransactionType>(
+                    groupValue: type,
+                    onChanged: (value) => setState(() {
+                      type = value;
+                      // Filters differ per type; keep the dropdown value valid.
+                      participantId = null;
+                      showValidation = true;
+                    }),
+                    child: const Column(
+                      children: [
+                        _TransactionTypeChoice(
+                          value: TransactionType.participantPayment,
+                          icon: Icons.person_add_alt_1_outlined,
+                          label: 'Pembayaran peserta',
+                        ),
+                        _TransactionTypeChoice(
+                          value: TransactionType.expense,
+                          icon: Icons.receipt_long_outlined,
+                          label: 'Pengeluaran',
+                        ),
+                        _TransactionTypeChoice(
+                          value: TransactionType.additionalContribution,
+                          icon: Icons.volunteer_activism_outlined,
+                          label: 'Kontribusi tambahan',
+                        ),
+                        _TransactionTypeChoice(
+                          value: TransactionType.refund,
+                          icon: Icons.reply_all_outlined,
+                          label: 'Refund peserta',
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (showValidation && type == null)
+                    const _FieldError('Pilih jenis transaksi terlebih dahulu.'),
+                ],
                 if (needsParticipant) ...[
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
@@ -1764,6 +2491,35 @@ Future<bool> showTransactionDialog(
                         : null,
                   ),
                 ),
+                if (type == TransactionType.participantPayment &&
+                    participantId != null)
+                  Builder(
+                    builder: (context) {
+                      final remaining =
+                          controller.contributionTarget -
+                          participantNetPaid(
+                            controller.transactions,
+                            participantId!,
+                          );
+                      if (remaining <= 0 || amount == remaining) {
+                        return const SizedBox.shrink();
+                      }
+                      return Align(
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: ActionChip(
+                            avatar: const Icon(Icons.check_circle_outline),
+                            label: Text('Lunasi ${rupiah(remaining)}'),
+                            onPressed: () => setState(() {
+                              amountController.text = rupiah(remaining)
+                                  .substring(3);
+                            }),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 const SizedBox(height: 12),
                 TextField(
                   key: const Key('transaction-description'),
@@ -2652,6 +3408,36 @@ String refundPolicyLabel(RefundPolicy policy) {
 
 String formatDate(DateTime date) {
   return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+}
+
+const _monthShort = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'Mei',
+  'Jun',
+  'Jul',
+  'Agu',
+  'Sep',
+  'Okt',
+  'Nov',
+  'Des',
+];
+
+/// "12 Sep 2026": month names read faster than 12/09/2026 for older users.
+String formatDateLong(DateTime date) =>
+    '${date.day} ${_monthShort[date.month - 1]} ${date.year}';
+
+String formatDateRange(DateTime start, DateTime end) {
+  if (start.year != end.year) {
+    return '${formatDateLong(start)} – ${formatDateLong(end)}';
+  }
+  if (start.month != end.month) {
+    return '${start.day} ${_monthShort[start.month - 1]} – ${formatDateLong(end)}';
+  }
+  if (start.day == end.day) return formatDateLong(start);
+  return '${start.day}–${end.day} ${_monthShort[end.month - 1]} ${end.year}';
 }
 
 String formatDateTime(DateTime date) {

@@ -102,7 +102,7 @@ void main() {
 
     await tester.tap(find.text('Peserta'));
     await tester.pumpAndSettle();
-    await tester.drag(find.byType(ListView), const Offset(0, -400));
+    await tester.scrollUntilVisible(find.text('Ibu Rina'), 200);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Ibu Rina'));
     await tester.pumpAndSettle();

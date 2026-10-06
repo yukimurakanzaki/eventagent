@@ -176,19 +176,22 @@ void main() {
     );
   });
 
-  test('QA-8 refunds must still be allowed for a cancelled participant', () async {
-    final controller = CashbookController.forTesting();
-    final cancelled = controller.participants.firstWhere(
-      (item) => item.state == ParticipantState.cancelled,
-    );
-    final ok = await controller.recordTransaction(
-      type: TransactionType.refund,
-      amount: 500000,
-      description: 'Refund setelah batal',
-      participantId: cancelled.id,
-    );
-    expect(ok, isTrue, reason: 'the payment guard over-reached onto refunds');
-  });
+  test(
+    'QA-8 refunds must still be allowed for a cancelled participant',
+    () async {
+      final controller = CashbookController.forTesting();
+      final cancelled = controller.participants.firstWhere(
+        (item) => item.state == ParticipantState.cancelled,
+      );
+      final ok = await controller.recordTransaction(
+        type: TransactionType.refund,
+        amount: 500000,
+        description: 'Refund setelah batal',
+        participantId: cancelled.id,
+      );
+      expect(ok, isTrue, reason: 'the payment guard over-reached onto refunds');
+    },
+  );
 
   test('QA-9 over-budget funding is rejected end to end', () async {
     final base = CashbookSnapshot.demo();
@@ -225,7 +228,7 @@ void main() {
     await tester.pumpWidget(WargakasApp(controller: controller));
     await tester.tap(find.text('Peserta'));
     await tester.pumpAndSettle();
-    await tester.drag(find.byType(ListView), const Offset(0, -400));
+    await tester.scrollUntilVisible(find.text('Ibu Rina'), 200);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Ibu Rina'));
     await tester.pumpAndSettle();
@@ -264,53 +267,59 @@ void main() {
     );
   });
 
-  test('QA-14 a past-due reminder must be refused, not silently dropped', () async {
-    final spy = SpyNotifier();
-    final base = CashbookSnapshot.demo();
-    final controller = CashbookController.forTesting(
-      initial: base.copyWith(reminders: const []),
-      reminderNotifier: spy,
-    );
-    await controller.addReminder(
-      title: 'Pelunasan',
-      dueAt: DateTime.now().subtract(const Duration(days: 1)),
-    );
-    expect(
-      controller.reminders,
-      isEmpty,
-      reason: 'reminder listed as open but no notification will ever fire',
-    );
-  });
+  test(
+    'QA-14 a past-due reminder must be refused, not silently dropped',
+    () async {
+      final spy = SpyNotifier();
+      final base = CashbookSnapshot.demo();
+      final controller = CashbookController.forTesting(
+        initial: base.copyWith(reminders: const []),
+        reminderNotifier: spy,
+      );
+      await controller.addReminder(
+        title: 'Pelunasan',
+        dueAt: DateTime.now().subtract(const Duration(days: 1)),
+      );
+      expect(
+        controller.reminders,
+        isEmpty,
+        reason: 'reminder listed as open but no notification will ever fire',
+      );
+    },
+  );
 
   // --- Round 5: BUG-006, sponsor as a single source of truth ---
 
-  test('QA-15 the report breakdown reconciles with a sponsor record present', () {
-    final snapshot = _snap(transactions: _mixedLedgerWithSponsor());
-    final report = CashbookReport(
-      snapshot: snapshot,
-      creatorRole: 'treasurer',
-      generatedAt: DateTime.now(),
-    );
-    expect(
-      snapshot.event.openingBalance +
-          report.sponsorIncome +
-          report.participantIncome +
-          report.additionalIncome -
-          report.expenses,
-      report.endingBalance,
-      reason: 'report rows do not sum to the ending balance it prints',
-    );
-    expect(
-      report.endingBalance,
-      currentBalance(
-        snapshot.event,
-        snapshot.transactions
-            .where((item) => item.type != TransactionType.sponsor)
-            .toList(),
-      ),
-      reason: 'the sponsor record moved the balance',
-    );
-  });
+  test(
+    'QA-15 the report breakdown reconciles with a sponsor record present',
+    () {
+      final snapshot = _snap(transactions: _mixedLedgerWithSponsor());
+      final report = CashbookReport(
+        snapshot: snapshot,
+        creatorRole: 'treasurer',
+        generatedAt: DateTime.now(),
+      );
+      expect(
+        snapshot.event.openingBalance +
+            report.sponsorIncome +
+            report.participantIncome +
+            report.additionalIncome -
+            report.expenses,
+        report.endingBalance,
+        reason: 'report rows do not sum to the ending balance it prints',
+      );
+      expect(
+        report.endingBalance,
+        currentBalance(
+          snapshot.event,
+          snapshot.transactions
+              .where((item) => item.type != TransactionType.sponsor)
+              .toList(),
+        ),
+        reason: 'the sponsor record moved the balance',
+      );
+    },
+  );
 
   test('QA-16 the sponsor lock engages on the first participant payment, '
       'not before', () async {
@@ -421,25 +430,31 @@ void main() {
     );
   });
 
-  test('QA-19 a stored sponsor record still deserializes and keeps its label', () {
-    final snapshot = _snap(transactions: [_sponsorRecord()]);
-    final restored = CashbookSnapshot.fromJson(
-      Map<String, dynamic>.from(
-        jsonDecode(jsonEncode(snapshot.toJson())) as Map,
-      ),
-    );
-    expect(
-      restored.transactions.single.type,
-      TransactionType.sponsor,
-      reason: 'sponsor type no longer round-trips through storage',
-    );
-    expect(transactionTypeLabel(restored.transactions.single.type), 'Sponsor');
-    expect(
-      currentBalance(restored.event, restored.transactions),
-      currentBalance(restored.event, const []),
-      reason: 'a restored sponsor record moved the balance',
-    );
-  });
+  test(
+    'QA-19 a stored sponsor record still deserializes and keeps its label',
+    () {
+      final snapshot = _snap(transactions: [_sponsorRecord()]);
+      final restored = CashbookSnapshot.fromJson(
+        Map<String, dynamic>.from(
+          jsonDecode(jsonEncode(snapshot.toJson())) as Map,
+        ),
+      );
+      expect(
+        restored.transactions.single.type,
+        TransactionType.sponsor,
+        reason: 'sponsor type no longer round-trips through storage',
+      );
+      expect(
+        transactionTypeLabel(restored.transactions.single.type),
+        'Sponsor',
+      );
+      expect(
+        currentBalance(restored.event, restored.transactions),
+        currentBalance(restored.event, const []),
+        reason: 'a restored sponsor record moved the balance',
+      );
+    },
+  );
 
   test('QA-20 a sponsor record arriving from the server is kept, not dropped, '
       'and moves nothing', () async {
