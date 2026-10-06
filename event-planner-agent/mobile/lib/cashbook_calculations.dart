@@ -5,9 +5,7 @@ import 'cashbook_models.dart';
 int participantTarget(EventRecord event, int activeCount) {
   final divisor = activeCount < 1 ? 1 : activeCount;
   final target =
-      ((event.finalBudget -
-                  event.sponsorContribution -
-                  event.openingBalance) /
+      ((event.finalBudget - event.sponsorContribution - event.openingBalance) /
               divisor)
           .round();
   return target < 0 ? 0 : target;
@@ -152,3 +150,58 @@ int participantNetPaid(
 ) =>
     participantPaid(transactions, participantId) -
     refundTotalForParticipant(transactions, participantId);
+
+enum PayState { paid, partial, unpaid }
+
+PayState payState(int netPaid, int target) => netPaid >= target
+    ? PayState.paid
+    : netPaid > 0
+    ? PayState.partial
+    : PayState.unpaid;
+
+/// Collection progress over active participants only: who is lunas / sebagian /
+/// belum, how much is in, and how much the target expects in total.
+class CollectionProgress {
+  const CollectionProgress({
+    required this.paid,
+    required this.partial,
+    required this.unpaid,
+    required this.collected,
+    required this.expected,
+  });
+
+  final int paid, partial, unpaid;
+  final int collected, expected;
+
+  /// 0..1; an event with no expected money counts as complete.
+  double get fraction =>
+      expected <= 0 ? 1 : (collected / expected).clamp(0, 1).toDouble();
+}
+
+CollectionProgress collectionProgress(
+  Iterable<ParticipantRecord> participants,
+  Iterable<TransactionRecord> transactions,
+  int target,
+) {
+  var paid = 0, partial = 0, unpaid = 0, collected = 0;
+  for (final participant in participants) {
+    if (participant.state != ParticipantState.active) continue;
+    final net = participantNetPaid(transactions, participant.id);
+    collected += net < target ? net : target;
+    switch (payState(net, target)) {
+      case PayState.paid:
+        paid++;
+      case PayState.partial:
+        partial++;
+      case PayState.unpaid:
+        unpaid++;
+    }
+  }
+  return CollectionProgress(
+    paid: paid,
+    partial: partial,
+    unpaid: unpaid,
+    collected: collected < 0 ? 0 : collected,
+    expected: target * (paid + partial + unpaid),
+  );
+}
