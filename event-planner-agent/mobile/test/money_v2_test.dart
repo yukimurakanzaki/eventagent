@@ -72,6 +72,11 @@ void main() {
       tester,
       _controller([_expense('e1', 'Bensin bus', storage: 'a/b.jpg')]),
     );
+    await tester.scrollUntilVisible(
+      find.text('Pengeluaran per kategori'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Pengeluaran per kategori'), findsOneWidget);
     expect(find.byType(LinearProgressIndicator), findsWidgets);
     expect(

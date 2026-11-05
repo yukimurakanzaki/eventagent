@@ -99,6 +99,43 @@ void main() {
       expect(tr('Halo {name}', {'name': 'Ana'}), 'Halo Ana');
     });
 
+    test('uses singular forms where the language has them', () {
+      L10n.code = 'en';
+      expect(
+        tr('{count} peserta belum bayar', {'count': 1}),
+        '1 participant has not paid yet',
+      );
+      expect(
+        tr('{count} peserta belum bayar', {'count': 3}),
+        contains('participants'),
+      );
+      L10n.code = 'ja';
+      expect(
+        tr('{count} peserta belum bayar', {'count': 1}),
+        isNot(contains('participant ')),
+      );
+    });
+
+    test('signed amounts stay one unit in right-to-left languages', () {
+      final ar = formatSignedMoney(
+        5000,
+        outflow: false,
+        currency: 'IDR',
+        languageCode: 'ar',
+      );
+      expect(ar, startsWith('\u2066+'));
+      expect(ar, endsWith('\u2069'));
+      expect(
+        formatSignedMoney(
+          5000,
+          outflow: true,
+          currency: 'IDR',
+          languageCode: 'id',
+        ),
+        '−Rp 5.000',
+      );
+    });
+
     test('resolves the phone language or English', () {
       expect(L10n.resolve('ms'), 'ms');
       expect(L10n.resolve('sw'), 'en');

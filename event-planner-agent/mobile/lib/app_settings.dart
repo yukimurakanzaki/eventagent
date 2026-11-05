@@ -103,8 +103,9 @@ class AppSettings extends ChangeNotifier {
   /// Suggests a currency from the phone's region the first time the app runs.
   void suggestCurrencyFromLocale(Locale locale) {
     if (_currencyChosen) return;
-    final suggested = currencyForCountry(locale.countryCode);
-    if (suggested != null) _defaultCurrency = suggested;
+    _defaultCurrency =
+        currencyForCountry(locale.countryCode) ??
+        currencyForLanguage(locale.languageCode);
   }
 
   Future<void> setLanguage(String? code) async {
@@ -232,3 +233,18 @@ String? currencyForCountry(String? country) {
   };
   return map[country];
 }
+
+/// Fallback when the phone reports a language but no region.
+String currencyForLanguage(String languageCode) => switch (languageCode) {
+  'id' => 'IDR',
+  'ms' => 'MYR',
+  'th' => 'THB',
+  'vi' => 'VND',
+  'hi' => 'INR',
+  'zh' => 'CNY',
+  'ja' => 'JPY',
+  'de' || 'fr' => 'EUR',
+  'ar' => 'SAR',
+  'pt' => 'BRL',
+  _ => 'USD',
+};

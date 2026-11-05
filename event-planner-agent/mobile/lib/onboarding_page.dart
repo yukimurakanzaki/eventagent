@@ -182,6 +182,8 @@ class _WelcomeSetup extends StatelessWidget {
           key: const Key('onboarding-language'),
           initialValue: settings.languageCode ?? '',
           isExpanded: true,
+          // Long labels ("Follow phone language (English)") may wrap.
+          itemHeight: null,
           items: [
             DropdownMenuItem(
               value: '',

@@ -321,6 +321,8 @@ class _EventHeader extends StatelessWidget {
                                     'active': activeCount,
                                     'capacity': event.participantCapacity,
                                   }),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     color: theme.colorScheme.onSurfaceVariant,
                                   ),
@@ -343,7 +345,7 @@ class _EventHeader extends StatelessWidget {
                     ? tr('Selesaikan konflik sebelum mengedit acara')
                     : tr('Edit acara'),
                 // Icon-only at large text so the event name keeps its width.
-                child: MediaQuery.textScalerOf(context).scale(1) > 1.3
+                child: MediaQuery.textScalerOf(context).scale(1) >= 1.25
                     ? IconButton(
                         onPressed: onEdit,
                         icon: const Icon(Icons.edit_calendar_outlined),

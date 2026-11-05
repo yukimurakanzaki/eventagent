@@ -223,7 +223,7 @@ class _LabelValueRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final stacked = MediaQuery.textScalerOf(context).scale(1) > 1.3;
+    final stacked = MediaQuery.textScalerOf(context).scale(1) >= 1.25;
     final text = stacked
         ? Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -236,7 +236,9 @@ class _LabelValueRow extends StatelessWidget {
             children: [
               Expanded(child: Text(label, style: labelStyle)),
               const SizedBox(width: 8),
-              Text(value, style: valueStyle),
+              Flexible(
+                child: Text(value, style: valueStyle, textAlign: TextAlign.end),
+              ),
             ],
           );
     return MergeSemantics(
@@ -415,7 +417,7 @@ class _TransactionTile extends StatelessWidget {
       trailing: Text(
         isCorrection
             ? '-'
-            : '${outflow ? '−' : '+'}${formatMoney(transaction.amount)}',
+            : formatSignedMoney(transaction.amount, outflow: outflow),
         style: Theme.of(context).textTheme.titleSmall
             ?.copyWith(color: amountColor)
             .merge(struck),

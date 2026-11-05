@@ -448,7 +448,10 @@ class _TransactionRow extends StatelessWidget {
     ];
     final amount = transaction.type == TransactionType.correction
         ? ''
-        : '${isOutflow(transaction.type) ? '−' : '+'}${formatMoney(transaction.amount)}';
+        : formatSignedMoney(
+            transaction.amount,
+            outflow: isOutflow(transaction.type),
+          );
     return ListTile(
       leading: Icon(
         isExpense

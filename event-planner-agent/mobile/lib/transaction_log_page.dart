@@ -4,6 +4,7 @@ import 'cashbook_calculations.dart';
 import 'cashbook_controller.dart';
 import 'cashbook_models.dart';
 import 'l10n/l10n.dart';
+import 'money.dart';
 import 'report_service.dart';
 import 'transaction_log.dart';
 
@@ -346,7 +347,7 @@ class _LogTile extends StatelessWidget {
       trailing: Text(
         transaction.type == TransactionType.correction
             ? '-'
-            : '${outflow ? '−' : '+'}${formatReportRupiah(transaction.amount)}',
+            : formatSignedMoney(transaction.amount, outflow: outflow),
         style: Theme.of(context).textTheme.titleSmall?.merge(struck),
       ),
       onTap: onTap,

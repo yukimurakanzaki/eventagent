@@ -140,8 +140,36 @@ String formatMoney(int minorUnits, {String? currency, String? languageCode}) {
   // A space after letter symbols ("Rp 10", "CHF 10") keeps them readable;
   // sign symbols ("$10", "€10") sit tight like printed prices.
   final letterSymbol = RegExp(r'[A-Za-z]$').hasMatch(spec.symbol);
-  return '$sign${spec.symbol}${letterSymbol ? ' ' : ''}$number';
+  return _isolateForRtl(
+    '$sign${spec.symbol}${letterSymbol ? ' ' : ''}$number',
+    language,
+  );
 }
+
+/// "+Rp 10.000" / "−Rp 10.000" kept as one left-to-right unit, so the sign
+/// stays next to the number inside right-to-left (Arabic) text.
+String formatSignedMoney(
+  int minorUnits, {
+  required bool outflow,
+  String? currency,
+  String? languageCode,
+}) {
+  final language = languageCode ?? L10n.code;
+  final plain = formatMoney(
+    minorUnits.abs(),
+    currency: currency,
+    languageCode: language,
+  ).replaceAll(_lri, '').replaceAll(_pdi, '');
+  return _isolateForRtl('${outflow ? '−' : '+'}$plain', language);
+}
+
+const _lri = '\u2066';
+const _pdi = '\u2069';
+
+String _isolateForRtl(String text, String language) =>
+    L10n.languageFor(language).rtl && L10n.isSupported(language)
+    ? '$_lri$text$_pdi'
+    : text;
 
 /// The text a money input field shows for a stored amount.
 String formatMoneyInput(

@@ -94,15 +94,29 @@ class L10n {
     return 'en';
   }
 
-  static String lookup(String key, String code) {
+  /// [count] picks a singular form: catalogs may hold `'<key>|one'` for
+  /// languages whose grammar changes at 1 ("1 participant" vs "2 ...").
+  static String lookup(String key, String code, {int? count}) {
     if (code == source) return key;
-    return catalogs[code]?[key] ?? catalogs['en']?[key] ?? key;
+    final catalog = catalogs[code];
+    if (count == 1) {
+      final one = catalog?['$key|one'];
+      if (one != null) return one;
+      if (catalog?[key] == null) {
+        final englishOne = catalogs['en']?['$key|one'];
+        if (englishOne != null) return englishOne;
+      }
+    }
+    return catalog?[key] ?? catalogs['en']?[key] ?? key;
   }
+
+  static bool get isRtl => languageFor(_code).rtl;
 }
 
 /// Translates an Indonesian source string into the active language.
 String tr(String key, [Map<String, Object?> args = const {}]) {
-  var text = L10n.lookup(key, L10n.code);
+  final count = args['count'];
+  var text = L10n.lookup(key, L10n.code, count: count is int ? count : null);
   if (args.isEmpty) return text;
   args.forEach((name, value) {
     text = text.replaceAll('{$name}', '${value ?? ''}');
