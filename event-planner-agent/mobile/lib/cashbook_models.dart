@@ -231,9 +231,11 @@ class TransactionRecord {
     if (receiptStoragePath != null) 'receiptStoragePath': receiptStoragePath,
   };
 
+  /// [clearStoragePath] drops the hosted copy when a new photo replaces it.
   TransactionRecord copyWith({
     String? receiptPath,
     String? receiptStoragePath,
+    bool clearStoragePath = false,
   }) => TransactionRecord(
     id: id,
     type: type,
@@ -244,7 +246,9 @@ class TransactionRecord {
     relatedTransactionId: relatedTransactionId,
     category: category,
     receiptPath: receiptPath ?? this.receiptPath,
-    receiptStoragePath: receiptStoragePath ?? this.receiptStoragePath,
+    receiptStoragePath: clearStoragePath
+        ? receiptStoragePath
+        : receiptStoragePath ?? this.receiptStoragePath,
   );
 
   factory TransactionRecord.fromJson(Map<String, dynamic> json) {

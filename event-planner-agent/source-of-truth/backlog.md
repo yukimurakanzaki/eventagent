@@ -1,5 +1,17 @@
 # Backlog
 
+## Release 2.0.0 (built 2026-11-05) — go-live steps for the owner
+
+Code, migration, docs and CI are done; these need accounts or devices only the owner has. Full steps: `../docs/production-runbook.md`.
+
+- [ ] `supabase db push` to project `yytzncyxyulwqsanejcg` (applies `202610020001_multi_event.sql` and `202611050001_global_release.sql`); confirm `events.currency`, `get_shared_cashbook` and the `receipts` bucket exist.
+- [ ] Configure custom SMTP and add the support email; fill the `[placeholders]` in `../docs/privacy-policy.md` and `terms-of-service.md`.
+- [ ] GitHub: add secrets (SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, KEYSTORE_*), enable Pages (source: GitHub Actions), then tag `v2.0.0`.
+- [ ] Upload the AAB to Play Console internal testing; complete Data safety from `../docs/play-store-listing.md`.
+- [ ] iOS: on a Mac, `flutter build ipa`, sign, TestFlight.
+- [ ] Real-device SIT: sign in, multi-device sync, receipt upload, share link open + revoke, account deletion.
+
+
 ## Current Gate: Respondent-3 Usage Pilot (starts week of 2026-09-28)
 
 - [x] Divide the contribution target by active participants instead of capacity.

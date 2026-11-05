@@ -397,6 +397,19 @@ with check (
   and (select private.is_event_member((storage.foldername(name))[1]))
 );
 
+-- Replacing a receipt photo overwrites the same object (upsert).
+drop policy if exists receipts_member_update on storage.objects;
+create policy receipts_member_update on storage.objects
+for update to authenticated
+using (
+  bucket_id = 'receipts'
+  and (select private.is_event_member((storage.foldername(name))[1]))
+)
+with check (
+  bucket_id = 'receipts'
+  and (select private.is_event_member((storage.foldername(name))[1]))
+);
+
 ------------------------------------------------------------------------------
 -- 6. Account deletion (required by app stores). History stays with the
 --    group; the departing user's id is cleared from it.

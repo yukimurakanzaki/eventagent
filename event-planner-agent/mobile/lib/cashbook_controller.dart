@@ -482,9 +482,11 @@ class CashbookController extends ChangeNotifier {
         .where((item) => item.id == transactionId)
         .firstOrNull;
     if (original == null) return tr('Transaksi tidak ditemukan.');
+    // A new local photo replaces any uploaded one; it re-uploads below.
     final updated = original.copyWith(
       receiptPath: localPath,
       receiptStoragePath: storagePath,
+      clearStoragePath: localPath != null && storagePath == null,
     );
     await _commit(
       _snapshot.copyWith(

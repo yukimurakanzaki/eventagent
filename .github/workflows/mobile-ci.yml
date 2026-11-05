@@ -32,6 +32,9 @@ jobs:
       - name: Run Flutter tests
         working-directory: event-planner-agent/mobile
         run: flutter test
+      - name: Build web (participant viewer)
+        working-directory: event-planner-agent/mobile
+        run: flutter build web --release
       - name: Run prototype model tests
         working-directory: event-planner-agent/prototype
         run: node cashbook-model.test.js

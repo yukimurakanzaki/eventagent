@@ -314,4 +314,27 @@ void main() {
       expect(find.text('Tautan tidak dapat dibuka'), findsOneWidget);
     });
   });
+
+  test('a replaced receipt photo is uploaded again', () async {
+    final uploads = <String>[];
+    final controller = CashbookController.forTesting(
+      receiptUploader: (eventId, transactionId, path) async {
+        uploads.add(path);
+        return '$eventId/$transactionId.jpg';
+      },
+    );
+    await controller.recordTransaction(
+      type: TransactionType.expense,
+      amount: 1000,
+      description: 'Parkir',
+      receiptPath: '/tmp/a.jpg',
+    );
+    await Future<void>.delayed(Duration.zero);
+    final id = controller.transactions.last.id;
+    expect(controller.transactions.last.receiptStoragePath, isNotNull);
+    await controller.attachReceipt(id, localPath: '/tmp/b.jpg');
+    expect(uploads, ['/tmp/a.jpg', '/tmp/b.jpg']);
+    expect(controller.transactions.last.receiptPath, '/tmp/b.jpg');
+    expect(controller.transactions.last.receiptStoragePath, isNotNull);
+  });
 }
