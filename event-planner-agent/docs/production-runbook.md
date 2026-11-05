@@ -16,6 +16,19 @@ Still manual:
 4. iOS is built on a Mac (section 4); `release.yml` builds Android (APK + AAB) and `web-viewer.yml` deploys the web viewer.
 5. Run the QA checklist in section 9 against the real project before inviting users; unit and CI tests use a local PostgreSQL with stubbed Supabase schemas.
 
+## Automation: what runs once secrets are added
+
+Add these in GitHub → Settings → Secrets and variables → Actions. Every workflow skips the steps whose secrets are missing, so they can be added one at a time.
+
+| Workflow | Runs on | Secrets | Does |
+|---|---|---|---|
+| `supabase-deploy.yml` | merge to `main` touching `supabase/`, or manual | `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_REF`; optional `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_ADMIN_EMAIL`, `SMTP_SENDER_NAME` | Applies migrations, sets the auth redirect `io.wargakas.mobile://auth-callback/`, configures custom SMTP and its rate limit, verifies the release schema |
+| `release.yml` | tag `v*` | `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`; optional `PLAY_SERVICE_ACCOUNT_JSON` | Tests, builds APK + arm64 APK + AAB, uploads the AAB to Play internal testing, publishes a GitHub release |
+| `ios.yml` | tag `v*`, PRs touching iOS, manual | `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`; optional `IOS_CERTIFICATE_P12_BASE64`, `IOS_CERTIFICATE_PASSWORD`, `IOS_PROVISIONING_PROFILE_BASE64`, `IOS_TEAM_ID`, `IOS_PROFILE_NAME`, `APPSTORE_ISSUER_ID`, `APPSTORE_API_KEY_ID`, `APPSTORE_API_PRIVATE_KEY` | Unsigned compile check, or signed IPA uploaded to TestFlight |
+| `web-viewer.yml` | tag `v*`, manual | `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (enable Pages: source GitHub Actions) | Publishes the participant read-only viewer |
+
+Bundle/package id on both platforms: `io.wargakas.mobile`.
+
 ## 1. Supabase
 
 ### 1.1 Create the project and choose the region
