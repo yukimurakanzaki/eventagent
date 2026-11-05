@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'app_settings.dart';
 import 'l10n/l10n.dart';
 import 'main.dart' show wargakasTheme;
+import 'onboarding_page.dart';
 
 /// The single MaterialApp configuration every entry point uses, so language,
 /// theme, accent, contrast and text size apply the same way everywhere.
@@ -12,9 +13,13 @@ class WargakasMaterialApp extends StatefulWidget {
     required this.home,
     this.settings,
     this.navigatorKey,
+    this.enableOnboarding = false,
     super.key,
   });
 
+  /// Shows the first-run welcome until it is completed once. Off in tests
+  /// and embedded screens.
+  final bool enableOnboarding;
   final Widget home;
   final AppSettings? settings;
   final GlobalKey<NavigatorState>? navigatorKey;
@@ -103,7 +108,9 @@ class _WargakasMaterialAppState extends State<WargakasMaterialApp> {
               child: child ?? const SizedBox.shrink(),
             );
           },
-          home: widget.home,
+          home: widget.enableOnboarding && !settings.onboardingDone
+              ? OnboardingPage(settings: settings, onDone: () {})
+              : widget.home,
         );
       },
     );

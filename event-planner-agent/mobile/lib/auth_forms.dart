@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'auth_support.dart';
 import 'l10n/l10n.dart';
+import 'settings_page.dart' show openSettings;
 import 'supabase_backend.dart';
 
 enum _Mode { signIn, signUp, reset, confirmation }
@@ -242,7 +243,17 @@ class _LoginPageState extends State<LoginPage> {
         ? tr('Lupa kata sandi')
         : tr('Masuk ke Wargakas');
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
+      appBar: AppBar(
+        title: Text(title),
+        actions: [
+          IconButton(
+            key: const Key('login-settings'),
+            onPressed: () => openSettings(context),
+            tooltip: tr('Bahasa & tampilan'),
+            icon: const Icon(Icons.translate),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(

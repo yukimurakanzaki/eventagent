@@ -10,7 +10,9 @@ import 'cashbook_calculations.dart';
 import 'cashbook_models.dart';
 import 'formatting.dart';
 import 'l10n/l10n.dart';
+import 'labels.dart';
 import 'money.dart';
+import 'pdf_fonts.dart';
 import 'ledger_pdf.dart';
 import 'transaction_log.dart';
 
@@ -108,8 +110,40 @@ class CashbookReport {
           ? ''
           : ' ${tr('(bayar {paid}, refund {refund})', {'paid': formatReportRupiah(grossPaid), 'refund': formatReportRupiah(refunds)})}';
       buffer.writeln(
-        '- ${sanitizeReportText(participant.name)}: $status, ${formatReportRupiah(netPaid)}$breakdown',
+        '- ${participantReportName(participant)}: $status, ${formatReportRupiah(netPaid)}$breakdown',
       );
+    }
+    final corrected = correctedTransactionIds(snapshot.transactions);
+    final categoryTotals = expenseTotalsByCategory(
+      snapshot.transactions,
+      corrected,
+    );
+    if (categoryTotals.isNotEmpty) {
+      buffer
+        ..writeln()
+        ..writeln('*${tr('Pengeluaran per kategori')}*');
+      for (final (category, total) in categoryTotals) {
+        buffer.writeln(
+          '- ${expenseCategoryLabel(category)}: ${formatReportRupiah(total)}',
+        );
+      }
+    }
+    final expenseLines = snapshot.transactions
+        .where(
+          (item) =>
+              item.type == TransactionType.expense &&
+              !corrected.contains(item.id),
+        )
+        .toList();
+    if (expenseLines.isNotEmpty) {
+      buffer
+        ..writeln()
+        ..writeln('*${tr('Rincian pengeluaran')}*');
+      for (final item in expenseLines) {
+        buffer.writeln(
+          '- ${formatReportDate(item.createdAt)} ${expenseDetailText(item)}: ${formatReportRupiah(item.amount)}',
+        );
+      }
     }
     buffer
       ..writeln()
@@ -137,9 +171,11 @@ class CashbookReport {
 
   Future<Uint8List> buildPdf() async {
     if (kind != ReportKind.summary) return buildLedgerPdf(this);
+    final theme = await loadPdfTheme();
     final document = pw.Document(
       title: tr('Laporan Wargakas - {name}', {'name': snapshot.event.name}),
       author: reportRoleLabel(creatorRole),
+      theme: theme,
     );
     final event = snapshot.event;
     final participantRows = snapshot.participants.map((participant) {
@@ -155,7 +191,7 @@ class CashbookReport {
             })
           : paymentStatus(netPaid, target);
       return [
-        sanitizeReportText(participant.name),
+        participantReportName(participant),
         status,
         refunds == 0
             ? formatReportRupiah(netPaid)
@@ -167,6 +203,10 @@ class CashbookReport {
       ];
     }).toList();
     final corrected = correctedTransactionIds(snapshot.transactions);
+    final categoryTotals = expenseTotalsByCategory(
+      snapshot.transactions,
+      corrected,
+    );
     final transactionRows = snapshot.transactions.map((transaction) {
       final voided =
           corrected.contains(transaction.id) ||
@@ -181,7 +221,7 @@ class CashbookReport {
                 ),
                 'reason': sanitizeReportText(transaction.description),
               })
-            : '${sanitizeReportText(transaction.description)}${corrected.contains(transaction.id) ? ' ${tr('(dikoreksi)')}' : ''}',
+            : '${transaction.type == TransactionType.expense ? expenseDetailText(transaction) : sanitizeReportText(transaction.description)}${corrected.contains(transaction.id) ? ' ${tr('(dikoreksi)')}' : ''}',
         voided
             ? tr('({amount}) tidak dihitung', {
                 'amount': formatReportRupiah(transaction.amount),
@@ -192,9 +232,11 @@ class CashbookReport {
 
     document.addPage(
       pw.MultiPage(
-        pageTheme: const pw.PageTheme(
+        pageTheme: pw.PageTheme(
           pageFormat: PdfPageFormat.a4,
-          margin: pw.EdgeInsets.all(26),
+          margin: const pw.EdgeInsets.all(26),
+          theme: theme,
+          textDirection: pdfTextDirection,
         ),
         header: (context) => pw.Container(
           padding: const pw.EdgeInsets.only(bottom: 10),
@@ -292,6 +334,27 @@ class CashbookReport {
               headers: [tr('Nama'), tr('Status'), tr('Dibayar')],
               data: participantRows,
             ),
+          if (categoryTotals.isNotEmpty) ...[
+            pw.SizedBox(height: 12),
+            _reportSectionTitle(tr('Pengeluaran per kategori')),
+            pw.TableHelper.fromTextArray(
+              headerDecoration: const pw.BoxDecoration(color: PdfColors.teal50),
+              headerStyle: pw.TextStyle(
+                fontSize: 11,
+                fontWeight: pw.FontWeight.bold,
+              ),
+              cellStyle: const pw.TextStyle(fontSize: 11),
+              cellPadding: const pw.EdgeInsets.symmetric(
+                horizontal: 4,
+                vertical: 3,
+              ),
+              headers: [tr('Kategori'), tr('Total')],
+              data: [
+                for (final (category, total) in categoryTotals)
+                  [expenseCategoryLabel(category), formatReportRupiah(total)],
+              ],
+            ),
+          ],
           pw.SizedBox(height: 12),
           _reportSectionTitle(tr('Transaksi')),
           if (transactionRows.isEmpty)
@@ -389,6 +452,24 @@ class PlatformReportShareGateway implements ReportShareGateway {
     await Clipboard.setData(ClipboardData(text: report.whatsappText));
     await SharePlus.instance.share(ShareParams(text: report.whatsappText));
   }
+}
+
+/// Participant name for reports; committee members are marked. Never
+/// includes the phone number.
+String participantReportName(ParticipantRecord participant) {
+  final name = sanitizeReportText(participant.name);
+  return participant.role == ParticipantRole.committee
+      ? '$name (${participantRoleLabel(ParticipantRole.committee)})'
+      : name;
+}
+
+/// Expense description with its category and whether a receipt exists.
+String expenseDetailText(TransactionRecord transaction) {
+  final category = expenseCategoryLabel(
+    transaction.category ?? ExpenseCategory.other,
+  );
+  final receipt = transaction.hasReceipt ? tr('ada nota') : tr('tanpa nota');
+  return '${sanitizeReportText(transaction.description)} [$category, $receipt]';
 }
 
 pw.Widget _reportSectionTitle(String title) => pw.Padding(

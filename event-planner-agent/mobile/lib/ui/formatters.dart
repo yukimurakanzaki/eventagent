@@ -6,6 +6,8 @@ String roleLabel(String? role) {
       return tr('Bendahara');
     case 'chairperson':
       return tr('Ketua acara');
+    case 'committee':
+      return tr('Panitia');
     default:
       return tr('Anggota acara');
   }

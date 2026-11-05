@@ -15,6 +15,8 @@ Future<bool> showTransactionDialog(
   );
   final descriptionController = TextEditingController(text: initialDescription);
   var showValidation = false;
+  var category = ExpenseCategory.other;
+  String? receiptPath;
   final draft = await showDialog<_TransactionDraft>(
     context: context,
     builder: (context) => StatefulBuilder(
@@ -231,6 +233,88 @@ Future<bool> showTransactionDialog(
                         : null,
                   ),
                 ),
+                if (type == TransactionType.expense) ...[
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<ExpenseCategory>(
+                    key: const Key('transaction-category'),
+                    isExpanded: true,
+                    initialValue: category,
+                    decoration: InputDecoration(labelText: tr('Kategori')),
+                    items: [
+                      for (final item in ExpenseCategory.values)
+                        DropdownMenuItem(
+                          value: item,
+                          child: Row(
+                            children: [
+                              Icon(expenseCategoryIcon(item), size: 20),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  expenseCategoryLabel(item),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                    onChanged: (value) =>
+                        setState(() => category = value ?? category),
+                  ),
+                  if (Receipts.supported) ...[
+                    const SizedBox(height: 12),
+                    if (receiptPath != null)
+                      Row(
+                        children: [
+                          SizedBox(
+                            width: 64,
+                            height: 64,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: ReceiptImage(
+                                transaction: TransactionRecord(
+                                  id: 'draft',
+                                  type: TransactionType.expense,
+                                  amount: 0,
+                                  description: '',
+                                  createdAt: DateTime.now(),
+                                  receiptPath: receiptPath,
+                                ),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(child: Text(tr('Foto nota terlampir'))),
+                          IconButton(
+                            key: const Key('transaction-receipt-remove'),
+                            tooltip: tr('Hapus foto nota'),
+                            icon: const Icon(Icons.close),
+                            onPressed: () => setState(() => receiptPath = null),
+                          ),
+                        ],
+                      ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: OutlinedButton.icon(
+                        key: const Key('transaction-receipt-attach'),
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(48, 48),
+                        ),
+                        icon: const Icon(Icons.photo_camera_outlined),
+                        label: Text(
+                          receiptPath == null
+                              ? tr('Lampirkan foto nota')
+                              : tr('Ganti foto nota'),
+                        ),
+                        onPressed: () async {
+                          final path = await pickReceiptPhoto(dialogContext);
+                          if (path != null) setState(() => receiptPath = path);
+                        },
+                      ),
+                    ),
+                  ],
+                ],
               ],
             ),
           ),
@@ -248,6 +332,12 @@ Future<bool> showTransactionDialog(
                         amount: amount,
                         description: descriptionController.text,
                         participantId: participantId,
+                        category: type == TransactionType.expense
+                            ? category
+                            : null,
+                        receiptPath: type == TransactionType.expense
+                            ? receiptPath
+                            : null,
                       ),
                     )
                   : null,
@@ -267,6 +357,8 @@ Future<bool> showTransactionDialog(
     amount: draft.amount,
     description: draft.description,
     participantId: draft.participantId,
+    category: draft.category,
+    receiptPath: draft.receiptPath,
   );
   return true;
 }
@@ -277,12 +369,16 @@ class _TransactionDraft {
     required this.amount,
     required this.description,
     required this.participantId,
+    this.category,
+    this.receiptPath,
   });
 
   final TransactionType type;
   final int amount;
   final String description;
   final String? participantId;
+  final ExpenseCategory? category;
+  final String? receiptPath;
 }
 
 class _CancellationDraft {

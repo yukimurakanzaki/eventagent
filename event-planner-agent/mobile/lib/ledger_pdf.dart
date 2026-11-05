@@ -7,6 +7,8 @@ import 'cashbook_calculations.dart';
 import 'cashbook_models.dart';
 import 'formatting.dart';
 import 'l10n/l10n.dart';
+import 'labels.dart';
+import 'pdf_fonts.dart';
 import 'report_service.dart';
 import 'transaction_log.dart';
 
@@ -49,25 +51,30 @@ pw.Widget _section(String text) => pw.Padding(
 
 /// Transaction-log PDF (filtered) or whole-event portfolio PDF, chosen by
 /// [CashbookReport.kind]. Running balances always use the full history.
-Future<Uint8List> buildLedgerPdf(CashbookReport report) {
+Future<Uint8List> buildLedgerPdf(CashbookReport report) async {
+  final theme = await loadPdfTheme();
   final portfolio = report.kind == ReportKind.portfolio;
   final snapshot = report.snapshot;
   final event = snapshot.event;
   final ledger = buildLedger(event, snapshot.transactions);
   final rows = portfolio ? ledger : filterLedger(ledger, report.filter);
   final summary = summarize(rows);
-  final names = {for (final p in snapshot.participants) p.id: p.name};
+  final names = {
+    for (final p in snapshot.participants) p.id: participantReportName(p),
+  };
   final byId = {for (final t in snapshot.transactions) t.id: t};
   final title = portfolio ? tr('Portofolio acara') : tr('Riwayat transaksi');
   final document = pw.Document(
     title: '$title - ${event.name}',
     author: reportRoleLabel(report.creatorRole),
+    theme: theme,
   );
 
   String detail(TransactionRecord t) => [
-    sanitizeReportText(t.description),
-    if (names[t.participantId] != null)
-      sanitizeReportText(names[t.participantId]!),
+    t.type == TransactionType.expense
+        ? expenseDetailText(t)
+        : sanitizeReportText(t.description),
+    if (names[t.participantId] != null) names[t.participantId]!,
     if (t.type == TransactionType.correction)
       tr('membatalkan {name}', {
         'name': sanitizeReportText(
@@ -115,13 +122,17 @@ Future<Uint8List> buildLedgerPdf(CashbookReport report) {
         [transactionTypeLabel(type), formatReportRupiah(summary.byType[type]!)],
   ];
   final months = monthlyTotals(rows);
+  final categoryTotals = expenseTotalsByCategory([
+    for (final entry in rows)
+      if (entry.counted) entry.transaction,
+  ], const <String>{});
   final participantRows = [
     for (final p in snapshot.participants)
       () {
         final paid = participantPaid(snapshot.transactions, p.id);
         final refunds = refundTotalForParticipant(snapshot.transactions, p.id);
         return [
-          sanitizeReportText(p.name),
+          participantReportName(p),
           p.state == ParticipantState.cancelled
               ? tr('Dibatalkan - {policy}', {
                   'policy': refundPolicyLabelForReport(p.refundPolicy),
@@ -136,9 +147,11 @@ Future<Uint8List> buildLedgerPdf(CashbookReport report) {
 
   document.addPage(
     pw.MultiPage(
-      pageTheme: const pw.PageTheme(
+      pageTheme: pw.PageTheme(
         pageFormat: PdfPageFormat.a4,
-        margin: pw.EdgeInsets.all(26),
+        margin: const pw.EdgeInsets.all(26),
+        theme: theme,
+        textDirection: pdfTextDirection,
       ),
       header: (context) => pw.Container(
         padding: const pw.EdgeInsets.only(bottom: 10),
@@ -258,6 +271,16 @@ Future<Uint8List> buildLedgerPdf(CashbookReport report) {
               tr('Refund'),
               tr('Bersih'),
             ], participantRows),
+        ],
+        if (categoryTotals.isNotEmpty) ...[
+          _section(tr('Pengeluaran per kategori')),
+          _table(
+            [tr('Kategori'), tr('Total')],
+            [
+              for (final (category, total) in categoryTotals)
+                [expenseCategoryLabel(category), formatReportRupiah(total)],
+            ],
+          ),
         ],
         _section(portfolio ? tr('Buku kas lengkap') : tr('Daftar transaksi')),
         ledgerTable,

@@ -1,14 +1,22 @@
-# Wargakas mobile shell
+# Wargakas mobile app
 
-This is the Android-first Flutter app for the controlled community-trip cashbook pilot. It starts with the Dieng rehearsal data and supports one configurable event per workspace with the fixed information architecture:
+Flutter app (Android, iOS and web) for a transparent shared cashbook for community events. Navigation:
 
 `Acara Saya → Ringkasan | Peserta | Uang | Laporan`
 
-Changes are written to a local JSON snapshot and recorded in a pending sync queue. Future reminders are scheduled as local Android notifications and restored after app startup or device reboot. When Supabase configuration is supplied, the app adds email/password login, shared event state, optimistic queue replay, and server-side audit writes. Hosted mode is the default; the offline demo must be enabled explicitly with `WARGAKAS_APP_MODE=demo` so a release/test build cannot silently bypass authentication.
+## What it does
 
-Both treasurer and chairperson can edit event and cashbook content. Only the treasurer can grant workspace access. If two devices submit different offline snapshots, editing stops until the user explicitly chooses the online snapshot or the device snapshot. Reports are generated locally as PDF or WhatsApp-ready text and shared through Android's native share sheet.
+- Offline-first: every change is saved on the phone and queued for sync; conflicts are never merged silently.
+- 13 languages (follow the phone or pick one in Settings; Arabic is right-to-left), 40+ currencies stored in each currency's minor unit, locale-aware dates and numbers.
+- Personal settings per device: language, light/dark/automatic theme, text size, accent colour, high contrast, reduced motion, default currency. First-run welcome screen.
+- Participants and committee members in one list (the committee pays too), optional WhatsApp number for personal payment reminders (never printed in reports or the share link), search for large groups.
+- Expenses with categories and optional receipt photos (uploaded to a private Supabase bucket); expenses without a receipt are labelled "tanpa nota" so gaps are visible.
+- Sponsor money may be added or changed at any time; every change is in the audit history and the per-person target is recalculated.
+- Reports: PDF (embedded Noto fonts for Latin, Vietnamese, Thai, Arabic, Devanagari; CJK font fetched on demand), WhatsApp text with per-transaction detail, CSV for Excel, and a revocable read-only web link for participants (no account needed).
+- Roles: treasurer (manages access and events), chairperson, committee. In-app account deletion.
+- Reminders use the phone's own timezone.
 
-The notification slice currently uses the fixed Indonesian timezone and inexact Android scheduling for this scenario. Production should derive the device timezone and validate battery-optimization behavior on target phones. The hosted slice still needs a linked Supabase project and live RLS/conflict testing; the treasurer-controlled chairperson access flow is implemented for an existing Supabase account.
+Roadmap evidence and decisions live in `../source-of-truth`; go-live steps in `../docs/production-runbook.md`.
 
 Email confirmation returns to `io.wargakas.mobile://auth-callback/`. Keep this URL in Supabase Authentication → URL Configuration → Redirect URLs. The Flutter client passes it as `emailRedirectTo` during account creation. Android disables Flutter's competing default deep-link handler so `supabase_flutter` can process the PKCE callback.
 

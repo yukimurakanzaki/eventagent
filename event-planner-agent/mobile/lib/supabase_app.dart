@@ -11,6 +11,8 @@ import 'cashbook_controller.dart';
 import 'event_directory.dart';
 import 'l10n/l10n.dart';
 import 'app_shell.dart';
+import 'receipts.dart';
+import 'share_link.dart';
 import 'main.dart' show EventHomePage;
 import 'supabase_backend.dart';
 
@@ -18,9 +20,14 @@ export 'auth_support.dart' show authErrorMessage;
 export 'auth_forms.dart' show LoginPage, PasswordRecoveryPage;
 
 class SupabaseApp extends StatefulWidget {
-  const SupabaseApp({required this.backend, super.key});
+  const SupabaseApp({
+    required this.backend,
+    this.enableOnboarding = false,
+    super.key,
+  });
 
   final SupabaseBackend backend;
+  final bool enableOnboarding;
 
   @override
   State<SupabaseApp> createState() => _SupabaseAppState();
@@ -41,6 +48,7 @@ class _SupabaseAppState extends State<SupabaseApp> implements EventDirectory {
   @override
   void initState() {
     super.initState();
+    Receipts.urlResolver = (path) => widget.backend.receiptUrl(path);
     _session = widget.backend.currentSession;
     _authSubscription = widget.backend.authChanges.listen(
       (state) {
@@ -196,6 +204,16 @@ class _SupabaseAppState extends State<SupabaseApp> implements EventDirectory {
     });
   }
 
+  Future<void> _inviteMember(String email, String role) async {
+    final workspaceId = _workspaceId;
+    if (workspaceId == null) throw StateError(tr('workspace belum siap'));
+    await widget.backend.inviteMember(
+      workspaceId: workspaceId,
+      email: email,
+      role: role,
+    );
+  }
+
   Future<void> _inviteChairperson(String email) async {
     final workspaceId = _workspaceId;
     if (workspaceId == null) throw StateError(tr('workspace belum siap'));
@@ -208,6 +226,7 @@ class _SupabaseAppState extends State<SupabaseApp> implements EventDirectory {
   @override
   Widget build(BuildContext context) {
     return WargakasMaterialApp(
+      enableOnboarding: widget.enableOnboarding,
       home: Scaffold(
         body: SafeArea(
           child: Column(
@@ -274,6 +293,15 @@ class _SupabaseAppState extends State<SupabaseApp> implements EventDirectory {
           controller: snapshot.data!,
           onSignOut: widget.backend.signOut,
           onInviteChairperson: _role == 'treasurer' ? _inviteChairperson : null,
+          onInviteMember: _role == 'treasurer' ? _inviteMember : null,
+          onDeleteAccount: () => widget.backend.deleteAccount(),
+          shareLinkService: _eventId == null
+              ? null
+              : CallbackShareLinkService(
+                  create: () => widget.backend.createShareLink(_eventId!),
+                  revoke: () => widget.backend.revokeShareLinks(_eventId!),
+                  canRevoke: _role == 'treasurer',
+                ),
           eventDirectory: this,
           accountEmail: widget.backend.user?.email,
           accountRole: _role,

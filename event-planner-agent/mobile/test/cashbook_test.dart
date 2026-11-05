@@ -544,31 +544,34 @@ void main() {
     },
   );
 
-  test('validates configurable event fields; late sponsor money is allowed', () async {
-    final controller = CashbookController.forTesting();
-    final changedSponsor = controller.event.copyWith(
-      sponsorContribution: controller.event.sponsorContribution + 1,
-    );
+  test(
+    'validates configurable event fields; late sponsor money is allowed',
+    () async {
+      final controller = CashbookController.forTesting();
+      final changedSponsor = controller.event.copyWith(
+        sponsorContribution: controller.event.sponsorContribution + 1,
+      );
 
-    expect(controller.validateEventUpdate(changedSponsor), isNull);
-    expect(
-      controller.validateEventUpdate(
-        controller.event.copyWith(participantCapacity: 1),
-      ),
-      contains('peserta aktif'),
-    );
+      expect(controller.validateEventUpdate(changedSponsor), isNull);
+      expect(
+        controller.validateEventUpdate(
+          controller.event.copyWith(participantCapacity: 1),
+        ),
+        contains('peserta aktif'),
+      );
 
-    final updated = controller.event.copyWith(
-      name: 'Wisata Bandung',
-      finalBudget: 41000000,
-      openingBalance: 2500000,
-    );
-    expect(await controller.updateEvent(updated), isNull);
-    expect(controller.event.name, 'Wisata Bandung');
-    expect(controller.pendingOperations.single.entity, 'event');
-    expect(controller.pendingOperations.single.payload, contains('before'));
-    expect(controller.pendingOperations.single.payload, contains('after'));
-  });
+      final updated = controller.event.copyWith(
+        name: 'Wisata Bandung',
+        finalBudget: 41000000,
+        openingBalance: 2500000,
+      );
+      expect(await controller.updateEvent(updated), isNull);
+      expect(controller.event.name, 'Wisata Bandung');
+      expect(controller.pendingOperations.single.entity, 'event');
+      expect(controller.pendingOperations.single.payload, contains('before'));
+      expect(controller.pendingOperations.single.payload, contains('after'));
+    },
+  );
 
   test('persists conflict and can choose the online version', () async {
     final remote = CashbookSnapshot.demo().copyWith(

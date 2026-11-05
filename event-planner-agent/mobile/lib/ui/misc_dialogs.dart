@@ -93,25 +93,63 @@ Future<void> showReminderDialog(
 
 Future<void> showInviteChairpersonDialog(
   BuildContext context,
-  Future<void> Function(String email) onInvite,
-) async {
+  Future<void> Function(String email) onInvite, {
+  Future<void> Function(String email, String role)? onInviteMember,
+}) async {
   final emailController = TextEditingController();
   var busy = false;
+  var role = 'chairperson';
   await showDialog<void>(
     context: context,
     builder: (dialogContext) => StatefulBuilder(
       builder: (dialogContext, setState) => AlertDialog(
         scrollable: true,
-        title: Text(tr('Tambah ketua acara')),
+        title: Text(
+          onInviteMember == null
+              ? tr('Tambah ketua acara')
+              : tr('Tambah pengurus acara'),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (onInviteMember != null) ...[
+              SegmentedButton<String>(
+                segments: [
+                  ButtonSegment(
+                    value: 'chairperson',
+                    label: Text(tr('Ketua acara')),
+                  ),
+                  ButtonSegment(value: 'committee', label: Text(tr('Panitia'))),
+                ],
+                selected: {role},
+                onSelectionChanged: busy
+                    ? null
+                    : (value) => setState(() => role = value.first),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                role == 'chairperson'
+                    ? tr(
+                        'Ketua acara dapat melihat dan mencatat semua transaksi.',
+                      )
+                    : tr(
+                        'Panitia dapat mencatat pembayaran dan pengeluaran, tetapi tidak dapat mengatur akses atau acara.',
+                      ),
+                style: Theme.of(dialogContext).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 12),
+            ],
             Text(tr('Masukkan email akun yang sudah dibuat di Wargakas.')),
             const SizedBox(height: 12),
             TextField(
               controller: emailController,
               keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(labelText: tr('Email ketua acara')),
+              decoration: InputDecoration(
+                labelText: onInviteMember == null
+                    ? tr('Email ketua acara')
+                    : tr('Email akun'),
+              ),
             ),
           ],
         ),
@@ -135,16 +173,25 @@ Future<void> showInviteChairpersonDialog(
                     }
                     setState(() => busy = true);
                     try {
-                      await onInvite(email);
+                      if (onInviteMember != null) {
+                        await onInviteMember(email, role);
+                      } else {
+                        await onInvite(email);
+                      }
                       if (!dialogContext.mounted) return;
                       Navigator.pop(dialogContext);
                       await showInfo(
                         context,
                         tr('Akses diberikan'),
-                        tr(
-                          '{email} sekarang dapat membuka acara ini sebagai ketua acara.',
-                          {'email': email},
-                        ),
+                        role == 'committee'
+                            ? tr(
+                                '{email} sekarang dapat membuka acara ini sebagai panitia.',
+                                {'email': email},
+                              )
+                            : tr(
+                                '{email} sekarang dapat membuka acara ini sebagai ketua acara.',
+                                {'email': email},
+                              ),
                       );
                     } catch (error) {
                       if (!dialogContext.mounted) return;
@@ -152,7 +199,7 @@ Future<void> showInviteChairpersonDialog(
                       await showInfo(
                         dialogContext,
                         tr('Belum berhasil'),
-                        error.toString(),
+                        inviteErrorMessage(error),
                       );
                     }
                   },
@@ -164,12 +211,35 @@ Future<void> showInviteChairpersonDialog(
   );
 }
 
+/// Turns invite RPC failures into plain guidance.
+String inviteErrorMessage(Object error) {
+  final text = error.toString().toLowerCase();
+  if (text.contains('must create an account')) {
+    return tr(
+      'Belum ada akun Wargakas dengan email ini. Minta orang tersebut mendaftar dulu, lalu coba lagi.',
+    );
+  }
+  if (text.contains('another role')) {
+    return tr('Orang ini sudah memiliki peran lain di acara ini.');
+  }
+  if (text.contains('only the treasurer')) {
+    return tr('Hanya bendahara yang dapat menambah pengurus.');
+  }
+  if (text.contains('socket') ||
+      text.contains('network') ||
+      text.contains('timeout')) {
+    return tr('Belum tersambung ke internet. Coba lagi saat sinyal stabil.');
+  }
+  return tr('Terjadi kendala: {detail}', {'detail': error.toString()});
+}
+
 Future<void> showAccountDialog(
   BuildContext context,
   CashbookController controller,
   Future<void> Function() onSignOut, {
   String? email,
   String? role,
+  Future<void> Function()? onDeleteAccount,
 }) async {
   final action = await showDialog<String>(
     context: context,
@@ -215,6 +285,15 @@ Future<void> showAccountDialog(
         ],
       ),
       actions: [
+        if (onDeleteAccount != null)
+          TextButton(
+            key: const Key('delete-account'),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(dialogContext).colorScheme.error,
+            ),
+            onPressed: () => Navigator.pop(dialogContext, 'delete'),
+            child: Text(tr('Hapus akun')),
+          ),
         TextButton(
           onPressed: () => Navigator.pop(dialogContext),
           child: Text(tr('Tutup')),
@@ -227,6 +306,10 @@ Future<void> showAccountDialog(
       ],
     ),
   );
+  if (action == 'delete' && onDeleteAccount != null && context.mounted) {
+    await _confirmDeleteAccount(context, role, onDeleteAccount);
+    return;
+  }
   if (action != 'signOut' || !context.mounted) return;
 
   if (controller.pendingOperations.isNotEmpty) {
@@ -283,6 +366,91 @@ Future<void> showInfo(BuildContext context, String title, String message) {
           child: Text(tr('Mengerti')),
         ),
       ],
+    ),
+  );
+}
+
+Future<void> _confirmDeleteAccount(
+  BuildContext context,
+  String? role,
+  Future<void> Function() onDeleteAccount,
+) async {
+  var understood = false;
+  var busy = false;
+  await showDialog<void>(
+    context: context,
+    builder: (dialogContext) => StatefulBuilder(
+      builder: (dialogContext, setState) => AlertDialog(
+        scrollable: true,
+        icon: const Icon(Icons.warning_amber_rounded),
+        title: Text(tr('Hapus akun secara permanen?')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              role == 'treasurer'
+                  ? tr(
+                      'Akun dan akses Anda akan dihapus. Jika ada ketua acara atau panitia, peran bendahara diserahkan kepada mereka dan riwayat kas tetap tersimpan untuk kelompok. Jika tidak ada pengurus lain, semua acara di akun ini ikut terhapus.',
+                    )
+                  : tr(
+                      'Akun dan akses Anda akan dihapus. Riwayat kas tetap tersimpan untuk kelompok tanpa nama akun Anda.',
+                    ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              tr(
+                'Unduh laporan PDF atau CSV dulu jika Anda memerlukan salinan.',
+              ),
+            ),
+            const SizedBox(height: 8),
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              value: understood,
+              onChanged: busy
+                  ? null
+                  : (value) => setState(() => understood = value ?? false),
+              title: Text(
+                tr('Saya mengerti tindakan ini tidak bisa dibatalkan.'),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: busy ? null : () => Navigator.pop(dialogContext),
+            child: Text(tr('Batal')),
+          ),
+          FilledButton(
+            key: const Key('confirm-delete-account'),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(dialogContext).colorScheme.error,
+              foregroundColor: Theme.of(dialogContext).colorScheme.onError,
+            ),
+            onPressed: !understood || busy
+                ? null
+                : () async {
+                    setState(() => busy = true);
+                    try {
+                      await onDeleteAccount();
+                      if (dialogContext.mounted) Navigator.pop(dialogContext);
+                    } catch (error) {
+                      if (!dialogContext.mounted) return;
+                      setState(() => busy = false);
+                      await showInfo(
+                        dialogContext,
+                        tr('Akun belum terhapus'),
+                        tr(
+                          'Coba lagi saat tersambung internet. Detail: {detail}',
+                          {'detail': error.toString()},
+                        ),
+                      );
+                    }
+                  },
+            child: Text(busy ? tr('Menghapus…') : tr('Hapus akun')),
+          ),
+        ],
+      ),
     ),
   );
 }

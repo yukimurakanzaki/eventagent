@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 import 'event_directory.dart';
+import 'app_settings.dart';
 import 'formatting.dart';
 import 'l10n/l10n.dart';
 import 'main.dart' show showInfo;
 import 'money.dart';
+import 'settings_page.dart' show pickCurrency;
 
 /// Bottom sheet listing the account's events: switch, add, archive, restore.
 Future<void> showEventPicker(BuildContext context, EventDirectory directory) {
@@ -236,6 +238,7 @@ Future<NewEventDraft?> showNewEventDialog(BuildContext context) {
   var startDate = DateTime(today.year, today.month, today.day);
   var endDate = startDate;
   var error = '';
+  var currency = AppSettings.instance.defaultCurrency;
 
   Future<DateTime?> pick(BuildContext dialogContext, DateTime initial) =>
       showDatePicker(
@@ -294,12 +297,45 @@ Future<NewEventDraft?> showNewEventDialog(BuildContext context) {
                 decoration: InputDecoration(labelText: tr('Kapasitas peserta')),
               ),
               const SizedBox(height: 12),
+              OutlinedButton.icon(
+                key: const Key('new-event-currency'),
+                icon: const Icon(Icons.payments_outlined),
+                label: Text(
+                  tr('Mata uang: {currency}', {
+                    'currency': '$currency · ${currencySpec(currency).name}',
+                  }),
+                ),
+                onPressed: () async {
+                  final code = await pickCurrency(
+                    dialogContext,
+                    selected: currency,
+                  );
+                  if (code == null) return;
+                  setState(() {
+                    final budget = parseMoneyInput(
+                      budgetController.text,
+                      currency: currency,
+                    );
+                    final from = currencySpec(currency).minorFactor;
+                    currency = code;
+                    final value =
+                        budget * currencySpec(code).minorFactor ~/ from;
+                    budgetController.text = value == 0
+                        ? '0'
+                        : formatMoneyInput(value, currency: code);
+                  });
+                },
+              ),
+              const SizedBox(height: 12),
               TextField(
                 controller: budgetController,
-                keyboardType: TextInputType.number,
+                keyboardType: currencySpec(currency).decimals > 0
+                    ? const TextInputType.numberWithOptions(decimal: true)
+                    : TextInputType.number,
+                inputFormatters: [MoneyTextInputFormatter(currency: currency)],
                 decoration: InputDecoration(
                   labelText: tr('Anggaran final ({currency})', {
-                    'currency': Money.currency,
+                    'currency': currencySpec(currency).symbol,
                   }),
                   helperText: tr(
                     'Sponsor dan saldo awal diatur lewat Edit acara.',
@@ -330,8 +366,16 @@ Future<NewEventDraft?> showNewEventDialog(BuildContext context) {
                 name: nameController.text,
                 startDate: startDate,
                 endDate: endDate,
-                capacity: parseMoneyInput(capacityController.text),
-                budget: parseMoneyInput(budgetController.text),
+                capacity:
+                    int.tryParse(
+                      capacityController.text.replaceAll(RegExp(r'[^0-9]'), ''),
+                    ) ??
+                    0,
+                budget: parseMoneyInput(
+                  budgetController.text,
+                  currency: currency,
+                ),
+                currency: currency,
               );
               final problem = draft.validate();
               if (problem != null) {

@@ -12,10 +12,12 @@ import 'settings_page.dart';
 import 'labels.dart';
 import 'receipts.dart';
 import 'share_link.dart';
+import 'shared_view_page.dart';
 
 import 'cashbook_calculations.dart';
 import 'cashbook_controller.dart';
 import 'cashbook_models.dart';
+import 'csv_export.dart';
 import 'event_directory.dart';
 import 'event_picker.dart';
 import 'report_service.dart';
@@ -46,8 +48,25 @@ Future<void> main() async {
   );
   if (SupabaseBackend.isDemoMode) {
     final controller = await CashbookController.bootstrap();
-    runApp(WargakasApp(controller: controller));
+    runApp(WargakasApp(controller: controller, enableOnboarding: true));
     return;
+  }
+  // Participant share link (web build): read-only, no sign-in.
+  final shareToken = Uri.base.queryParameters['share'];
+  if (shareToken != null &&
+      shareToken.isNotEmpty &&
+      SupabaseBackend.isConfigured) {
+    try {
+      final backend = await SupabaseBackend.initializeFromEnvironment();
+      if (backend != null) {
+        runApp(
+          SharedViewApp(token: shareToken, loader: backend.fetchSharedCashbook),
+        );
+        return;
+      }
+    } catch (_) {
+      // Fall through to the normal app.
+    }
   }
   final configurationError = SupabaseBackend.configurationError;
   if (configurationError != null) {
@@ -57,7 +76,7 @@ Future<void> main() async {
   try {
     final backend = await SupabaseBackend.initializeFromEnvironment();
     if (backend != null) {
-      runApp(SupabaseApp(backend: backend));
+      runApp(SupabaseApp(backend: backend, enableOnboarding: true));
       return;
     }
   } catch (_) {
@@ -119,8 +138,18 @@ class WargakasApp extends StatelessWidget {
     this.eventDirectory,
     this.reportShareGateway = const PlatformReportShareGateway(),
     this.settings,
+    this.enableOnboarding = false,
+    this.onDeleteAccount,
+    this.onInviteMember,
+    this.shareLinkService,
     super.key,
   });
+
+  /// Show the first-run welcome (real app only; tests skip it).
+  final bool enableOnboarding;
+  final Future<void> Function()? onDeleteAccount;
+  final Future<void> Function(String email, String role)? onInviteMember;
+  final ShareLinkService? shareLinkService;
 
   /// Personal preferences; defaults to [AppSettings.instance].
   final AppSettings? settings;
@@ -136,6 +165,7 @@ class WargakasApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return WargakasMaterialApp(
       settings: settings,
+      enableOnboarding: enableOnboarding,
       home: EventHomePage(
         controller: controller,
         onSignOut: onSignOut,
@@ -144,6 +174,9 @@ class WargakasApp extends StatelessWidget {
         accountRole: accountRole,
         eventDirectory: eventDirectory,
         reportShareGateway: reportShareGateway,
+        onDeleteAccount: onDeleteAccount,
+        onInviteMember: onInviteMember,
+        shareLinkService: shareLinkService,
       ),
     );
   }

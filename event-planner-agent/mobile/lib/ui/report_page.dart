@@ -23,6 +23,170 @@ class ReportPage extends StatefulWidget {
 class _ReportPageState extends State<ReportPage> {
   bool _busy = false;
   String? _error;
+  bool _linkBusy = false;
+  String? _link;
+
+  void _snack(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<void> _exportCsv() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await shareLedgerCsv(widget.controller.snapshot);
+    } catch (_) {
+      _snack(tr('File CSV belum dapat dibuat atau dibagikan. Coba lagi.'));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<String?> _ensureLink() async {
+    final service = widget.shareLinkService;
+    if (service == null) return null;
+    try {
+      final link = await service.createLink();
+      if (mounted) setState(() => _link = link);
+      return link;
+    } catch (_) {
+      _snack(tr('Tautan belum dapat dibuat. Periksa koneksi lalu coba lagi.'));
+      return null;
+    }
+  }
+
+  Future<void> _createAndCopyLink() async {
+    if (_linkBusy) return;
+    setState(() => _linkBusy = true);
+    try {
+      final link = await _ensureLink();
+      if (link != null) {
+        await copyTextToClipboard(link);
+        _snack(tr('Tautan disalin.'));
+      }
+    } catch (_) {
+      _snack(tr('Tautan belum dapat disalin. Coba lagi.'));
+    } finally {
+      if (mounted) setState(() => _linkBusy = false);
+    }
+  }
+
+  Future<void> _shareLink() async {
+    if (_linkBusy) return;
+    setState(() => _linkBusy = true);
+    try {
+      final link = _link ?? await _ensureLink();
+      if (link != null) {
+        await SharePlus.instance.share(
+          ShareParams(
+            text: tr('Lihat laporan kas {name} di sini: {link}', {
+              'name': widget.controller.event.name,
+              'link': link,
+            }),
+          ),
+        );
+      }
+    } catch (_) {
+      _snack(tr('Tautan belum dapat dibagikan. Coba lagi.'));
+    } finally {
+      if (mounted) setState(() => _linkBusy = false);
+    }
+  }
+
+  Future<void> _revokeLink() async {
+    final service = widget.shareLinkService;
+    if (service == null || _linkBusy) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(tr('Matikan tautan?')),
+        content: Text(
+          tr(
+            'Semua tautan yang sudah dibagikan tidak akan bisa dibuka lagi. Anda bisa membuat tautan baru kapan saja.',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(tr('Batal')),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(tr('Matikan tautan')),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    setState(() => _linkBusy = true);
+    try {
+      await service.revokeLinks();
+      if (mounted) setState(() => _link = null);
+      _snack(tr('Tautan dimatikan.'));
+    } catch (_) {
+      _snack(tr('Tautan belum dapat dimatikan. Coba lagi.'));
+    } finally {
+      if (mounted) setState(() => _linkBusy = false);
+    }
+  }
+
+  Widget _shareLinkCard(ThemeData theme) {
+    final service = widget.shareLinkService!;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Semantics(
+              header: true,
+              child: Text(
+                tr('Tautan baca-saja untuk peserta'),
+                style: theme.textTheme.titleMedium,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              tr(
+                'Peserta bisa membuka tautan ini di browser tanpa akun. Selalu menampilkan data terbaru. Nomor telepon dan foto nota tidak ditampilkan.',
+              ),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            if (_link != null) ...[
+              const SizedBox(height: 8),
+              SelectableText(_link!, style: theme.textTheme.bodyMedium),
+            ],
+            const SizedBox(height: 12),
+            FilledButton.icon(
+              onPressed: _linkBusy ? null : _createAndCopyLink,
+              icon: const Icon(Icons.link),
+              label: Text(
+                _linkBusy ? tr('Menyiapkan...') : tr('Buat / salin tautan'),
+              ),
+            ),
+            const SizedBox(height: 8),
+            FilledButton.tonalIcon(
+              onPressed: _linkBusy ? null : _shareLink,
+              icon: const Icon(Icons.share_outlined),
+              label: Text(tr('Bagikan tautan')),
+            ),
+            if (service.canRevoke) ...[
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: _linkBusy ? null : _revokeLink,
+                icon: const Icon(Icons.link_off),
+                label: Text(tr('Matikan tautan')),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
 
   CashbookReport _report([ReportKind kind = ReportKind.summary]) =>
       CashbookReport(
@@ -124,6 +288,12 @@ class _ReportPageState extends State<ReportPage> {
           label: Text(tr('Portofolio acara lengkap (PDF)')),
         ),
         const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: _busy ? null : _exportCsv,
+          icon: const Icon(Icons.table_chart_outlined),
+          label: Text(tr('Ekspor CSV (Excel)')),
+        ),
+        const SizedBox(height: 8),
         Text(
           tr('Periksa penerima sebelum mengirim.'),
           textAlign: TextAlign.center,
@@ -132,6 +302,10 @@ class _ReportPageState extends State<ReportPage> {
           ),
         ),
         const SizedBox(height: 16),
+        if (widget.shareLinkService != null) ...[
+          _shareLinkCard(theme),
+          const SizedBox(height: 16),
+        ],
         Card(
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -259,7 +433,12 @@ class _ReportParticipantRow extends StatelessWidget {
           children: [
             ConstrainedBox(
               constraints: const BoxConstraints(minWidth: 120),
-              child: Text(participant.name, style: theme.textTheme.bodyLarge),
+              child: Text(
+                participant.role == ParticipantRole.committee
+                    ? '${participant.name} (${participantRoleLabel(ParticipantRole.committee)})'
+                    : participant.name,
+                style: theme.textTheme.bodyLarge,
+              ),
             ),
             if (cancelled)
               StatusPill(

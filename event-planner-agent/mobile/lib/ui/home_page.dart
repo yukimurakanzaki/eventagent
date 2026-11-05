@@ -11,10 +11,14 @@ class EventHomePage extends StatefulWidget {
     this.reportShareGateway = const PlatformReportShareGateway(),
     this.shareLinkService,
     this.onDeleteAccount,
+    this.onInviteMember,
     super.key,
   });
 
   final ShareLinkService? shareLinkService;
+
+  /// Hosted builds: invite with an explicit role (chairperson or committee).
+  final Future<void> Function(String email, String role)? onInviteMember;
 
   /// Hosted builds only: permanently deletes the signed-in account.
   final Future<void> Function()? onDeleteAccount;
@@ -68,6 +72,7 @@ class _EventHomePageState extends State<EventHomePage> {
                   onPressed: () => showInviteChairpersonDialog(
                     context,
                     widget.onInviteChairperson!,
+                    onInviteMember: widget.onInviteMember,
                   ),
                   tooltip: tr('Tambah ketua acara'),
                   icon: const Icon(Icons.person_add_outlined),
@@ -77,6 +82,12 @@ class _EventHomePageState extends State<EventHomePage> {
                 tooltip: tr('Bantuan'),
                 icon: const Icon(Icons.help_outline),
               ),
+              IconButton(
+                key: const Key('open-settings'),
+                onPressed: () => openSettings(context),
+                tooltip: tr('Pengaturan'),
+                icon: const Icon(Icons.settings_outlined),
+              ),
               if (widget.onSignOut != null)
                 IconButton(
                   onPressed: () => showAccountDialog(
@@ -85,6 +96,7 @@ class _EventHomePageState extends State<EventHomePage> {
                     widget.onSignOut!,
                     email: widget.accountEmail,
                     role: widget.accountRole,
+                    onDeleteAccount: widget.onDeleteAccount,
                   ),
                   tooltip: tr('Akun'),
                   icon: const Icon(Icons.account_circle_outlined),

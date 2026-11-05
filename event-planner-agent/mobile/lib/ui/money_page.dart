@@ -103,6 +103,18 @@ class MoneyPage extends StatelessWidget {
             ),
           ),
         ],
+        if (expenseTotalsByCategory(
+          controller.transactions,
+          correctedTransactionIds(controller.transactions),
+        ).isNotEmpty) ...[
+          const SizedBox(height: 8),
+          _CategoryTotalsCard(
+            totals: expenseTotalsByCategory(
+              controller.transactions,
+              correctedTransactionIds(controller.transactions),
+            ),
+          ),
+        ],
         const SizedBox(height: 8),
         Card(
           child: ExpansionTile(
@@ -284,6 +296,64 @@ class _TransactionTile extends StatelessWidget {
   final bool correctable;
   final bool showDate;
 
+  Widget _receiptRow(BuildContext context) {
+    final theme = Theme.of(context);
+    final category = transaction.category ?? ExpenseCategory.other;
+    final canPhoto = Receipts.supported && !controller.isReadOnly;
+    final muted = theme.textTheme.bodySmall?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+    return Wrap(
+      spacing: 8,
+      runSpacing: 0,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ExcludeSemantics(
+              child: Icon(expenseCategoryIcon(category), size: 16),
+            ),
+            const SizedBox(width: 4),
+            Text(expenseCategoryLabel(category), style: muted),
+          ],
+        ),
+        if (transaction.hasReceipt)
+          TextButton.icon(
+            key: Key('receipt-view-${transaction.id}'),
+            style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+            icon: const Icon(Icons.receipt_long, size: 18),
+            label: Text(tr('Lihat nota')),
+            onPressed: () => showReceiptViewer(context, transaction),
+          )
+        else
+          Text(tr('Tanpa nota'), style: muted),
+        if (canPhoto)
+          TextButton(
+            key: Key('receipt-attach-${transaction.id}'),
+            style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+            onPressed: () => _attach(context),
+            child: Text(
+              transaction.hasReceipt ? tr('Ganti nota') : tr('Lampirkan nota'),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Future<void> _attach(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final path = await pickReceiptPhoto(context);
+    if (path == null) return;
+    final error = await controller.attachReceipt(
+      transaction.id,
+      localPath: path,
+    );
+    if (error != null) {
+      messenger.showSnackBar(SnackBar(content: Text(error)));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isCorrection = transaction.type == TransactionType.correction;
@@ -321,6 +391,7 @@ class _TransactionTile extends StatelessWidget {
         : outflow
         ? colors.onDanger
         : colors.onSuccess;
+    final isExpense = transaction.type == TransactionType.expense;
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: ExcludeSemantics(
@@ -334,7 +405,13 @@ class _TransactionTile extends StatelessWidget {
         ),
       ),
       title: Text(title, style: struck),
-      subtitle: Text(detail),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(detail),
+          if (isExpense && !corrected) _receiptRow(context),
+        ],
+      ),
       trailing: Text(
         isCorrection
             ? '-'
@@ -410,6 +487,52 @@ Future<void> showCorrectTransactionDialog(
       ],
     ),
   );
+}
+
+class _CategoryTotalsCard extends StatelessWidget {
+  const _CategoryTotalsCard({required this.totals});
+
+  final List<(ExpenseCategory, int)> totals;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final total = totals.fold(0, (sum, item) => sum + item.$2);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Semantics(
+              header: true,
+              child: Text(
+                tr('Pengeluaran per kategori'),
+                style: theme.textTheme.titleMedium,
+              ),
+            ),
+            for (final (category, amount) in totals) ...[
+              const SizedBox(height: 12),
+              _LabelValueRow(
+                icon: expenseCategoryIcon(category),
+                label: expenseCategoryLabel(category),
+                value: formatMoney(amount),
+                valueStyle: theme.textTheme.titleSmall,
+              ),
+              const SizedBox(height: 4),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  minHeight: 8,
+                  value: total <= 0 ? 0 : amount / total,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _MoneyRow extends StatelessWidget {

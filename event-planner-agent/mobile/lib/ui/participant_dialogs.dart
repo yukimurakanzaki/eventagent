@@ -1,10 +1,100 @@
 part of '../main.dart';
 
+Widget _roleAndPhoneFields({
+  required ParticipantRole role,
+  required ValueChanged<ParticipantRole> onRoleChanged,
+  required TextEditingController phoneController,
+}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const SizedBox(height: 16),
+      SizedBox(
+        width: double.infinity,
+        child: SegmentedButton<ParticipantRole>(
+          key: const Key('participant-role'),
+          showSelectedIcon: false,
+          style: const ButtonStyle(
+            minimumSize: WidgetStatePropertyAll(Size(0, 48)),
+          ),
+          segments: [
+            for (final item in ParticipantRole.values)
+              ButtonSegment(
+                value: item,
+                label: Text(participantRoleLabel(item)),
+              ),
+          ],
+          selected: {role},
+          onSelectionChanged: (value) => onRoleChanged(value.first),
+        ),
+      ),
+      const SizedBox(height: 16),
+      TextField(
+        key: const Key('participant-phone'),
+        controller: phoneController,
+        keyboardType: TextInputType.phone,
+        decoration: InputDecoration(
+          labelText: tr('Nomor WhatsApp (opsional)'),
+          helperMaxLines: 3,
+          helperText: tr(
+            'Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.',
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+/// Opens [uri] outside the app. Replaceable in tests.
+Future<bool> Function(Uri uri) reminderLauncher = (uri) =>
+    launchUrl(uri, mode: LaunchMode.externalApplication);
+
+/// Shares plain text through the system share sheet. Replaceable in tests.
+Future<void> Function(String text) reminderSharer = (text) async {
+  await SharePlus.instance.share(ShareParams(text: text));
+};
+
+Future<void> sendPaymentReminder(
+  CashbookController controller,
+  ParticipantRecord participant,
+) async {
+  final paid = participantNetPaid(controller.transactions, participant.id);
+  final target = controller.contributionTarget;
+  final message = tr(
+    'Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!',
+    {
+      'name': participant.name,
+      'event': controller.event.name,
+      'paid': formatMoney(paid),
+      'target': formatMoney(target),
+      'remaining': formatMoney(target - paid),
+    },
+  );
+  final digits = participant.phone.replaceAll(RegExp(r'\D'), '');
+  if (digits.isNotEmpty) {
+    try {
+      final uri = Uri.parse(
+        'https://wa.me/$digits?text=${Uri.encodeComponent(message)}',
+      );
+      if (await reminderLauncher(uri)) return;
+    } catch (_) {
+      // Fall through to the share sheet.
+    }
+  }
+  try {
+    await reminderSharer(message);
+  } catch (_) {
+    // Sharing is best effort.
+  }
+}
+
 Future<void> showParticipantDialog(
   BuildContext context,
   CashbookController controller,
 ) async {
   final nameController = TextEditingController();
+  final phoneController = TextEditingController();
+  var role = ParticipantRole.participant;
   String? replacementForId;
   await showDialog<void>(
     context: context,
@@ -20,6 +110,11 @@ Future<void> showParticipantDialog(
                 autofocus: true,
                 textCapitalization: TextCapitalization.words,
                 decoration: InputDecoration(labelText: tr('Nama peserta')),
+              ),
+              _roleAndPhoneFields(
+                role: role,
+                onRoleChanged: (value) => setState(() => role = value),
+                phoneController: phoneController,
               ),
               if (controller.participants.any(
                 (item) => item.state == ParticipantState.cancelled,
@@ -66,6 +161,8 @@ Future<void> showParticipantDialog(
             final error = await controller.addParticipant(
               nameController.text,
               replacementForId: replacementForId,
+              role: role,
+              phone: phoneController.text.trim(),
             );
             if (error != null && context.mounted) {
               await showInfo(context, tr('Peserta belum ditambahkan'), error);
@@ -87,6 +184,9 @@ Future<void> showParticipantActions(
   CashbookController controller,
   ParticipantRecord participant,
 ) async {
+  final remainingToPay =
+      controller.contributionTarget -
+      participantNetPaid(controller.transactions, participant.id);
   final action = await showModalBottomSheet<String>(
     context: context,
     builder: (sheetContext) => SafeArea(
@@ -103,6 +203,13 @@ Future<void> showParticipantActions(
             title: Text(tr('Edit nama')),
             onTap: () => Navigator.pop(sheetContext, 'edit'),
           ),
+          if (participant.state == ParticipantState.active &&
+              remainingToPay > 0)
+            ListTile(
+              leading: const Icon(Icons.notifications_active_outlined),
+              title: Text(tr('Kirim pengingat')),
+              onTap: () => Navigator.pop(sheetContext, 'remind'),
+            ),
           if (participant.state == ParticipantState.active)
             ListTile(
               leading: const Icon(Icons.person_off_outlined),
@@ -128,6 +235,8 @@ Future<void> showParticipantActions(
     );
   } else if (action == 'edit') {
     await showEditParticipantDialog(context, controller, participant);
+  } else if (action == 'remind') {
+    await sendPaymentReminder(controller, participant);
   } else if (action == 'cancel') {
     await showCancelParticipantDialog(context, controller, participant);
   }
@@ -139,14 +248,28 @@ Future<void> showEditParticipantDialog(
   ParticipantRecord participant,
 ) async {
   final nameController = TextEditingController(text: participant.name);
+  final phoneController = TextEditingController(text: participant.phone);
+  var role = participant.role;
   await showDialog<void>(
     context: context,
     builder: (context) => AlertDialog(
       scrollable: true,
       title: Text(tr('Edit peserta')),
-      content: TextField(
-        controller: nameController,
-        decoration: InputDecoration(labelText: tr('Nama peserta')),
+      content: StatefulBuilder(
+        builder: (dialogContext, setState) => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(labelText: tr('Nama peserta')),
+            ),
+            _roleAndPhoneFields(
+              role: role,
+              onRoleChanged: (value) => setState(() => role = value),
+              phoneController: phoneController,
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(
@@ -165,7 +288,11 @@ Future<void> showEditParticipantDialog(
               return;
             }
             final error = await controller.editParticipant(
-              participant.copyWith(name: name),
+              participant.copyWith(
+                name: name,
+                role: role,
+                phone: phoneController.text.trim(),
+              ),
             );
             if (error != null && context.mounted) {
               await showInfo(context, tr('Peserta belum diperbarui'), error);

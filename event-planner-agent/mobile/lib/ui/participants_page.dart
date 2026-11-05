@@ -1,6 +1,6 @@
 part of '../main.dart';
 
-class ParticipantsPage extends StatelessWidget {
+class ParticipantsPage extends StatefulWidget {
   const ParticipantsPage({
     required this.controller,
     this.filter,
@@ -13,6 +13,21 @@ class ParticipantsPage extends StatelessWidget {
   /// Pay-state filter for the active list; null shows everyone.
   final PayState? filter;
   final ValueChanged<PayState?>? onFilterChanged;
+
+  @override
+  State<ParticipantsPage> createState() => _ParticipantsPageState();
+}
+
+/// Search only appears once the list is long enough to need it.
+const _searchThreshold = 8;
+
+class _ParticipantsPageState extends State<ParticipantsPage> {
+  String _query = '';
+  bool _committeeOnly = false;
+
+  CashbookController get controller => widget.controller;
+  PayState? get filter => widget.filter;
+  ValueChanged<PayState?>? get onFilterChanged => widget.onFilterChanged;
 
   PayState _stateOf(ParticipantRecord participant) => payState(
     participantNetPaid(controller.transactions, participant.id),
@@ -32,9 +47,20 @@ class ParticipantsPage extends StatelessWidget {
       controller.transactions,
       controller.contributionTarget,
     );
-    final shown = filter == null
-        ? active
-        : active.where((item) => _stateOf(item) == filter).toList();
+    final showSearch = controller.participants.length > _searchThreshold;
+    final query = showSearch ? _query.trim().toLowerCase() : '';
+    bool matches(ParticipantRecord item) =>
+        (!_committeeOnly || item.role == ParticipantRole.committee) &&
+        (query.isEmpty || item.name.toLowerCase().contains(query));
+    final shown = active
+        .where((item) => filter == null || _stateOf(item) == filter)
+        .where(matches)
+        .toList();
+    final shownCancelled = cancelled.where(matches).toList();
+    final committeeCount = active
+        .where((item) => item.role == ParticipantRole.committee)
+        .length;
+    final narrowed = filter != null || _committeeOnly || query.isNotEmpty;
     int countOf(PayState? state) => switch (state) {
       null => active.length,
       PayState.paid => progress.paid,
@@ -51,6 +77,19 @@ class ParticipantsPage extends StatelessWidget {
           icon: const Icon(Icons.person_add_alt_1),
           label: Text(tr('Tambah peserta')),
         ),
+        if (showSearch) ...[
+          const SizedBox(height: 12),
+          TextField(
+            key: const Key('participant-search'),
+            onChanged: (value) => setState(() => _query = value),
+            textInputAction: TextInputAction.search,
+            decoration: InputDecoration(
+              labelText: tr('Cari peserta'),
+              prefixIcon: const Icon(Icons.search),
+              border: const OutlineInputBorder(),
+            ),
+          ),
+        ],
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
@@ -79,6 +118,18 @@ class ParticipantsPage extends StatelessWidget {
                     ? null
                     : (_) => onFilterChanged!(state),
               ),
+            FilterChip(
+              avatar: Icon(_committeeOnly ? Icons.check : Icons.badge_outlined),
+              label: Text(
+                tr('{label} ({count})', {
+                  'label': participantRoleLabel(ParticipantRole.committee),
+                  'count': committeeCount,
+                }),
+              ),
+              selected: _committeeOnly,
+              showCheckmark: false,
+              onSelected: (value) => setState(() => _committeeOnly = value),
+            ),
           ],
         ),
         const SizedBox(height: 8),
@@ -100,7 +151,20 @@ class ParticipantsPage extends StatelessWidget {
             ),
           )
         else ...[
-          if (shown.isEmpty && filter != null)
+          if (shown.isEmpty && narrowed && filter == null)
+            _EmptyState(
+              icon: Icons.filter_alt_off_outlined,
+              title: tr('Tidak ada peserta yang cocok'),
+              message: tr(
+                'Ubah pencarian atau filter untuk melihat peserta lain.',
+              ),
+              actionLabel: tr('Tampilkan semua'),
+              onAction: () => setState(() {
+                _query = '';
+                _committeeOnly = false;
+              }),
+            )
+          else if (shown.isEmpty && filter != null)
             _EmptyState(
               icon: Icons.filter_alt_off_outlined,
               title: tr('Tidak ada peserta {state}', {
@@ -110,7 +174,10 @@ class ParticipantsPage extends StatelessWidget {
               actionLabel: tr('Tampilkan semua'),
               onAction: onFilterChanged == null
                   ? null
-                  : () => onFilterChanged!(null),
+                  : () {
+                      setState(() => _committeeOnly = false);
+                      onFilterChanged!(null);
+                    },
             )
           else
             _ParticipantSection(
@@ -122,11 +189,11 @@ class ParticipantsPage extends StatelessWidget {
               participants: shown,
               controller: controller,
             ),
-          if (cancelled.isNotEmpty && filter == null) ...[
+          if (shownCancelled.isNotEmpty && filter == null) ...[
             const SizedBox(height: 16),
             _ParticipantSection(
               title: tr('Dibatalkan'),
-              participants: cancelled,
+              participants: shownCancelled,
               controller: controller,
             ),
           ],
@@ -340,6 +407,13 @@ class _ParticipantTile extends StatelessWidget {
                         )
                       else
                         PayStateChip(state),
+                      if (participant.role == ParticipantRole.committee)
+                        StatusPill(
+                          label: participantRoleLabel(participant.role),
+                          icon: Icons.badge_outlined,
+                          tone: theme.colorScheme.secondaryContainer,
+                          onTone: theme.colorScheme.onSecondaryContainer,
+                        ),
                       if (!cancelled && remaining > 0 && onPay != null)
                         TextButton.icon(
                           onPressed: () => onPay!(remaining),

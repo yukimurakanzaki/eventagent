@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'cashbook_models.dart';
@@ -102,6 +104,7 @@ class SupabaseBackend {
     if (user?.id != userId) throw AuthSessionMissingException();
     final controller = await CashbookController.bootstrap(
       syncAdapter: adapter,
+      receiptUploader: uploadReceipt,
       storageNamespace: '$userId-${adapter.workspaceId}-${adapter.eventId}',
     );
     if (user?.id != userId) {
@@ -204,6 +207,89 @@ class SupabaseBackend {
       'set_event_archived',
       params: {'p_event_id': eventId, 'p_archived': archived},
     );
+  }
+
+  Future<void> inviteMember({
+    required String workspaceId,
+    required String email,
+    required String role,
+  }) async {
+    await client.rpc(
+      'invite_workspace_member',
+      params: {
+        'p_workspace_id': workspaceId,
+        'p_email': email.trim(),
+        'p_role': role,
+      },
+    );
+  }
+
+  /// Permanently deletes the signed-in account (store requirement). The
+  /// server hands the treasurer role to another member or removes a
+  /// workspace nobody else can see.
+  Future<void> deleteAccount() async {
+    await client.rpc('delete_my_account');
+    try {
+      await client.auth.signOut(scope: SignOutScope.local);
+    } catch (_) {
+      // The user no longer exists server-side; local sign-out is enough.
+    }
+  }
+
+  /// Uploads a receipt photo to `receipts/<eventId>/<transactionId>.<ext>`.
+  Future<String?> uploadReceipt(
+    String eventId,
+    String transactionId,
+    String localPath,
+  ) async {
+    final file = File(localPath);
+    if (!await file.exists()) return null;
+    final extension = localPath.toLowerCase().endsWith('.png') ? 'png' : 'jpg';
+    final path = '$eventId/$transactionId.$extension';
+    await client.storage
+        .from('receipts')
+        .upload(
+          path,
+          file,
+          fileOptions: FileOptions(
+            upsert: true,
+            contentType: extension == 'png' ? 'image/png' : 'image/jpeg',
+          ),
+        );
+    return path;
+  }
+
+  /// Returns the active participant share token for [eventId].
+  Future<String> createShareLink(String eventId) async {
+    final token = await client.rpc(
+      'create_share_link',
+      params: {'p_event_id': eventId},
+    );
+    return token as String;
+  }
+
+  Future<void> revokeShareLinks(String eventId) async {
+    await client.rpc('revoke_share_links', params: {'p_event_id': eventId});
+  }
+
+  /// Public read-only snapshot for a participant share link.
+  Future<Map<String, dynamic>> fetchSharedCashbook(String token) async {
+    final result = await client.rpc(
+      'get_shared_cashbook',
+      params: {'p_token': token},
+    );
+    return Map<String, dynamic>.from(result as Map);
+  }
+
+  /// Short-lived signed URL so members on other phones can see a receipt.
+  Future<String?> receiptUrl(String storagePath) async {
+    try {
+      return await client.storage
+          .from('receipts')
+          .createSignedUrl(storagePath, 60 * 60);
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<void> inviteChairperson({

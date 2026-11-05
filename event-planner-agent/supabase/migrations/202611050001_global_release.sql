@@ -307,8 +307,9 @@ end;
 $$;
 
 -- Public, read-only view of one event for participants. No account needed.
--- Strips device-only state (sync queue, conflicts, reminders) and receipt
--- storage paths; it only says whether a receipt exists.
+-- Strips device-only state (sync queue, conflicts, reminders), participant
+-- phone numbers and receipt storage paths; it only says whether a receipt
+-- exists.
 create or replace function public.get_shared_cashbook(p_token text)
 returns jsonb
 language plpgsql
@@ -320,6 +321,7 @@ declare
   v_event_id text;
   v_state public.cashbook_states%rowtype;
   v_transactions jsonb;
+  v_participants jsonb;
 begin
   if p_token is null or char_length(p_token) <> 64 then
     raise exception 'share link not found';
@@ -347,9 +349,14 @@ begin
   into v_transactions
   from jsonb_array_elements(coalesce(v_state.snapshot->'transactions', '[]'::jsonb)) item;
 
+  -- Phone numbers are for the committee's personal reminders only.
+  select coalesce(jsonb_agg(item - 'phone'), '[]'::jsonb)
+  into v_participants
+  from jsonb_array_elements(coalesce(v_state.snapshot->'participants', '[]'::jsonb)) item;
+
   return jsonb_build_object(
     'event', v_state.snapshot->'event',
-    'participants', coalesce(v_state.snapshot->'participants', '[]'::jsonb),
+    'participants', v_participants,
     'transactions', v_transactions,
     'updatedAt', v_state.updated_at,
     'version', v_state.version

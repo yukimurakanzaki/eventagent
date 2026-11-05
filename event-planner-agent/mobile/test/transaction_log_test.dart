@@ -87,6 +87,9 @@ void main() {
     await tester.tap(find.text('Uang').last);
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(find.text('Filter & laporan rinci'), 200);
+    // The money page grew (category card); bring the link clear of the FAB.
+    await tester.ensureVisible(find.text('Filter & laporan rinci'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Filter & laporan rinci'));
     await tester.pumpAndSettle();
     expect(find.text('Riwayat transaksi'), findsOneWidget);
