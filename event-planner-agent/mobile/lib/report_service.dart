@@ -30,13 +30,15 @@ class CashbookReport {
   final String creatorRole;
   final DateTime generatedAt;
 
-  int get participantIncome => effectiveTransactions(snapshot.transactions)
-      .where((item) => item.type == TransactionType.participantPayment)
-      .fold(0, (sum, item) => sum + item.amount);
+  int get participantIncome =>
+      effectiveTransactions(snapshot.transactions)
+          .where((item) => item.type == TransactionType.participantPayment)
+          .fold(0, (sum, item) => sum + item.amount);
   int get sponsorIncome => snapshot.event.sponsorContribution;
-  int get additionalIncome => effectiveTransactions(snapshot.transactions)
-      .where((item) => item.type == TransactionType.additionalContribution)
-      .fold(0, (sum, item) => sum + item.amount);
+  int get additionalIncome =>
+      effectiveTransactions(snapshot.transactions)
+          .where((item) => item.type == TransactionType.additionalContribution)
+          .fold(0, (sum, item) => sum + item.amount);
   int get expenses => expenseTotal(snapshot.transactions);
   int get target => participantTarget(
     snapshot.event,
@@ -297,7 +299,9 @@ class PlatformReportShareGateway implements ReportShareGateway {
     try {
       final external = await getExternalStorageDirectory();
       if (external != null) {
-        savedPath = (await file.copy('${external.path}/${file.uri.pathSegments.last}')).path;
+        savedPath = (await file.copy(
+          '${external.path}/${file.uri.pathSegments.last}',
+        )).path;
       }
     } catch (_) {}
     await SharePlus.instance.share(
@@ -359,9 +363,8 @@ String sanitizeReportText(String value) {
   final rupiahAmount = RegExp(r'^\d{1,3}(\.\d{3})+$');
   sanitized = sanitized.replaceAllMapped(
     RegExp(r'(?<!\d)\+?\d[\d\s.-]{7,}\d(?!\d)'),
-    (match) => rupiahAmount.hasMatch(match[0]!)
-        ? match[0]!
-        : '[nomor disembunyikan]',
+    (match) =>
+        rupiahAmount.hasMatch(match[0]!) ? match[0]! : '[nomor disembunyikan]',
   );
   sanitized = sanitized.replaceAll(
     RegExp(

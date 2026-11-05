@@ -19,8 +19,18 @@ String filterLabel(TransactionFilter filter) {
 }
 
 const _months = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-  'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'Mei',
+  'Jun',
+  'Jul',
+  'Agu',
+  'Sep',
+  'Okt',
+  'Nov',
+  'Des',
 ];
 
 String _monthLabel(String key) {
@@ -69,7 +79,8 @@ Future<Uint8List> buildLedgerPdf(CashbookReport report) {
 
   String detail(TransactionRecord t) => [
     sanitizeReportText(t.description),
-    if (names[t.participantId] != null) sanitizeReportText(names[t.participantId]!),
+    if (names[t.participantId] != null)
+      sanitizeReportText(names[t.participantId]!),
     if (t.type == TransactionType.correction)
       'membatalkan ${sanitizeReportText(byId[t.relatedTransactionId]?.description ?? 'transaksi')}',
   ].join(' - ');
@@ -222,10 +233,13 @@ Future<Uint8List> buildLedgerPdf(CashbookReport report) {
           if (participantRows.isEmpty)
             pw.Text('Belum ada peserta.')
           else
-            _table(
-              ['Nama', 'Status', 'Bayar', 'Refund', 'Bersih'],
-              participantRows,
-            ),
+            _table([
+              'Nama',
+              'Status',
+              'Bayar',
+              'Refund',
+              'Bersih',
+            ], participantRows),
         ],
         _section(portfolio ? 'Buku kas lengkap' : 'Daftar transaksi'),
         ledgerTable,

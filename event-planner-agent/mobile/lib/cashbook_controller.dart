@@ -253,7 +253,10 @@ class CashbookController extends ChangeNotifier {
 
   /// Voids a mistaken entry without deleting it. The original stays visible,
   /// marked as corrected, and the correction row records why.
-  Future<String?> correctTransaction(String transactionId, String reason) async {
+  Future<String?> correctTransaction(
+    String transactionId,
+    String reason,
+  ) async {
     if (isReadOnly) return 'Selesaikan konflik data sebelum koreksi.';
     final trimmedReason = reason.trim();
     if (trimmedReason.isEmpty) return 'Alasan koreksi wajib diisi.';
