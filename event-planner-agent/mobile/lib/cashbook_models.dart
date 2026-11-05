@@ -24,10 +24,14 @@ class EventRecord {
     required this.sponsorName,
     required this.sponsorContribution,
     required this.openingBalance,
+    this.currency = 'IDR',
   });
 
   final String id;
   final String name;
+
+  /// ISO 4217 code; amounts are stored in this currency's minor unit.
+  final String currency;
   final DateTime startDate;
   final DateTime endDate;
   final int participantCapacity;
@@ -46,8 +50,10 @@ class EventRecord {
     String? sponsorName,
     int? sponsorContribution,
     int? openingBalance,
+    String? currency,
   }) {
     return EventRecord(
+      currency: currency ?? this.currency,
       id: id ?? this.id,
       name: name ?? this.name,
       startDate: startDate ?? this.startDate,
@@ -70,6 +76,7 @@ class EventRecord {
     'sponsorName': sponsorName,
     'sponsorContribution': sponsorContribution,
     'openingBalance': openingBalance,
+    'currency': currency,
   };
 
   factory EventRecord.fromJson(Map<String, dynamic> json) {
@@ -83,6 +90,7 @@ class EventRecord {
       sponsorName: json['sponsorName'] as String,
       sponsorContribution: (json['sponsorContribution'] as num).toInt(),
       openingBalance: (json['openingBalance'] as num).toInt(),
+      currency: json['currency'] as String? ?? 'IDR',
     );
   }
 }

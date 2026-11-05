@@ -9,7 +9,8 @@ import 'auth_forms.dart';
 import 'auth_support.dart';
 import 'cashbook_controller.dart';
 import 'event_directory.dart';
-import 'main.dart' show EventHomePage, wargakasTheme;
+import 'app_shell.dart';
+import 'main.dart' show EventHomePage;
 import 'supabase_backend.dart';
 
 export 'auth_support.dart' show authErrorMessage;
@@ -204,11 +205,7 @@ class _SupabaseAppState extends State<SupabaseApp> implements EventDirectory {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Wargakas',
-      debugShowCheckedModeBanner: false,
-      theme: wargakasTheme(),
-      darkTheme: wargakasTheme(brightness: Brightness.dark),
+    return WargakasMaterialApp(
       home: Scaffold(
         body: SafeArea(
           child: Column(

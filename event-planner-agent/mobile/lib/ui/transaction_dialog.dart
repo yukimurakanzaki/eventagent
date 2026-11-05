@@ -11,7 +11,7 @@ Future<bool> showTransactionDialog(
   TransactionType? type = initialType;
   String? participantId = initialParticipantId;
   final amountController = TextEditingController(
-    text: initialAmount > 0 ? rupiah(initialAmount).substring(3) : '',
+    text: initialAmount > 0 ? formatMoney(initialAmount).substring(3) : '',
   );
   final descriptionController = TextEditingController(text: initialDescription);
   var showValidation = false;
@@ -19,7 +19,7 @@ Future<bool> showTransactionDialog(
     context: context,
     builder: (context) => StatefulBuilder(
       builder: (dialogContext, setState) {
-        final amount = parseRupiahInput(amountController.text);
+        final amount = parseMoneyInput(amountController.text);
         final needsParticipant =
             type == TransactionType.participantPayment ||
             type == TransactionType.refund;
@@ -118,7 +118,7 @@ Future<bool> showTransactionDialog(
                             value: item.id,
                             child: Text(
                               type == TransactionType.refund
-                                  ? '${item.name} • tersedia ${rupiah(refundableAmountForParticipant(controller.transactions, item.id))}'
+                                  ? '${item.name} • tersedia ${formatMoney(refundableAmountForParticipant(controller.transactions, item.id))}'
                                   : item.name,
                             ),
                           ),
@@ -140,7 +140,7 @@ Future<bool> showTransactionDialog(
                     Padding(
                       padding: const EdgeInsets.only(top: 6),
                       child: Text(
-                        'Maksimum refund peserta ini: ${rupiah(refundLimit)}.',
+                        'Maksimum refund peserta ini: ${formatMoney(refundLimit)}.',
                       ),
                     ),
                 ],
@@ -149,7 +149,7 @@ Future<bool> showTransactionDialog(
                   key: const Key('transaction-amount'),
                   controller: amountController,
                   keyboardType: TextInputType.number,
-                  inputFormatters: [RupiahTextInputFormatter()],
+                  inputFormatters: [MoneyTextInputFormatter()],
                   onChanged: (_) => setState(() => showValidation = true),
                   decoration: InputDecoration(
                     labelText: 'Jumlah (rupiah)',
@@ -159,7 +159,7 @@ Future<bool> showTransactionDialog(
                         : type == TransactionType.refund &&
                               participantId != null &&
                               amount > refundLimit
-                        ? 'Refund tidak boleh melebihi ${rupiah(refundLimit)}.'
+                        ? 'Refund tidak boleh melebihi ${formatMoney(refundLimit)}.'
                         : null,
                   ),
                 ),
@@ -182,9 +182,9 @@ Future<bool> showTransactionDialog(
                           padding: const EdgeInsets.only(top: 8),
                           child: ActionChip(
                             avatar: const Icon(Icons.check_circle_outline),
-                            label: Text('Lunasi ${rupiah(remaining)}'),
+                            label: Text('Lunasi ${formatMoney(remaining)}'),
                             onPressed: () => setState(() {
-                              amountController.text = rupiah(remaining)
+                              amountController.text = formatMoney(remaining)
                                   .substring(3);
                             }),
                           ),
@@ -311,29 +311,4 @@ class _FieldError extends StatelessWidget {
       ),
     ),
   );
-}
-
-int parseRupiahInput(String value) =>
-    int.tryParse(value.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
-
-class RupiahTextInputFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    final digits = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
-    if (digits.isEmpty) return const TextEditingValue();
-    final formatted = digits.replaceFirst(RegExp(r'^0+'), '');
-    final value = formatted.isEmpty ? '0' : formatted;
-    final groups = <String>[];
-    for (var end = value.length; end > 0; end -= 3) {
-      groups.add(value.substring(end - 3 < 0 ? 0 : end - 3, end));
-    }
-    final text = groups.reversed.join('.');
-    return TextEditingValue(
-      text: text,
-      selection: TextSelection.collapsed(offset: text.length),
-    );
-  }
 }

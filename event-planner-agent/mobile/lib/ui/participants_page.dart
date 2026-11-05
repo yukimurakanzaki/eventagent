@@ -265,23 +265,23 @@ class _ParticipantTile extends StatelessWidget {
                   if (cancelled)
                     Text(
                       refundAmount == 0
-                          ? 'Dibayar ${rupiah(grossPaidAmount)}'
-                          : 'Bayar ${rupiah(grossPaidAmount)} • Refund ${rupiah(refundAmount)}',
+                          ? 'Dibayar ${formatMoney(grossPaidAmount)}'
+                          : 'Bayar ${formatMoney(grossPaidAmount)} • Refund ${formatMoney(refundAmount)}',
                       style: muted,
                     )
                   else ...[
                     Text(
-                      '${refundAmount == 0 ? 'Dibayar' : 'Bersih'} ${rupiah(netPaidAmount)} dari ${rupiah(target)}',
+                      '${refundAmount == 0 ? 'Dibayar' : 'Bersih'} ${formatMoney(netPaidAmount)} dari ${formatMoney(target)}',
                       style: muted,
                     ),
                     if (refundAmount > 0)
                       Text(
-                        'Bayar ${rupiah(grossPaidAmount)} • Refund ${rupiah(refundAmount)}',
+                        'Bayar ${formatMoney(grossPaidAmount)} • Refund ${formatMoney(refundAmount)}',
                         style: muted,
                       ),
                     if (remaining > 0)
                       Text(
-                        'Kurang ${rupiah(remaining)}',
+                        'Kurang ${formatMoney(remaining)}',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),

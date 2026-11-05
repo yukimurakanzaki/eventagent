@@ -197,7 +197,7 @@ Future<void> showCancelParticipantDialog(
     context: context,
     builder: (dialogContext) => StatefulBuilder(
       builder: (dialogContext, setState) {
-        final partialAmount = parseRupiahInput(partialRefundController.text);
+        final partialAmount = parseMoneyInput(partialRefundController.text);
         final partialValid = partialAmount > 0 && partialAmount <= refundable;
         return AlertDialog(
           title: const Text('Batalkan peserta'),
@@ -225,12 +225,12 @@ Future<void> showCancelParticipantDialog(
                       setState(() => selectedPolicy = value ?? selectedPolicy),
                 ),
                 const SizedBox(height: 12),
-                Text('Maksimum refund: ${rupiah(refundable)}.'),
+                Text('Maksimum refund: ${formatMoney(refundable)}.'),
                 if (selectedPolicy == RefundPolicy.full)
                   Text(
                     refundable == 0
                         ? 'Tidak ada pembayaran bersih yang dapat direfund.'
-                        : '${rupiah(refundable)} akan dicatat sebagai refund penuh.',
+                        : '${formatMoney(refundable)} akan dicatat sebagai refund penuh.',
                   ),
                 if (selectedPolicy == RefundPolicy.partial) ...[
                   const SizedBox(height: 12),
@@ -238,7 +238,7 @@ Future<void> showCancelParticipantDialog(
                     key: const Key('cancellation-refund-amount'),
                     controller: partialRefundController,
                     keyboardType: TextInputType.number,
-                    inputFormatters: [RupiahTextInputFormatter()],
+                    inputFormatters: [MoneyTextInputFormatter()],
                     onChanged: (_) => setState(() {}),
                     decoration: InputDecoration(
                       labelText: 'Nominal refund sebagian (rupiah)',
@@ -246,7 +246,7 @@ Future<void> showCancelParticipantDialog(
                           ? null
                           : partialValid
                           ? null
-                          : 'Masukkan nominal dari Rp 1 sampai ${rupiah(refundable)}.',
+                          : 'Masukkan nominal dari Rp 1 sampai ${formatMoney(refundable)}.',
                     ),
                   ),
                 ],

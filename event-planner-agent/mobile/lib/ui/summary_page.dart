@@ -44,8 +44,8 @@ class SummaryPage extends StatelessWidget {
         ],
         const SizedBox(height: 12),
         _BalanceHero(
-          balance: rupiah(controller.balance),
-          contribution: rupiah(controller.contributionTarget),
+          balance: formatMoney(controller.balance),
+          contribution: formatMoney(controller.contributionTarget),
           helper:
               '(Anggaran − sponsor − saldo awal) ÷ $activeCount peserta aktif',
           progress: progress,
@@ -253,7 +253,7 @@ class _BalanceHero extends StatelessWidget {
     final theme = Theme.of(context);
     final percent = (progress.fraction * 100).floor();
     final summary =
-        'Iuran terkumpul ${rupiah(progress.collected)} dari ${rupiah(progress.expected)} ($percent%)';
+        'Iuran terkumpul ${formatMoney(progress.collected)} dari ${formatMoney(progress.expected)} ($percent%)';
     return Card(
       color: theme.colorScheme.primaryContainer,
       child: DefaultTextStyle.merge(

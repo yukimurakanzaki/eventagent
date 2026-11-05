@@ -8,6 +8,8 @@ import 'package:share_plus/share_plus.dart';
 
 import 'cashbook_calculations.dart';
 import 'cashbook_models.dart';
+import 'formatting.dart';
+import 'money.dart';
 import 'ledger_pdf.dart';
 import 'transaction_log.dart';
 
@@ -376,17 +378,8 @@ String sanitizeReportText(String value) {
   return sanitized;
 }
 
-String formatReportRupiah(int value) {
-  final digits = value.abs().toString();
-  final grouped = digits.replaceAllMapped(
-    RegExp(r'\B(?=(\d{3})+(?!\d))'),
-    (_) => '.',
-  );
-  return '${value < 0 ? '-' : ''}Rp $grouped';
-}
+String formatReportRupiah(int value) => formatMoney(value);
 
-String formatReportDate(DateTime value) =>
-    '${value.day.toString().padLeft(2, '0')}/${value.month.toString().padLeft(2, '0')}/${value.year}';
+String formatReportDate(DateTime value) => formatDate(value);
 
-String formatReportDateTime(DateTime value) =>
-    '${formatReportDate(value)} ${value.hour.toString().padLeft(2, '0')}:${value.minute.toString().padLeft(2, '0')}';
+String formatReportDateTime(DateTime value) => formatDateTime(value);

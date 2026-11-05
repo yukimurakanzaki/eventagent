@@ -77,16 +77,19 @@ class ConflictThenSyncAdapter implements CashbookSyncAdapter {
 }
 
 void main() {
-  test('splits the participant need across active participants, not capacity', () {
-    final demo = CashbookSnapshot.demo();
-    final active = activeParticipantCount(demo.participants);
+  test(
+    'splits the participant need across active participants, not capacity',
+    () {
+      final demo = CashbookSnapshot.demo();
+      final active = activeParticipantCount(demo.participants);
 
-    // (40.3M - 5M sponsor - 2M saldo awal) / 3 active; Ibu Rina is cancelled.
-    expect(active, 3);
-    expect(participantTarget(demo.event, active), 11100000);
-    expect(participantTarget(demo.event, 0), 33300000);
-    expect(demo.event.participantCapacity, 18);
-  });
+      // (40.3M - 5M sponsor - 2M saldo awal) / 3 active; Ibu Rina is cancelled.
+      expect(active, 3);
+      expect(participantTarget(demo.event, active), 11100000);
+      expect(participantTarget(demo.event, 0), 33300000);
+      expect(demo.event.participantCapacity, 18);
+    },
+  );
 
   test('a correction voids the original without deleting it', () async {
     final controller = CashbookController.forTesting();
@@ -109,7 +112,10 @@ void main() {
     );
 
     expect(controller.balance, balanceBefore);
-    expect(controller.transactions.map((item) => item.id), contains(mistake.id));
+    expect(
+      controller.transactions.map((item) => item.id),
+      contains(mistake.id),
+    );
     final correction = controller.transactions.last;
     expect(correction.type, TransactionType.correction);
     expect(correction.relatedTransactionId, mistake.id);
@@ -138,7 +144,10 @@ void main() {
     final controller = CashbookController.forTesting();
     expect(participantPaid(controller.transactions, 'p-budi'), 1000000);
 
-    await controller.correctTransaction('tx-budi', 'Dicatat ke orang yang salah');
+    await controller.correctTransaction(
+      'tx-budi',
+      'Dicatat ke orang yang salah',
+    );
 
     expect(participantPaid(controller.transactions, 'p-budi'), 0);
     expect(incomeTotal(controller.transactions), 1850000 + 1850000);

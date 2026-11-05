@@ -144,18 +144,24 @@ class _ReportPageState extends State<ReportPage> {
                 const Divider(height: 24),
                 _ReportRow(
                   'Saldo awal',
-                  rupiah(controller.event.openingBalance),
+                  formatMoney(controller.event.openingBalance),
                 ),
                 _ReportRow(
                   'Pemasukan peserta',
-                  rupiah(report.participantIncome),
+                  formatMoney(report.participantIncome),
                 ),
-                _ReportRow('Iuran tambahan', rupiah(report.additionalIncome)),
-                _ReportRow('Refund dan pengeluaran', rupiah(report.expenses)),
+                _ReportRow(
+                  'Iuran tambahan',
+                  formatMoney(report.additionalIncome),
+                ),
+                _ReportRow(
+                  'Refund dan pengeluaran',
+                  formatMoney(report.expenses),
+                ),
                 const Divider(height: 16),
                 _ReportRow(
                   'Saldo akhir',
-                  rupiah(controller.balance),
+                  formatMoney(controller.balance),
                   bold: true,
                 ),
                 const Divider(height: 24),
@@ -247,7 +253,7 @@ class _ReportParticipantRow extends StatelessWidget {
               PayStateChip(state),
               if (state != PayState.paid)
                 Text(
-                  'kurang ${rupiah(remaining)}',
+                  'kurang ${formatMoney(remaining)}',
                   style: theme.textTheme.bodyMedium,
                 ),
             ],

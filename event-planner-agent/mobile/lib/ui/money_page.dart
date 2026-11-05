@@ -61,23 +61,23 @@ class MoneyPage extends StatelessWidget {
                   _SummaryAmount(
                     icon: Icons.account_balance_wallet_outlined,
                     label: 'Saldo saat ini',
-                    value: rupiah(controller.balance),
+                    value: formatMoney(controller.balance),
                   ),
                   const Divider(height: 28),
                   _FlowRow(
                     icon: Icons.arrow_downward,
                     label: 'Pembayaran peserta',
-                    value: '+${rupiah(participantIncome)}',
+                    value: '+${formatMoney(participantIncome)}',
                   ),
                   _FlowRow(
                     icon: Icons.arrow_downward,
                     label: 'Kontribusi tambahan',
-                    value: '+${rupiah(additionalIncome)}',
+                    value: '+${formatMoney(additionalIncome)}',
                   ),
                   _FlowRow(
                     icon: Icons.arrow_upward,
                     label: 'Pengeluaran bersih',
-                    value: '−${rupiah(expense)}',
+                    value: '−${formatMoney(expense)}',
                   ),
                 ],
               ),
@@ -113,15 +113,15 @@ class MoneyPage extends StatelessWidget {
             children: [
               _MoneyRow(
                 label: 'Anggaran final',
-                value: rupiah(controller.event.finalBudget),
+                value: formatMoney(controller.event.finalBudget),
               ),
               _MoneyRow(
                 label: 'Sponsor',
-                value: rupiah(controller.event.sponsorContribution),
+                value: formatMoney(controller.event.sponsorContribution),
               ),
               _MoneyRow(
                 label: 'Saldo awal',
-                value: rupiah(controller.event.openingBalance),
+                value: formatMoney(controller.event.openingBalance),
               ),
             ],
           ),
@@ -332,7 +332,7 @@ class _TransactionTile extends StatelessWidget {
       trailing: Text(
         isCorrection
             ? '-'
-            : '${outflow ? '−' : '+'}${rupiah(transaction.amount)}',
+            : '${outflow ? '−' : '+'}${formatMoney(transaction.amount)}',
         style: Theme.of(context).textTheme.titleSmall
             ?.copyWith(color: amountColor)
             .merge(struck),
@@ -362,7 +362,9 @@ Future<void> showCorrectTransactionDialog(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('${transaction.description} • ${rupiah(transaction.amount)}'),
+          Text(
+            '${transaction.description} • ${formatMoney(transaction.amount)}',
+          ),
           const SizedBox(height: 8),
           const Text(
             'Transaksi ini tidak dihapus. Ia tetap terlihat dicoret di riwayat '

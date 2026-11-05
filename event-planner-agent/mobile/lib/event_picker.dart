@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'event_directory.dart';
-import 'main.dart' show formatDate, parseRupiahInput, showInfo;
+import 'formatting.dart';
+import 'main.dart' show showInfo;
+import 'money.dart';
 
 /// Bottom sheet listing the account's events: switch, add, archive, restore.
 Future<void> showEventPicker(BuildContext context, EventDirectory directory) {
@@ -320,8 +322,8 @@ Future<NewEventDraft?> showNewEventDialog(BuildContext context) {
                 name: nameController.text,
                 startDate: startDate,
                 endDate: endDate,
-                capacity: parseRupiahInput(capacityController.text),
-                budget: parseRupiahInput(budgetController.text),
+                capacity: parseMoneyInput(capacityController.text),
+                budget: parseMoneyInput(budgetController.text),
               );
               final problem = draft.validate();
               if (problem != null) {

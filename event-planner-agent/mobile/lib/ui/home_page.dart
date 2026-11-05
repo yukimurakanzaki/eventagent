@@ -52,6 +52,7 @@ class _EventHomePageState extends State<EventHomePage> {
     return AnimatedBuilder(
       animation: widget.controller,
       builder: (context, child) {
+        Money.currency = widget.controller.event.currency;
         return Scaffold(
           appBar: AppBar(
             title: const Text('Acara Saya'),

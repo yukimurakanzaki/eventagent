@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/date_symbol_data_local.dart';
+
+import 'app_settings.dart';
+import 'app_shell.dart';
+import 'formatting.dart';
+import 'l10n/l10n.dart';
+import 'money.dart';
 
 import 'cashbook_calculations.dart';
 import 'cashbook_controller.dart';
@@ -27,6 +34,11 @@ part 'ui/transaction_dialog.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting();
+  final settings = await AppSettings.load();
+  settings.suggestCurrencyFromLocale(
+    WidgetsBinding.instance.platformDispatcher.locale,
+  );
   if (SupabaseBackend.isDemoMode) {
     final controller = await CashbookController.bootstrap();
     runApp(WargakasApp(controller: controller));
@@ -65,11 +77,7 @@ class ConfigurationErrorApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Wargakas',
-      debugShowCheckedModeBanner: false,
-      theme: wargakasTheme(),
-      darkTheme: wargakasTheme(brightness: Brightness.dark),
+    return WargakasMaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Wargakas')),
         body: Padding(
@@ -103,9 +111,12 @@ class WargakasApp extends StatelessWidget {
     this.accountRole,
     this.eventDirectory,
     this.reportShareGateway = const PlatformReportShareGateway(),
+    this.settings,
     super.key,
   });
 
+  /// Personal preferences; defaults to [AppSettings.instance].
+  final AppSettings? settings;
   final EventDirectory? eventDirectory;
   final CashbookController controller;
   final Future<void> Function()? onSignOut;
@@ -116,11 +127,8 @@ class WargakasApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Wargakas',
-      debugShowCheckedModeBanner: false,
-      theme: wargakasTheme(),
-      darkTheme: wargakasTheme(brightness: Brightness.dark),
+    return WargakasMaterialApp(
+      settings: settings,
       home: EventHomePage(
         controller: controller,
         onSignOut: onSignOut,
@@ -169,12 +177,16 @@ TextTheme _wargakasTextTheme(TextTheme base) {
   );
 }
 
-ThemeData wargakasTheme({Brightness brightness = Brightness.light}) {
-  const primary = Color(0xff006b5b);
+ThemeData wargakasTheme({
+  Brightness brightness = Brightness.light,
+  Color seedColor = const Color(0xff006b5b),
+  bool highContrast = false,
+}) {
   final dark = brightness == Brightness.dark;
   final scheme = ColorScheme.fromSeed(
-    seedColor: primary,
+    seedColor: seedColor,
     brightness: brightness,
+    contrastLevel: highContrast ? 1.0 : 0.0,
   );
   final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(12));
   return ThemeData(
@@ -194,7 +206,10 @@ ThemeData wargakasTheme({Brightness brightness = Brightness.light}) {
       color: dark ? const Color(0xff16211e) : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: scheme.outlineVariant),
+        side: BorderSide(
+          color: highContrast ? scheme.outline : scheme.outlineVariant,
+          width: highContrast ? 1.5 : 1,
+        ),
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(

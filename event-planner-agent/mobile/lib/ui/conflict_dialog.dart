@@ -116,10 +116,10 @@ class _ConflictVersionCard extends StatelessWidget {
             Text(detail),
             const SizedBox(height: 6),
             Text('$active peserta aktif'),
-            Text('Pemasukan tercatat ${rupiah(income)}'),
-            Text('Refund dan pengeluaran ${rupiah(expenses)}'),
+            Text('Pemasukan tercatat ${formatMoney(income)}'),
+            Text('Refund dan pengeluaran ${formatMoney(expenses)}'),
             Text(
-              'Saldo ${rupiah(currentBalance(snapshot.event, snapshot.transactions))}',
+              'Saldo ${formatMoney(currentBalance(snapshot.event, snapshot.transactions))}',
             ),
             Text('$openReminders pengingat terbuka'),
           ],
@@ -167,19 +167,19 @@ List<String> _eventChangeSummary(EventRecord before, EventRecord after) {
   }
   if (before.finalBudget != after.finalBudget) {
     changes.add(
-      'Anggaran: ${rupiah(before.finalBudget)} -> ${rupiah(after.finalBudget)}',
+      'Anggaran: ${formatMoney(before.finalBudget)} -> ${formatMoney(after.finalBudget)}',
     );
   }
   if (before.sponsorName != after.sponsorName ||
       before.sponsorContribution != after.sponsorContribution) {
     changes.add(
-      'Sponsor: ${before.sponsorName} ${rupiah(before.sponsorContribution)} -> '
-      '${after.sponsorName} ${rupiah(after.sponsorContribution)}',
+      'Sponsor: ${before.sponsorName} ${formatMoney(before.sponsorContribution)} -> '
+      '${after.sponsorName} ${formatMoney(after.sponsorContribution)}',
     );
   }
   if (before.openingBalance != after.openingBalance) {
     changes.add(
-      'Saldo awal: ${rupiah(before.openingBalance)} -> ${rupiah(after.openingBalance)}',
+      'Saldo awal: ${formatMoney(before.openingBalance)} -> ${formatMoney(after.openingBalance)}',
     );
   }
   return changes;

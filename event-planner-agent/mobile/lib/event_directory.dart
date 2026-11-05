@@ -23,7 +23,11 @@ class NewEventDraft {
     required this.endDate,
     required this.capacity,
     required this.budget,
+    this.currency = 'IDR',
   });
+
+  /// ISO 4217 code chosen when the event is created.
+  final String currency;
 
   final String name;
   final DateTime startDate;
@@ -50,6 +54,7 @@ class NewEventDraft {
       endDate: endDate,
       participantCapacity: capacity,
       finalBudget: budget,
+      currency: currency,
     ),
   );
 }
