@@ -9,9 +9,15 @@ class EventHomePage extends StatefulWidget {
     this.accountRole,
     this.eventDirectory,
     this.reportShareGateway = const PlatformReportShareGateway(),
+    this.shareLinkService,
+    this.onDeleteAccount,
     super.key,
   });
 
+  final ShareLinkService? shareLinkService;
+
+  /// Hosted builds only: permanently deletes the signed-in account.
+  final Future<void> Function()? onDeleteAccount;
   final EventDirectory? eventDirectory;
   final CashbookController controller;
   final Future<void> Function()? onSignOut;
@@ -216,6 +222,7 @@ class _EventHomePageState extends State<EventHomePage> {
           controller: widget.controller,
           creatorRole: widget.accountRole ?? 'treasurer',
           shareGateway: widget.reportShareGateway,
+          shareLinkService: widget.shareLinkService,
         );
       default:
         return SummaryPage(

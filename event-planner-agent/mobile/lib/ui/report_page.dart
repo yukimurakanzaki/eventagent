@@ -5,12 +5,16 @@ class ReportPage extends StatefulWidget {
     required this.controller,
     required this.creatorRole,
     required this.shareGateway,
+    this.shareLinkService,
     super.key,
   });
 
   final CashbookController controller;
   final String creatorRole;
   final ReportShareGateway shareGateway;
+
+  /// Hosted builds only: creates the participant read-only link.
+  final ShareLinkService? shareLinkService;
 
   @override
   State<ReportPage> createState() => _ReportPageState();

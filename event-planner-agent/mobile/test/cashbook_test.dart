@@ -544,16 +544,13 @@ void main() {
     },
   );
 
-  test('validates configurable event fields and sponsor lock', () async {
+  test('validates configurable event fields; late sponsor money is allowed', () async {
     final controller = CashbookController.forTesting();
     final changedSponsor = controller.event.copyWith(
       sponsorContribution: controller.event.sponsorContribution + 1,
     );
 
-    expect(
-      controller.validateEventUpdate(changedSponsor),
-      'Sponsor dikunci setelah pembayaran peserta dimulai.',
-    );
+    expect(controller.validateEventUpdate(changedSponsor), isNull);
     expect(
       controller.validateEventUpdate(
         controller.event.copyWith(participantCapacity: 1),

@@ -4,18 +4,30 @@ import 'package:flutter/foundation.dart';
 
 import 'cashbook_calculations.dart';
 import 'cashbook_models.dart';
+import 'money.dart';
 import 'l10n/l10n.dart';
 import 'cashbook_store.dart';
 import 'cashbook_sync.dart';
 import 'reminder_notifier.dart';
+
+typedef ReceiptUploader = Future<String?> Function(
+  String eventId,
+  String transactionId,
+  String localPath,
+);
 
 class CashbookController extends ChangeNotifier {
   CashbookController._(
     this._store,
     this._snapshot,
     this._reminderNotifier,
-    this._syncAdapter,
-  );
+    this._syncAdapter, [
+    this._receiptUploader,
+  ]);
+
+  /// Uploads a local receipt photo and returns its storage path, or null when
+  /// uploads are not available (demo mode).
+  final ReceiptUploader? _receiptUploader;
 
   final CashbookStore _store;
   final ReminderNotifier _reminderNotifier;
@@ -40,6 +52,7 @@ class CashbookController extends ChangeNotifier {
 
   static Future<CashbookController> bootstrap({
     CashbookSyncAdapter? syncAdapter,
+    ReceiptUploader? receiptUploader,
     String storageNamespace = 'demo',
   }) async {
     final store = LocalCashbookStore(namespace: storageNamespace);
@@ -57,13 +70,16 @@ class CashbookController extends ChangeNotifier {
       initial,
       notifier,
       syncAdapter,
+      receiptUploader,
     );
     if (saved == null || remote != null) await store.save(controller.snapshot);
     await controller._schedulePendingReminders();
     await controller._flushPending();
     controller._retryTimer = Timer.periodic(const Duration(seconds: 30), (_) {
       controller._flushPending();
+      controller._uploadPendingReceipts();
     });
+    unawaited(controller._uploadPendingReceipts());
     return controller;
   }
 
@@ -71,18 +87,22 @@ class CashbookController extends ChangeNotifier {
     CashbookSnapshot? initial,
     ReminderNotifier? reminderNotifier,
     CashbookSyncAdapter? syncAdapter,
+    ReceiptUploader? receiptUploader,
   }) {
     return CashbookController._(
       MemoryCashbookStore(initial),
       initial ?? CashbookSnapshot.demo(),
       reminderNotifier ?? const NoopReminderNotifier(),
       syncAdapter,
+      receiptUploader,
     );
   }
 
   Future<String?> addParticipant(
     String name, {
     String? replacementForId,
+    ParticipantRole role = ParticipantRole.participant,
+    String phone = '',
   }) async {
     if (isReadOnly) {
       return tr('Selesaikan konflik data sebelum menambah peserta.');
@@ -111,6 +131,8 @@ class CashbookController extends ChangeNotifier {
       id: _newId('participant'),
       name: trimmedName,
       replacementForId: replacementForId,
+      role: role,
+      phone: phone.trim(),
     );
     await _commit(
       _snapshot.copyWith(participants: [...participants, participant]),
@@ -128,7 +150,10 @@ class CashbookController extends ChangeNotifier {
     }
     final trimmedName = participant.name.trim();
     if (trimmedName.isEmpty) return tr('Nama peserta wajib diisi.');
-    final edited = participant.copyWith(name: trimmedName);
+    final edited = participant.copyWith(
+      name: trimmedName,
+      phone: participant.phone.trim(),
+    );
     final updated = participants
         .map((item) => item.id == edited.id ? edited : item)
         .toList();
@@ -215,6 +240,8 @@ class CashbookController extends ChangeNotifier {
     required String description,
     String? participantId,
     String? relatedTransactionId,
+    ExpenseCategory? category,
+    String? receiptPath,
   }) async {
     if (isReadOnly) return false;
     if (amount <= 0 || description.trim().isEmpty) return false;
@@ -249,6 +276,10 @@ class CashbookController extends ChangeNotifier {
       createdAt: DateTime.now(),
       participantId: participantId,
       relatedTransactionId: relatedTransactionId,
+      category: type == TransactionType.expense
+          ? category ?? ExpenseCategory.other
+          : null,
+      receiptPath: receiptPath,
     );
     await _commit(
       _snapshot.copyWith(transactions: [...transactions, transaction]),
@@ -257,6 +288,7 @@ class CashbookController extends ChangeNotifier {
       action: 'create',
       payload: transaction.toJson(),
     );
+    if (receiptPath != null) unawaited(_uploadPendingReceipts());
     return true;
   }
 
@@ -420,12 +452,88 @@ class CashbookController extends ChangeNotifier {
     if (next.sponsorContribution + next.openingBalance > next.finalBudget) {
       return tr('Sponsor dan saldo awal tidak boleh melebihi anggaran final.');
     }
-    if (!sponsorEditable(transactions) &&
-        (next.sponsorName != event.sponsorName ||
-            next.sponsorContribution != event.sponsorContribution)) {
-      return tr('Sponsor dikunci setelah pembayaran peserta dimulai.');
+    // Sponsor money often arrives or shrinks after collection starts (both
+    // interviewed treasurers); the change stays visible in the audit trail.
+    if (next.currency != event.currency &&
+        currencySpec(next.currency).decimals !=
+            currencySpec(event.currency).decimals &&
+        (transactions.isNotEmpty ||
+            event.finalBudget != 0 ||
+            event.sponsorContribution != 0 ||
+            event.openingBalance != 0)) {
+      return tr(
+        'Mata uang hanya bisa diganti ke mata uang dengan jumlah desimal yang sama setelah ada nominal tercatat.',
+      );
     }
     return null;
+  }
+
+  /// Attaches (or replaces) the receipt photo of an existing transaction.
+  /// The ledger amount is untouched, so this is allowed on any entry.
+  Future<String?> attachReceipt(
+    String transactionId, {
+    String? localPath,
+    String? storagePath,
+  }) async {
+    if (isReadOnly) {
+      return tr('Selesaikan konflik data sebelum melampirkan nota.');
+    }
+    final original = transactions
+        .where((item) => item.id == transactionId)
+        .firstOrNull;
+    if (original == null) return tr('Transaksi tidak ditemukan.');
+    final updated = original.copyWith(
+      receiptPath: localPath,
+      receiptStoragePath: storagePath,
+    );
+    await _commit(
+      _snapshot.copyWith(
+        transactions: transactions
+            .map((item) => item.id == transactionId ? updated : item)
+            .toList(),
+      ),
+      entity: 'transaction',
+      entityId: transactionId,
+      action: 'attach_receipt',
+      payload: {
+        'transactionId': transactionId,
+        'receiptStoragePath': ?updated.receiptStoragePath,
+        'hasLocalReceipt': updated.receiptPath != null,
+      },
+    );
+    await _uploadPendingReceipts();
+    return null;
+  }
+
+  /// Uploads receipts that exist only on this device. Safe to call often.
+  Future<void> _uploadPendingReceipts() async {
+    final uploader = _receiptUploader;
+    if (uploader == null || isReadOnly) return;
+    for (final transaction in [...transactions]) {
+      final local = transaction.receiptPath;
+      if (local == null || local.isEmpty) continue;
+      if (transaction.receiptStoragePath?.isNotEmpty ?? false) continue;
+      try {
+        final storagePath = await uploader(event.id, transaction.id, local);
+        if (storagePath == null) continue;
+        final updated = transaction.copyWith(receiptStoragePath: storagePath);
+        await _commit(
+          _snapshot.copyWith(
+            transactions: transactions
+                .map((item) => item.id == transaction.id ? updated : item)
+                .toList(),
+          ),
+          entity: 'transaction',
+          entityId: transaction.id,
+          action: 'receipt_uploaded',
+          payload: {'receiptStoragePath': storagePath},
+        );
+      } catch (_) {
+        // Offline or storage unavailable: the photo stays on the device and
+        // is retried with the next sync.
+        return;
+      }
+    }
   }
 
   Future<String?> updateEvent(EventRecord next) async {

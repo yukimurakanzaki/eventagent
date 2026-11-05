@@ -10,21 +10,21 @@ Future<void> showEventDialog(
     text: current.participantCapacity.toString(),
   );
   final budgetController = TextEditingController(
-    text: current.finalBudget.toString(),
+    text: _moneyText(current.finalBudget, current.currency),
   );
   final sponsorNameController = TextEditingController(
     text: current.sponsorName,
   );
   final sponsorAmountController = TextEditingController(
-    text: current.sponsorContribution.toString(),
+    text: _moneyText(current.sponsorContribution, current.currency),
   );
   final openingController = TextEditingController(
-    text: current.openingBalance.toString(),
+    text: _moneyText(current.openingBalance, current.currency),
   );
   var startDate = current.startDate;
   var endDate = current.endDate;
   var error = '';
-  final sponsorLocked = !sponsorEditable(controller.transactions);
+  var currency = current.currency;
 
   await showDialog<void>(
     context: context,
@@ -90,42 +90,91 @@ Future<void> showEventDialog(
                   ),
                 ),
                 const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  key: const Key('event-currency'),
+                  onPressed: () async {
+                    final code = await pickCurrency(
+                      dialogContext,
+                      selected: currency,
+                    );
+                    if (code == null || code == currency) return;
+                    final values = [
+                      budgetController,
+                      sponsorAmountController,
+                      openingController,
+                    ].map((c) => parseMoneyInput(c.text, currency: currency));
+                    final list = values.toList();
+                    setState(() {
+                      // Same face value in the new currency's minor units.
+                      final from = currencySpec(currency).minorFactor;
+                      final to = currencySpec(code).minorFactor;
+                      currency = code;
+                      budgetController.text = _moneyText(
+                        list[0] * to ~/ from,
+                        code,
+                      );
+                      sponsorAmountController.text = _moneyText(
+                        list[1] * to ~/ from,
+                        code,
+                      );
+                      openingController.text = _moneyText(
+                        list[2] * to ~/ from,
+                        code,
+                      );
+                    });
+                  },
+                  icon: const Icon(Icons.payments_outlined),
+                  label: Text(
+                    tr('Mata uang: {currency}', {
+                      'currency': '$currency · ${currencySpec(currency).name}',
+                    }),
+                  ),
+                ),
+                const SizedBox(height: 12),
                 TextField(
                   controller: budgetController,
-                  keyboardType: TextInputType.number,
+                  keyboardType: _moneyKeyboard(currency),
+                  inputFormatters: [
+                    MoneyTextInputFormatter(currency: currency),
+                  ],
                   decoration: InputDecoration(
                     labelText: tr('Anggaran final ({currency})', {
-                      'currency': Money.spec.symbol,
+                      'currency': currencySpec(currency).symbol,
                     }),
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: sponsorNameController,
-                  enabled: !sponsorLocked,
                   decoration: InputDecoration(labelText: tr('Nama sponsor')),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: sponsorAmountController,
-                  enabled: !sponsorLocked,
-                  keyboardType: TextInputType.number,
+                  keyboardType: _moneyKeyboard(currency),
+                  inputFormatters: [
+                    MoneyTextInputFormatter(currency: currency),
+                  ],
                   decoration: InputDecoration(
                     labelText: tr('Kontribusi sponsor ({currency})', {
-                      'currency': Money.spec.symbol,
+                      'currency': currencySpec(currency).symbol,
                     }),
-                    helperText: sponsorLocked
-                        ? tr('Dikunci karena pembayaran peserta sudah dimulai.')
-                        : null,
+                    helperText: tr(
+                      'Boleh diubah kapan saja; perubahan tercatat di riwayat dan target per peserta dihitung ulang.',
+                    ),
+                    helperMaxLines: 3,
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: openingController,
-                  keyboardType: TextInputType.number,
+                  keyboardType: _moneyKeyboard(currency),
+                  inputFormatters: [
+                    MoneyTextInputFormatter(currency: currency),
+                  ],
                   decoration: InputDecoration(
                     labelText: tr('Saldo awal ({currency})', {
-                      'currency': Money.spec.symbol,
+                      'currency': currencySpec(currency).symbol,
                     }),
                   ),
                 ),
@@ -150,9 +199,18 @@ Future<void> showEventDialog(
           FilledButton(
             onPressed: () async {
               final capacity = _parseWholeNumber(capacityController.text);
-              final budget = _parseWholeNumber(budgetController.text);
-              final sponsor = _parseWholeNumber(sponsorAmountController.text);
-              final opening = _parseWholeNumber(openingController.text);
+              final budget = parseMoneyInput(
+                budgetController.text,
+                currency: currency,
+              );
+              final sponsor = parseMoneyInput(
+                sponsorAmountController.text,
+                currency: currency,
+              );
+              final opening = parseMoneyInput(
+                openingController.text,
+                currency: currency,
+              );
               if ([capacity, budget, sponsor, opening].contains(null)) {
                 setState(
                   () => error = tr('Gunakan angka bulat pada semua nilai.'),
@@ -168,6 +226,7 @@ Future<void> showEventDialog(
                 sponsorName: sponsorNameController.text.trim(),
                 sponsorContribution: sponsor,
                 openingBalance: opening,
+                currency: currency,
               );
               final validation = controller.validateEventUpdate(next);
               if (validation != null) {
@@ -271,3 +330,11 @@ class _EventDateButton extends StatelessWidget {
     );
   }
 }
+
+String _moneyText(int minorUnits, String currency) =>
+    minorUnits == 0 ? '0' : formatMoneyInput(minorUnits, currency: currency);
+
+TextInputType _moneyKeyboard(String currency) =>
+    currencySpec(currency).decimals > 0
+    ? const TextInputType.numberWithOptions(decimal: true)
+    : TextInputType.number;

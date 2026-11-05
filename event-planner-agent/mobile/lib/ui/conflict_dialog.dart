@@ -196,6 +196,14 @@ List<String> _eventChangeSummary(EventRecord before, EventRecord after) {
       }),
     );
   }
+  if (before.currency != after.currency) {
+    changes.add(
+      tr('Mata uang: {before} -> {after}', {
+        'before': before.currency,
+        'after': after.currency,
+      }),
+    );
+  }
   if (before.participantCapacity != after.participantCapacity) {
     changes.add(
       tr('Kapasitas: {before} -> {after}', {
