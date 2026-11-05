@@ -3,6 +3,8 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
+import 'l10n/l10n.dart';
+
 abstract interface class ReminderNotifier {
   Future<void> initialize();
 
@@ -39,9 +41,9 @@ class LocalReminderNotifier implements ReminderNotifier {
     : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
 
   static const _channelId = 'wargakas_deadlines';
-  static const _channelName = 'Pengingat acara';
-  static const _channelDescription =
-      'Pengingat pembayaran, pengumpulan, dan persiapan acara.';
+  static String get _channelName => tr('Pengingat acara');
+  static String get _channelDescription =>
+      tr('Pengingat pembayaran, pengumpulan, dan persiapan acara.');
 
   final FlutterLocalNotificationsPlugin _plugin;
 
@@ -74,10 +76,10 @@ class LocalReminderNotifier implements ReminderNotifier {
     if (scheduled.isBefore(tz.TZDateTime.now(tz.local))) return;
     await _plugin.zonedSchedule(
       id: _notificationId(id),
-      title: 'Wargakas: $title',
-      body: note.isEmpty ? 'Pengingat acara Wargakas.' : note,
+      title: tr('Wargakas: {title}', {'title': title}),
+      body: note.isEmpty ? tr('Pengingat acara Wargakas.') : note,
       scheduledDate: scheduled,
-      notificationDetails: const NotificationDetails(
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           _channelId,
           _channelName,

@@ -1,4 +1,5 @@
 import 'cashbook_models.dart';
+import 'l10n/l10n.dart';
 
 /// Costs are per head, so the need is split across active participants, not
 /// capacity. Capacity only caps how many can join.
@@ -79,9 +80,9 @@ int currentBalance(
 }
 
 String paymentStatus(int paidAmount, int target) {
-  if (paidAmount >= target) return 'Lunas';
-  if (paidAmount > 0) return 'Sebagian';
-  return 'Belum bayar';
+  if (paidAmount >= target) return tr('Lunas');
+  if (paidAmount > 0) return tr('Sebagian');
+  return tr('Belum bayar');
 }
 
 /// The sponsor field stays editable until the first participant payment.

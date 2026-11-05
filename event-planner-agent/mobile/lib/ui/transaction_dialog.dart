@@ -11,7 +11,7 @@ Future<bool> showTransactionDialog(
   TransactionType? type = initialType;
   String? participantId = initialParticipantId;
   final amountController = TextEditingController(
-    text: initialAmount > 0 ? formatMoney(initialAmount).substring(3) : '',
+    text: formatMoneyInput(initialAmount),
   );
   final descriptionController = TextEditingController(text: initialDescription);
   var showValidation = false;
@@ -38,8 +38,8 @@ Future<bool> showTransactionDialog(
         return AlertDialog(
           title: Text(
             initialType == TransactionType.participantPayment
-                ? 'Catat pembayaran'
-                : 'Catat transaksi',
+                ? tr('Catat pembayaran')
+                : tr('Catat transaksi'),
           ),
           content: SingleChildScrollView(
             child: Column(
@@ -49,7 +49,7 @@ Future<bool> showTransactionDialog(
                 // A preset type (quick "Catat bayar") needs no type picker.
                 if (initialType == null) ...[
                   Text(
-                    'Pilih jenis transaksi',
+                    tr('Pilih jenis transaksi'),
                     style: Theme.of(dialogContext).textTheme.titleSmall,
                   ),
                   const SizedBox(height: 6),
@@ -61,33 +61,33 @@ Future<bool> showTransactionDialog(
                       participantId = null;
                       showValidation = true;
                     }),
-                    child: const Column(
+                    child: Column(
                       children: [
                         _TransactionTypeChoice(
                           value: TransactionType.participantPayment,
                           icon: Icons.person_add_alt_1_outlined,
-                          label: 'Pembayaran peserta',
+                          label: tr('Pembayaran peserta'),
                         ),
                         _TransactionTypeChoice(
                           value: TransactionType.expense,
                           icon: Icons.receipt_long_outlined,
-                          label: 'Pengeluaran',
+                          label: tr('Pengeluaran'),
                         ),
                         _TransactionTypeChoice(
                           value: TransactionType.additionalContribution,
                           icon: Icons.volunteer_activism_outlined,
-                          label: 'Kontribusi tambahan',
+                          label: tr('Kontribusi tambahan'),
                         ),
                         _TransactionTypeChoice(
                           value: TransactionType.refund,
                           icon: Icons.reply_all_outlined,
-                          label: 'Refund peserta',
+                          label: tr('Refund peserta'),
                         ),
                       ],
                     ),
                   ),
                   if (showValidation && type == null)
-                    const _FieldError('Pilih jenis transaksi terlebih dahulu.'),
+                    _FieldError(tr('Pilih jenis transaksi terlebih dahulu.')),
                 ],
                 if (needsParticipant) ...[
                   const SizedBox(height: 12),
@@ -95,12 +95,12 @@ Future<bool> showTransactionDialog(
                     key: const Key('transaction-participant'),
                     initialValue: participantId,
                     decoration: InputDecoration(
-                      labelText: 'Peserta',
+                      labelText: tr('Peserta'),
                       errorText: showValidation && participantId == null
-                          ? 'Pilih peserta untuk transaksi ini.'
+                          ? tr('Pilih peserta untuk transaksi ini.')
                           : null,
                     ),
-                    hint: const Text('Pilih peserta'),
+                    hint: Text(tr('Pilih peserta')),
                     items: controller.participants
                         .where(
                           (item) =>
@@ -118,7 +118,15 @@ Future<bool> showTransactionDialog(
                             value: item.id,
                             child: Text(
                               type == TransactionType.refund
-                                  ? '${item.name} • tersedia ${formatMoney(refundableAmountForParticipant(controller.transactions, item.id))}'
+                                  ? tr('{name} • tersedia {amount}', {
+                                      'name': item.name,
+                                      'amount': formatMoney(
+                                        refundableAmountForParticipant(
+                                          controller.transactions,
+                                          item.id,
+                                        ),
+                                      ),
+                                    })
                                   : item.name,
                             ),
                           ),
@@ -130,17 +138,21 @@ Future<bool> showTransactionDialog(
                     }),
                   ),
                   if (type == TransactionType.participantPayment)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 6),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
                       child: Text(
-                        'Nominal ini akan menambah total pembayaran peserta.',
+                        tr(
+                          'Nominal ini akan menambah total pembayaran peserta.',
+                        ),
                       ),
                     ),
                   if (type == TransactionType.refund && participantId != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 6),
                       child: Text(
-                        'Maksimum refund peserta ini: ${formatMoney(refundLimit)}.',
+                        tr('Maksimum refund peserta ini: {amount}.', {
+                          'amount': formatMoney(refundLimit),
+                        }),
                       ),
                     ),
                 ],
@@ -152,14 +164,20 @@ Future<bool> showTransactionDialog(
                   inputFormatters: [MoneyTextInputFormatter()],
                   onChanged: (_) => setState(() => showValidation = true),
                   decoration: InputDecoration(
-                    labelText: 'Jumlah (rupiah)',
-                    helperText: 'Contoh: 125.000',
+                    labelText: tr('Jumlah ({currency})', {
+                      'currency': Money.currency,
+                    }),
+                    helperText: tr('Contoh: 125.000'),
                     errorText: showValidation && amount <= 0
-                        ? 'Masukkan jumlah lebih dari Rp 0.'
+                        ? tr('Masukkan jumlah lebih dari {zero}.', {
+                            'zero': formatMoney(0),
+                          })
                         : type == TransactionType.refund &&
                               participantId != null &&
                               amount > refundLimit
-                        ? 'Refund tidak boleh melebihi ${formatMoney(refundLimit)}.'
+                        ? tr('Refund tidak boleh melebihi {amount}.', {
+                            'amount': formatMoney(refundLimit),
+                          })
                         : null,
                   ),
                 ),
@@ -182,10 +200,15 @@ Future<bool> showTransactionDialog(
                           padding: const EdgeInsets.only(top: 8),
                           child: ActionChip(
                             avatar: const Icon(Icons.check_circle_outline),
-                            label: Text('Lunasi ${formatMoney(remaining)}'),
+                            label: Text(
+                              tr('Lunasi {amount}', {
+                                'amount': formatMoney(remaining),
+                              }),
+                            ),
                             onPressed: () => setState(() {
-                              amountController.text = formatMoney(remaining)
-                                  .substring(3);
+                              amountController.text = formatMoneyInput(
+                                remaining,
+                              );
                             }),
                           ),
                         ),
@@ -199,12 +222,12 @@ Future<bool> showTransactionDialog(
                   textCapitalization: TextCapitalization.sentences,
                   onChanged: (_) => setState(() => showValidation = true),
                   decoration: InputDecoration(
-                    labelText: 'Keterangan',
-                    helperText: 'Contoh: Uang muka bus',
+                    labelText: tr('Keterangan'),
+                    helperText: tr('Contoh: Uang muka bus'),
                     errorText:
                         showValidation &&
                             descriptionController.text.trim().isEmpty
-                        ? 'Isi keterangan transaksi.'
+                        ? tr('Isi keterangan transaksi.')
                         : null,
                   ),
                 ),
@@ -214,7 +237,7 @@ Future<bool> showTransactionDialog(
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Batal'),
+              child: Text(tr('Batal')),
             ),
             FilledButton(
               onPressed: valid
@@ -228,7 +251,7 @@ Future<bool> showTransactionDialog(
                       ),
                     )
                   : null,
-              child: const Text('Simpan transaksi'),
+              child: Text(tr('Simpan transaksi')),
             ),
           ],
         );

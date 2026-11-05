@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'auth_support.dart';
+import 'l10n/l10n.dart';
 import 'supabase_backend.dart';
 
 enum _Mode { signIn, signUp, reset, confirmation }
@@ -98,7 +99,7 @@ class _LoginPageState extends State<LoginPage> {
         (_mode == _Mode.signUp
             ? validateNewPassword(password, _confirmation.text)
             : _mode == _Mode.signIn && password.isEmpty
-            ? 'Masukkan kata sandi Anda.'
+            ? tr('Masukkan kata sandi Anda.')
             : null);
     if (validation != null) {
       setState(() {
@@ -226,14 +227,20 @@ class _LoginPageState extends State<LoginPage> {
     final register = _mode == _Mode.signUp;
     final reset = _mode == _Mode.reset;
     final canResendConfirmation =
-        pending || (_error?.contains('Email belum dikonfirmasi') ?? false);
+        pending ||
+        (_error?.startsWith(
+              tr(
+                'Email belum dikonfirmasi. Buka email konfirmasi terbaru atau kirim ulang di bawah.',
+              ),
+            ) ??
+            false);
     final title = pending
-        ? 'Periksa email atau masuk'
+        ? tr('Periksa email atau masuk')
         : register
-        ? 'Buat akun Wargakas'
+        ? tr('Buat akun Wargakas')
         : reset
-        ? 'Lupa kata sandi'
-        : 'Masuk ke Wargakas';
+        ? tr('Lupa kata sandi')
+        : tr('Masuk ke Wargakas');
     return Scaffold(
       appBar: AppBar(title: Text(title)),
       body: SafeArea(
@@ -255,12 +262,18 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 16),
                     Text(
                       pending
-                          ? 'Sudah pernah mendaftar? Anda bisa langsung mencoba Masuk.'
+                          ? tr(
+                              'Sudah pernah mendaftar? Anda bisa langsung mencoba Masuk.',
+                            )
                           : reset
-                          ? 'Masukkan email akun Anda untuk meminta link pemulihan.'
+                          ? tr(
+                              'Masukkan email akun Anda untuk meminta link pemulihan.',
+                            )
                           : register
-                          ? 'Gunakan email aktif. Sudah punya akun? Pilih Masuk.'
-                          : 'Masuk untuk melihat acara bersama.',
+                          ? tr(
+                              'Gunakan email aktif. Sudah punya akun? Pilih Masuk.',
+                            )
+                          : tr('Masuk untuk melihat acara bersama.'),
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
@@ -281,8 +294,8 @@ class _LoginPageState extends State<LoginPage> {
                         _error = null;
                         _message = null;
                       }),
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
+                      decoration: InputDecoration(
+                        labelText: tr('Email'),
                         border: OutlineInputBorder(),
                       ),
                     ),
@@ -305,16 +318,18 @@ class _LoginPageState extends State<LoginPage> {
                             : TextInputAction.done,
                         onSubmitted: register ? null : (_) => _submit(),
                         decoration: InputDecoration(
-                          labelText: 'Kata sandi',
+                          labelText: tr('Kata sandi'),
                           border: const OutlineInputBorder(),
                           helperText: register
-                              ? 'Minimal 6 karakter; gunakan kata sandi yang kuat.'
+                              ? tr(
+                                  'Minimal 6 karakter; gunakan kata sandi yang kuat.',
+                                )
                               : null,
                           helperMaxLines: 2,
                           suffixIcon: IconButton(
                             tooltip: _obscure
-                                ? 'Tampilkan kata sandi'
-                                : 'Sembunyikan kata sandi',
+                                ? tr('Tampilkan kata sandi')
+                                : tr('Sembunyikan kata sandi'),
                             onPressed: _busy
                                 ? null
                                 : () => setState(() => _obscure = !_obscure),
@@ -339,8 +354,8 @@ class _LoginPageState extends State<LoginPage> {
                         autofillHints: const [AutofillHints.newPassword],
                         textInputAction: TextInputAction.done,
                         onSubmitted: (_) => _submit(),
-                        decoration: const InputDecoration(
-                          labelText: 'Ulangi kata sandi',
+                        decoration: InputDecoration(
+                          labelText: tr('Ulangi kata sandi'),
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -348,7 +363,7 @@ class _LoginPageState extends State<LoginPage> {
                     if (_error != null) _AuthNotice(_error!, error: true),
                     if (_message != null) _AuthNotice(_message!),
                     if (pending || reset)
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.only(top: 12),
                         child: Text(authEmailHelp),
                       ),
@@ -356,7 +371,10 @@ class _LoginPageState extends State<LoginPage> {
                       Padding(
                         padding: const EdgeInsets.only(top: 12),
                         child: Text(
-                          'Tunggu $_cooldown detik sebelum meminta email lagi.',
+                          tr(
+                            'Tunggu {count} detik sebelum meminta email lagi.',
+                            {'count': _cooldown},
+                          ),
                         ),
                       ),
                     const SizedBox(height: 20),
@@ -369,14 +387,14 @@ class _LoginPageState extends State<LoginPage> {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         child: Text(
                           _busy
-                              ? 'Memproses…'
+                              ? tr('Memproses…')
                               : pending
-                              ? 'Masuk sekarang'
+                              ? tr('Masuk sekarang')
                               : register
-                              ? 'Buat akun'
+                              ? tr('Buat akun')
                               : reset
-                              ? 'Kirim link pemulihan'
-                              : 'Masuk',
+                              ? tr('Kirim link pemulihan')
+                              : tr('Masuk'),
                         ),
                       ),
                     ),
@@ -384,7 +402,7 @@ class _LoginPageState extends State<LoginPage> {
                       TextButton(
                         key: const Key('auth-resend'),
                         onPressed: _mailBlocked ? null : _resend,
-                        child: const Text('Kirim ulang email konfirmasi'),
+                        child: Text(tr('Kirim ulang email konfirmasi')),
                       ),
                     if (!reset)
                       TextButton(
@@ -392,14 +410,14 @@ class _LoginPageState extends State<LoginPage> {
                         onPressed: _busy
                             ? null
                             : () => _switchMode(_Mode.reset),
-                        child: const Text('Lupa kata sandi?'),
+                        child: Text(tr('Lupa kata sandi?')),
                       ),
                     if (pending)
                       TextButton(
                         onPressed: _busy
                             ? null
                             : () => _switchMode(_Mode.signUp),
-                        child: const Text('Perbaiki email pendaftaran'),
+                        child: Text(tr('Perbaiki email pendaftaran')),
                       ),
                     if (register || reset || pending)
                       TextButton(
@@ -407,7 +425,7 @@ class _LoginPageState extends State<LoginPage> {
                         onPressed: _busy
                             ? null
                             : () => _switchMode(_Mode.signIn),
-                        child: const Text('Sudah punya akun? Masuk'),
+                        child: Text(tr('Sudah punya akun? Masuk')),
                       ),
                     if (!register && !pending)
                       TextButton(
@@ -415,7 +433,7 @@ class _LoginPageState extends State<LoginPage> {
                         onPressed: _busy
                             ? null
                             : () => _switchMode(_Mode.signUp),
-                        child: const Text('Belum punya akun? Buat akun'),
+                        child: Text(tr('Belum punya akun? Buat akun')),
                       ),
                   ],
                 ),
@@ -530,7 +548,7 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Buat ulang kata sandi')),
+    appBar: AppBar(title: Text(tr('Buat ulang kata sandi'))),
     body: SafeArea(
       child: Center(
         child: SingleChildScrollView(
@@ -544,17 +562,19 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
                   const Icon(Icons.lock_reset_outlined, size: 56),
                   const SizedBox(height: 16),
                   if (_saved) ...[
-                    const _AuthNotice(
-                      'Kata sandi berhasil diperbarui. Gunakan kata sandi baru saat masuk berikutnya.',
+                    _AuthNotice(
+                      tr(
+                        'Kata sandi berhasil diperbarui. Gunakan kata sandi baru saat masuk berikutnya.',
+                      ),
                     ),
                     const SizedBox(height: 20),
                     FilledButton(
                       onPressed: widget.onCompleted,
-                      child: const Text('Lanjut ke acara'),
+                      child: Text(tr('Lanjut ke acara')),
                     ),
                   ] else ...[
                     Text(
-                      'Buat kata sandi baru',
+                      tr('Buat kata sandi baru'),
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     if (widget.backend.user?.email != null)
@@ -570,15 +590,16 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
                       enableSuggestions: false,
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
-                        labelText: 'Kata sandi baru',
+                        labelText: tr('Kata sandi baru'),
                         border: const OutlineInputBorder(),
-                        helperText:
-                            'Minimal 6 karakter; gunakan kata sandi yang kuat.',
+                        helperText: tr(
+                          'Minimal 6 karakter; gunakan kata sandi yang kuat.',
+                        ),
                         helperMaxLines: 2,
                         suffixIcon: IconButton(
                           tooltip: _obscure
-                              ? 'Tampilkan kata sandi'
-                              : 'Sembunyikan kata sandi',
+                              ? tr('Tampilkan kata sandi')
+                              : tr('Sembunyikan kata sandi'),
                           onPressed: _busy
                               ? null
                               : () => setState(() => _obscure = !_obscure),
@@ -601,8 +622,8 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
                       enableSuggestions: false,
                       textInputAction: TextInputAction.done,
                       onSubmitted: (_) => _save(),
-                      decoration: const InputDecoration(
-                        labelText: 'Ulangi kata sandi baru',
+                      decoration: InputDecoration(
+                        labelText: tr('Ulangi kata sandi baru'),
                         border: OutlineInputBorder(),
                       ),
                     ),
@@ -611,11 +632,13 @@ class _PasswordRecoveryPageState extends State<PasswordRecoveryPage> {
                     FilledButton(
                       key: const Key('recovery-save'),
                       onPressed: _busy ? null : _save,
-                      child: Text(_busy ? 'Menyimpan…' : 'Simpan kata sandi'),
+                      child: Text(
+                        _busy ? tr('Menyimpan…') : tr('Simpan kata sandi'),
+                      ),
                     ),
                     TextButton(
                       onPressed: _busy ? null : _cancel,
-                      child: const Text('Batal dan kembali ke masuk'),
+                      child: Text(tr('Batal dan kembali ke masuk')),
                     ),
                   ],
                 ],

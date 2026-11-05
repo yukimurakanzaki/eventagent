@@ -9,7 +9,7 @@ Future<void> showParticipantDialog(
   await showDialog<void>(
     context: context,
     builder: (context) => AlertDialog(
-      title: const Text('Tambah peserta'),
+      title: Text(tr('Tambah peserta')),
       content: StatefulBuilder(
         builder: (dialogContext, setState) => SingleChildScrollView(
           child: Column(
@@ -19,7 +19,7 @@ Future<void> showParticipantDialog(
                 controller: nameController,
                 autofocus: true,
                 textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(labelText: 'Nama peserta'),
+                decoration: InputDecoration(labelText: tr('Nama peserta')),
               ),
               if (controller.participants.any(
                 (item) => item.state == ParticipantState.cancelled,
@@ -28,8 +28,8 @@ Future<void> showParticipantDialog(
                 DropdownButtonFormField<String>(
                   isExpanded: true,
                   initialValue: replacementForId,
-                  decoration: const InputDecoration(
-                    labelText: 'Menggantikan peserta (opsional)',
+                  decoration: InputDecoration(
+                    labelText: tr('Menggantikan peserta (opsional)'),
                   ),
                   items: controller.participants
                       .where((item) => item.state == ParticipantState.cancelled)
@@ -51,15 +51,15 @@ Future<void> showParticipantDialog(
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Batal'),
+          child: Text(tr('Batal')),
         ),
         FilledButton(
           onPressed: () async {
             if (nameController.text.trim().isEmpty) {
               await showInfo(
                 context,
-                'Nama belum diisi',
-                'Masukkan nama peserta terlebih dahulu.',
+                tr('Nama belum diisi'),
+                tr('Masukkan nama peserta terlebih dahulu.'),
               );
               return;
             }
@@ -68,12 +68,12 @@ Future<void> showParticipantDialog(
               replacementForId: replacementForId,
             );
             if (error != null && context.mounted) {
-              await showInfo(context, 'Peserta belum ditambahkan', error);
+              await showInfo(context, tr('Peserta belum ditambahkan'), error);
               return;
             }
             if (context.mounted) Navigator.pop(context);
           },
-          child: const Text('Simpan'),
+          child: Text(tr('Simpan')),
         ),
       ],
     ),
@@ -95,18 +95,18 @@ Future<void> showParticipantActions(
           if (participant.state == ParticipantState.active)
             ListTile(
               leading: const Icon(Icons.add_card_outlined),
-              title: const Text('Catat pembayaran'),
+              title: Text(tr('Catat pembayaran')),
               onTap: () => Navigator.pop(sheetContext, 'pay'),
             ),
           ListTile(
             leading: const Icon(Icons.edit_outlined),
-            title: const Text('Edit nama'),
+            title: Text(tr('Edit nama')),
             onTap: () => Navigator.pop(sheetContext, 'edit'),
           ),
           if (participant.state == ParticipantState.active)
             ListTile(
               leading: const Icon(Icons.person_off_outlined),
-              title: const Text('Batalkan peserta'),
+              title: Text(tr('Batalkan peserta')),
               onTap: () => Navigator.pop(sheetContext, 'cancel'),
             ),
         ],
@@ -124,7 +124,7 @@ Future<void> showParticipantActions(
       initialType: TransactionType.participantPayment,
       initialParticipantId: participant.id,
       initialAmount: remaining > 0 ? remaining : 0,
-      initialDescription: 'Iuran peserta',
+      initialDescription: tr('Iuran peserta'),
     );
   } else if (action == 'edit') {
     await showEditParticipantDialog(context, controller, participant);
@@ -143,15 +143,15 @@ Future<void> showEditParticipantDialog(
     context: context,
     builder: (context) => AlertDialog(
       scrollable: true,
-      title: const Text('Edit peserta'),
+      title: Text(tr('Edit peserta')),
       content: TextField(
         controller: nameController,
-        decoration: const InputDecoration(labelText: 'Nama peserta'),
+        decoration: InputDecoration(labelText: tr('Nama peserta')),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Batal'),
+          child: Text(tr('Batal')),
         ),
         FilledButton(
           onPressed: () async {
@@ -159,8 +159,8 @@ Future<void> showEditParticipantDialog(
             if (name.isEmpty) {
               await showInfo(
                 context,
-                'Nama belum diisi',
-                'Masukkan nama peserta terlebih dahulu.',
+                tr('Nama belum diisi'),
+                tr('Masukkan nama peserta terlebih dahulu.'),
               );
               return;
             }
@@ -168,12 +168,12 @@ Future<void> showEditParticipantDialog(
               participant.copyWith(name: name),
             );
             if (error != null && context.mounted) {
-              await showInfo(context, 'Peserta belum diperbarui', error);
+              await showInfo(context, tr('Peserta belum diperbarui'), error);
               return;
             }
             if (context.mounted) Navigator.pop(context);
           },
-          child: const Text('Simpan'),
+          child: Text(tr('Simpan')),
         ),
       ],
     ),
@@ -200,14 +200,16 @@ Future<void> showCancelParticipantDialog(
         final partialAmount = parseMoneyInput(partialRefundController.text);
         final partialValid = partialAmount > 0 && partialAmount <= refundable;
         return AlertDialog(
-          title: const Text('Batalkan peserta'),
+          title: Text(tr('Batalkan peserta')),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Riwayat pembayaran tetap disimpan. Pilih kebijakan refund:',
+                Text(
+                  tr(
+                    'Riwayat pembayaran tetap disimpan. Pilih kebijakan refund:',
+                  ),
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<RefundPolicy>(
@@ -225,12 +227,18 @@ Future<void> showCancelParticipantDialog(
                       setState(() => selectedPolicy = value ?? selectedPolicy),
                 ),
                 const SizedBox(height: 12),
-                Text('Maksimum refund: ${formatMoney(refundable)}.'),
+                Text(
+                  tr('Maksimum refund: {amount}.', {
+                    'amount': formatMoney(refundable),
+                  }),
+                ),
                 if (selectedPolicy == RefundPolicy.full)
                   Text(
                     refundable == 0
-                        ? 'Tidak ada pembayaran bersih yang dapat direfund.'
-                        : '${formatMoney(refundable)} akan dicatat sebagai refund penuh.',
+                        ? tr('Tidak ada pembayaran bersih yang dapat direfund.')
+                        : tr('{amount} akan dicatat sebagai refund penuh.', {
+                            'amount': formatMoney(refundable),
+                          }),
                   ),
                 if (selectedPolicy == RefundPolicy.partial) ...[
                   const SizedBox(height: 12),
@@ -241,12 +249,17 @@ Future<void> showCancelParticipantDialog(
                     inputFormatters: [MoneyTextInputFormatter()],
                     onChanged: (_) => setState(() {}),
                     decoration: InputDecoration(
-                      labelText: 'Nominal refund sebagian (rupiah)',
+                      labelText: tr('Nominal refund sebagian ({currency})', {
+                        'currency': Money.currency,
+                      }),
                       errorText: partialRefundController.text.isEmpty
                           ? null
                           : partialValid
                           ? null
-                          : 'Masukkan nominal dari Rp 1 sampai ${formatMoney(refundable)}.',
+                          : tr('Masukkan nominal dari {min} sampai {max}.', {
+                              'min': formatMoney(Money.spec.minorFactor),
+                              'max': formatMoney(refundable),
+                            }),
                     ),
                   ),
                 ],
@@ -256,7 +269,7 @@ Future<void> showCancelParticipantDialog(
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Batal'),
+              child: Text(tr('Batal')),
             ),
             FilledButton(
               onPressed: selectedPolicy != RefundPolicy.partial || partialValid
@@ -268,7 +281,7 @@ Future<void> showCancelParticipantDialog(
                       ),
                     )
                   : null,
-              child: const Text('Simpan pembatalan'),
+              child: Text(tr('Simpan pembatalan')),
             ),
           ],
         );

@@ -1,4 +1,5 @@
 import 'cashbook_models.dart';
+import 'l10n/l10n.dart';
 
 class EventSummary {
   const EventSummary({
@@ -37,13 +38,15 @@ class NewEventDraft {
 
   /// Mirrors the server checks so errors show before a network round trip.
   String? validate() {
-    if (name.trim().isEmpty) return 'Nama acara wajib diisi.';
-    if (name.trim().length > 120) return 'Nama acara maksimal 120 karakter.';
-    if (endDate.isBefore(startDate)) {
-      return 'Tanggal selesai tidak boleh sebelum tanggal mulai.';
+    if (name.trim().isEmpty) return tr('Nama acara wajib diisi.');
+    if (name.trim().length > 120) {
+      return tr('Nama acara maksimal 120 karakter.');
     }
-    if (capacity <= 0) return 'Kapasitas harus lebih dari 0.';
-    if (budget < 0) return 'Anggaran tidak boleh negatif.';
+    if (endDate.isBefore(startDate)) {
+      return tr('Tanggal selesai tidak boleh sebelum tanggal mulai.');
+    }
+    if (capacity <= 0) return tr('Kapasitas harus lebih dari 0.');
+    if (budget < 0) return tr('Anggaran tidak boleh negatif.');
     return null;
   }
 

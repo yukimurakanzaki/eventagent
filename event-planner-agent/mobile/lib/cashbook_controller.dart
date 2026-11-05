@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import 'cashbook_calculations.dart';
 import 'cashbook_models.dart';
+import 'l10n/l10n.dart';
 import 'cashbook_store.dart';
 import 'cashbook_sync.dart';
 import 'reminder_notifier.dart';
@@ -83,14 +84,18 @@ class CashbookController extends ChangeNotifier {
     String name, {
     String? replacementForId,
   }) async {
-    if (isReadOnly) return 'Selesaikan konflik data sebelum menambah peserta.';
+    if (isReadOnly) {
+      return tr('Selesaikan konflik data sebelum menambah peserta.');
+    }
     final trimmedName = name.trim();
-    if (trimmedName.isEmpty) return 'Nama peserta wajib diisi.';
+    if (trimmedName.isEmpty) return tr('Nama peserta wajib diisi.');
     final activeCount = participants
         .where((item) => item.state == ParticipantState.active)
         .length;
     if (activeCount >= event.participantCapacity) {
-      return 'Kapasitas ${event.participantCapacity} peserta aktif sudah penuh.';
+      return tr('Kapasitas {count} peserta aktif sudah penuh.', {
+        'count': event.participantCapacity,
+      });
     }
     if (replacementForId != null &&
         !participants.any(
@@ -98,7 +103,9 @@ class CashbookController extends ChangeNotifier {
               item.id == replacementForId &&
               item.state == ParticipantState.cancelled,
         )) {
-      return 'Peserta pengganti harus menggantikan peserta yang dibatalkan.';
+      return tr(
+        'Peserta pengganti harus menggantikan peserta yang dibatalkan.',
+      );
     }
     final participant = ParticipantRecord(
       id: _newId('participant'),
@@ -116,9 +123,11 @@ class CashbookController extends ChangeNotifier {
   }
 
   Future<String?> editParticipant(ParticipantRecord participant) async {
-    if (isReadOnly) return 'Selesaikan konflik data sebelum mengedit peserta.';
+    if (isReadOnly) {
+      return tr('Selesaikan konflik data sebelum mengedit peserta.');
+    }
     final trimmedName = participant.name.trim();
-    if (trimmedName.isEmpty) return 'Nama peserta wajib diisi.';
+    if (trimmedName.isEmpty) return tr('Nama peserta wajib diisi.');
     final edited = participant.copyWith(name: trimmedName);
     final updated = participants
         .map((item) => item.id == edited.id ? edited : item)
@@ -175,8 +184,8 @@ class CashbookController extends ChangeNotifier {
         type: TransactionType.refund,
         amount: amount,
         description: policy == RefundPolicy.full
-            ? 'Refund penuh untuk ${participant.name}'
-            : 'Refund sebagian untuk ${participant.name}',
+            ? tr('Refund penuh untuk {name}', {'name': participant.name})
+            : tr('Refund sebagian untuk {name}', {'name': participant.name}),
         createdAt: DateTime.now(),
         participantId: participant.id,
       );
@@ -257,24 +266,24 @@ class CashbookController extends ChangeNotifier {
     String transactionId,
     String reason,
   ) async {
-    if (isReadOnly) return 'Selesaikan konflik data sebelum koreksi.';
+    if (isReadOnly) return tr('Selesaikan konflik data sebelum koreksi.');
     final trimmedReason = reason.trim();
-    if (trimmedReason.isEmpty) return 'Alasan koreksi wajib diisi.';
+    if (trimmedReason.isEmpty) return tr('Alasan koreksi wajib diisi.');
     final original = transactions
         .where((item) => item.id == transactionId)
         .firstOrNull;
-    if (original == null) return 'Transaksi tidak ditemukan.';
+    if (original == null) return tr('Transaksi tidak ditemukan.');
     if (original.type == TransactionType.correction) {
-      return 'Koreksi tidak bisa dikoreksi lagi.';
+      return tr('Koreksi tidak bisa dikoreksi lagi.');
     }
     if (correctedTransactionIds(transactions).contains(original.id)) {
-      return 'Transaksi ini sudah dikoreksi.';
+      return tr('Transaksi ini sudah dikoreksi.');
     }
     if (original.type == TransactionType.participantPayment &&
         original.participantId != null &&
         participantNetPaid(transactions, original.participantId!) <
             original.amount) {
-      return 'Pembayaran ini sudah direfund. Koreksi refund-nya dulu.';
+      return tr('Pembayaran ini sudah direfund. Koreksi refund-nya dulu.');
     }
     final correction = TransactionRecord(
       id: _newId('transaction'),
@@ -301,11 +310,13 @@ class CashbookController extends ChangeNotifier {
     String note = '',
   }) async {
     if (isReadOnly) {
-      return 'Selesaikan konflik data sebelum menambah pengingat.';
+      return tr('Selesaikan konflik data sebelum menambah pengingat.');
     }
-    if (title.trim().isEmpty) return 'Judul pengingat wajib diisi.';
+    if (title.trim().isEmpty) return tr('Judul pengingat wajib diisi.');
     if (dueAt.isBefore(DateTime.now())) {
-      return 'Jatuh tempo sudah lewat. Pilih tanggal dan jam yang belum lewat.';
+      return tr(
+        'Jatuh tempo sudah lewat. Pilih tanggal dan jam yang belum lewat.',
+      );
     }
     final reminder = ReminderRecord(
       id: _newId('reminder'),
@@ -386,35 +397,41 @@ class CashbookController extends ChangeNotifier {
   Future<void> retryPendingSync() => _flushPending();
 
   String? validateEventUpdate(EventRecord next) {
-    if (next.name.trim().isEmpty) return 'Nama acara wajib diisi.';
+    if (next.name.trim().isEmpty) return tr('Nama acara wajib diisi.');
     if (next.endDate.isBefore(next.startDate)) {
-      return 'Tanggal selesai tidak boleh sebelum tanggal mulai.';
+      return tr('Tanggal selesai tidak boleh sebelum tanggal mulai.');
     }
     final activeCount = participants
         .where((item) => item.state == ParticipantState.active)
         .length;
-    if (next.participantCapacity <= 0) return 'Kapasitas harus lebih dari 0.';
+    if (next.participantCapacity <= 0) {
+      return tr('Kapasitas harus lebih dari 0.');
+    }
     if (next.participantCapacity < activeCount) {
-      return 'Kapasitas tidak boleh kurang dari $activeCount peserta aktif.';
+      return tr('Kapasitas tidak boleh kurang dari {count} peserta aktif.', {
+        'count': activeCount,
+      });
     }
     if (next.finalBudget < 0 ||
         next.sponsorContribution < 0 ||
         next.openingBalance < 0) {
-      return 'Nilai uang tidak boleh negatif.';
+      return tr('Nilai uang tidak boleh negatif.');
     }
     if (next.sponsorContribution + next.openingBalance > next.finalBudget) {
-      return 'Sponsor dan saldo awal tidak boleh melebihi anggaran final.';
+      return tr('Sponsor dan saldo awal tidak boleh melebihi anggaran final.');
     }
     if (!sponsorEditable(transactions) &&
         (next.sponsorName != event.sponsorName ||
             next.sponsorContribution != event.sponsorContribution)) {
-      return 'Sponsor dikunci setelah pembayaran peserta dimulai.';
+      return tr('Sponsor dikunci setelah pembayaran peserta dimulai.');
     }
     return null;
   }
 
   Future<String?> updateEvent(EventRecord next) async {
-    if (isReadOnly) return 'Selesaikan konflik data sebelum mengedit acara.';
+    if (isReadOnly) {
+      return tr('Selesaikan konflik data sebelum mengedit acara.');
+    }
     final normalized = next.copyWith(name: next.name.trim());
     final error = validateEventUpdate(normalized);
     if (error != null) return error;
@@ -530,8 +547,9 @@ class CashbookController extends ChangeNotifier {
         if (result.status == SyncResultStatus.conflict) {
           final remote = result.remoteSnapshot;
           if (remote == null) {
-            _syncError =
-                'Konflik ditemukan, tetapi data online tidak dapat dibaca.';
+            _syncError = tr(
+              'Konflik ditemukan, tetapi data online tidak dapat dibaca.',
+            );
             notifyListeners();
             return;
           }
@@ -548,7 +566,7 @@ class CashbookController extends ChangeNotifier {
             ),
           );
           await _store.save(_snapshot);
-          _syncError = 'Pilih data online atau data perangkat ini.';
+          _syncError = tr('Pilih data online atau data perangkat ini.');
           notifyListeners();
           return;
         }
@@ -561,8 +579,9 @@ class CashbookController extends ChangeNotifier {
         await _store.save(_snapshot);
         notifyListeners();
       } catch (_) {
-        _syncError =
-            'Belum tersambung. Perubahan tetap tersimpan di perangkat.';
+        _syncError = tr(
+          'Belum tersambung. Perubahan tetap tersimpan di perangkat.',
+        );
         notifyListeners();
         return;
       }

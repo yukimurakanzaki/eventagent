@@ -42,11 +42,14 @@ class _ReportPageState extends State<ReportPage> {
       String? note;
       if (pdf) {
         final saved = await widget.shareGateway.sharePdf(report);
-        if (saved != null) note = 'Salinan PDF tersimpan di: $saved';
+        if (saved != null) {
+          note = tr('Salinan PDF tersimpan di: {path}', {'path': saved});
+        }
       } else {
         await widget.shareGateway.shareWhatsAppText(report);
-        note =
-            'Teks laporan disalin. Jika WhatsApp tidak muncul, tempel manual.';
+        note = tr(
+          'Teks laporan disalin. Jika WhatsApp tidak muncul, tempel manual.',
+        );
       }
       if (note != null && mounted) {
         ScaffoldMessenger.of(context)
@@ -56,8 +59,8 @@ class _ReportPageState extends State<ReportPage> {
       if (mounted) {
         setState(() {
           _error = pdf
-              ? 'PDF belum dapat dibuat atau dibagikan. Coba lagi.'
-              : 'Pesan belum dapat dibagikan. Coba lagi.';
+              ? tr('PDF belum dapat dibuat atau dibagikan. Coba lagi.')
+              : tr('Pesan belum dapat dibagikan. Coba lagi.');
         });
       }
     } finally {
@@ -75,11 +78,13 @@ class _ReportPageState extends State<ReportPage> {
       children: [
         Semantics(
           header: true,
-          child: Text('Preview laporan', style: theme.textTheme.titleLarge),
+          child: Text(tr('Preview laporan'), style: theme.textTheme.titleLarge),
         ),
         const SizedBox(height: 4),
         Text(
-          'Periksa nama, status, transaksi, dan saldo sebelum membagikan laporan.',
+          tr(
+            'Periksa nama, status, transaksi, dan saldo sebelum membagikan laporan.',
+          ),
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -98,13 +103,13 @@ class _ReportPageState extends State<ReportPage> {
         FilledButton.icon(
           onPressed: _busy ? null : () => _share(pdf: true),
           icon: const Icon(Icons.picture_as_pdf_outlined),
-          label: Text(_busy ? 'Menyiapkan...' : 'Buat dan bagikan PDF'),
+          label: Text(_busy ? tr('Menyiapkan...') : tr('Buat dan bagikan PDF')),
         ),
         const SizedBox(height: 8),
         FilledButton.tonalIcon(
           onPressed: _busy ? null : () => _share(pdf: false),
           icon: const Icon(Icons.chat_outlined),
-          label: const Text('Bagikan pesan WhatsApp'),
+          label: Text(tr('Bagikan pesan WhatsApp')),
         ),
         const SizedBox(height: 8),
         OutlinedButton.icon(
@@ -112,11 +117,11 @@ class _ReportPageState extends State<ReportPage> {
               ? null
               : () => _share(pdf: true, kind: ReportKind.portfolio),
           icon: const Icon(Icons.auto_stories_outlined),
-          label: const Text('Portofolio acara lengkap (PDF)'),
+          label: Text(tr('Portofolio acara lengkap (PDF)')),
         ),
         const SizedBox(height: 8),
         Text(
-          'Periksa penerima sebelum mengirim.',
+          tr('Periksa penerima sebelum mengirim.'),
           textAlign: TextAlign.center,
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
@@ -132,40 +137,51 @@ class _ReportPageState extends State<ReportPage> {
                 Text(controller.event.name, style: theme.textTheme.titleLarge),
                 const SizedBox(height: 4),
                 Text(
-                  'Periode ${formatDateRange(controller.event.startDate, controller.event.endDate)}',
+                  tr('Periode {range}', {
+                    'range': formatDateRange(
+                      controller.event.startDate,
+                      controller.event.endDate,
+                    ),
+                  }),
                 ),
-                Text('Dibuat oleh: ${reportRoleLabel(widget.creatorRole)}'),
                 Text(
-                  'Disusun ${formatDateTime(report.generatedAt)}',
+                  tr('Dibuat oleh: {role}', {
+                    'role': reportRoleLabel(widget.creatorRole),
+                  }),
+                ),
+                Text(
+                  tr('Disusun {date}', {
+                    'date': formatDateTime(report.generatedAt),
+                  }),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const Divider(height: 24),
                 _ReportRow(
-                  'Saldo awal',
+                  tr('Saldo awal'),
                   formatMoney(controller.event.openingBalance),
                 ),
                 _ReportRow(
-                  'Pemasukan peserta',
+                  tr('Pemasukan peserta'),
                   formatMoney(report.participantIncome),
                 ),
                 _ReportRow(
-                  'Iuran tambahan',
+                  tr('Iuran tambahan'),
                   formatMoney(report.additionalIncome),
                 ),
                 _ReportRow(
-                  'Refund dan pengeluaran',
+                  tr('Refund dan pengeluaran'),
                   formatMoney(report.expenses),
                 ),
                 const Divider(height: 16),
                 _ReportRow(
-                  'Saldo akhir',
+                  tr('Saldo akhir'),
                   formatMoney(controller.balance),
                   bold: true,
                 ),
                 const Divider(height: 24),
-                Text('Status peserta', style: theme.textTheme.titleSmall),
+                Text(tr('Status peserta'), style: theme.textTheme.titleSmall),
                 const SizedBox(height: 8),
                 for (final participant in controller.participants)
                   _ReportParticipantRow(
@@ -243,8 +259,11 @@ class _ReportParticipantRow extends StatelessWidget {
             ),
             if (cancelled)
               StatusPill(
-                label:
-                    'Dibatalkan - ${refundPolicyLabelForReport(participant.refundPolicy)}',
+                label: tr('Dibatalkan - {policy}', {
+                  'policy': refundPolicyLabelForReport(
+                    participant.refundPolicy,
+                  ),
+                }),
                 icon: Icons.history,
                 tone: theme.colorScheme.surfaceContainerHighest,
                 onTone: theme.colorScheme.onSurfaceVariant,
@@ -253,7 +272,7 @@ class _ReportParticipantRow extends StatelessWidget {
               PayStateChip(state),
               if (state != PayState.paid)
                 Text(
-                  'kurang ${formatMoney(remaining)}',
+                  tr('kurang {amount}', {'amount': formatMoney(remaining)}),
                   style: theme.textTheme.bodyMedium,
                 ),
             ],

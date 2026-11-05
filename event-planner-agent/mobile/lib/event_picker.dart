@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'event_directory.dart';
 import 'formatting.dart';
+import 'l10n/l10n.dart';
 import 'main.dart' show showInfo;
 import 'money.dart';
 
@@ -44,7 +45,7 @@ class _EventPickerSheetState extends State<_EventPickerSheet> {
         await showInfo(
           context,
           failure,
-          'Periksa koneksi internet lalu coba lagi.',
+          tr('Periksa koneksi internet lalu coba lagi.'),
         );
       }
     } finally {
@@ -60,7 +61,7 @@ class _EventPickerSheetState extends State<_EventPickerSheet> {
     await _run(() async {
       await widget.directory.select(event.id);
       if (mounted) Navigator.pop(context);
-    }, 'Acara belum dapat dibuka');
+    }, tr('Acara belum dapat dibuka'));
   }
 
   Future<void> _create() async {
@@ -69,26 +70,28 @@ class _EventPickerSheetState extends State<_EventPickerSheet> {
     await _run(() async {
       await widget.directory.create(draft);
       if (mounted) Navigator.pop(context);
-    }, 'Acara belum dapat dibuat');
+    }, tr('Acara belum dapat dibuat'));
   }
 
   Future<void> _archive(EventSummary event) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Arsipkan acara?'),
+        title: Text(tr('Arsipkan acara?')),
         content: Text(
-          '${event.name} disembunyikan dari daftar acara aktif. Data dan '
-          'riwayat tetap tersimpan dan bisa dipulihkan kapan saja.',
+          tr(
+            '{name} disembunyikan dari daftar acara aktif. Data dan riwayat tetap tersimpan dan bisa dipulihkan kapan saja.',
+            {'name': event.name},
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Batal'),
+            child: Text(tr('Batal')),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Arsipkan'),
+            child: Text(tr('Arsipkan')),
           ),
         ],
       ),
@@ -103,13 +106,13 @@ class _EventPickerSheetState extends State<_EventPickerSheet> {
       } else {
         _reload();
       }
-    }, 'Acara belum dapat diarsipkan');
+    }, tr('Acara belum dapat diarsipkan'));
   }
 
   Future<void> _restore(EventSummary event) => _run(() async {
     await widget.directory.setArchived(event.id, false);
     _reload();
-  }, 'Acara belum dapat dipulihkan');
+  }, tr('Acara belum dapat dipulihkan'));
 
   @override
   Widget build(BuildContext context) {
@@ -127,11 +130,8 @@ class _EventPickerSheetState extends State<_EventPickerSheet> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Daftar acara belum dapat dimuat.'),
-                  TextButton(
-                    onPressed: _reload,
-                    child: const Text('Coba lagi'),
-                  ),
+                  Text(tr('Daftar acara belum dapat dimuat.')),
+                  TextButton(onPressed: _reload, child: Text(tr('Coba lagi'))),
                 ],
               ),
             );
@@ -149,13 +149,13 @@ class _EventPickerSheetState extends State<_EventPickerSheet> {
             shrinkWrap: true,
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
             children: [
-              Text('Acara', style: Theme.of(context).textTheme.titleLarge),
+              Text(tr('Acara'), style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 8),
               if (canManage)
                 FilledButton.icon(
                   onPressed: _busy ? null : _create,
                   icon: const Icon(Icons.add),
-                  label: const Text('Buat acara baru'),
+                  label: Text(tr('Buat acara baru')),
                 ),
               const SizedBox(height: 8),
               for (final event in active)
@@ -163,12 +163,14 @@ class _EventPickerSheetState extends State<_EventPickerSheet> {
                   event: event,
                   current: event.id == widget.directory.currentEventId,
                   onTap: _busy ? null : () => _select(event),
-                  menuLabel: canManage ? 'Arsipkan' : null,
+                  menuLabel: canManage ? tr('Arsipkan') : null,
                   onMenu: _busy ? null : () => _archive(event),
                 ),
               if (archived.isNotEmpty)
                 ExpansionTile(
-                  title: Text('Diarsipkan (${archived.length})'),
+                  title: Text(
+                    tr('Diarsipkan ({count})', {'count': archived.length}),
+                  ),
                   tilePadding: EdgeInsets.zero,
                   children: [
                     for (final event in archived)
@@ -176,7 +178,7 @@ class _EventPickerSheetState extends State<_EventPickerSheet> {
                         event: event,
                         current: event.id == widget.directory.currentEventId,
                         onTap: _busy ? null : () => _select(event),
-                        menuLabel: canManage ? 'Pulihkan' : null,
+                        menuLabel: canManage ? tr('Pulihkan') : null,
                         onMenu: _busy ? null : () => _restore(event),
                       ),
                   ],
@@ -247,7 +249,7 @@ Future<NewEventDraft?> showNewEventDialog(BuildContext context) {
     context: context,
     builder: (dialogContext) => StatefulBuilder(
       builder: (dialogContext, setState) => AlertDialog(
-        title: const Text('Acara baru'),
+        title: Text(tr('Acara baru')),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -257,12 +259,14 @@ Future<NewEventDraft?> showNewEventDialog(BuildContext context) {
                 controller: nameController,
                 autofocus: true,
                 textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(labelText: 'Nama acara'),
+                decoration: InputDecoration(labelText: tr('Nama acara')),
               ),
               const SizedBox(height: 12),
               OutlinedButton.icon(
                 icon: const Icon(Icons.event_outlined),
-                label: Text('Mulai ${formatDate(startDate)}'),
+                label: Text(
+                  tr('Mulai {date}', {'date': formatDate(startDate)}),
+                ),
                 onPressed: () async {
                   final picked = await pick(dialogContext, startDate);
                   if (picked == null) return;
@@ -275,7 +279,9 @@ Future<NewEventDraft?> showNewEventDialog(BuildContext context) {
               const SizedBox(height: 8),
               OutlinedButton.icon(
                 icon: const Icon(Icons.event_available_outlined),
-                label: Text('Selesai ${formatDate(endDate)}'),
+                label: Text(
+                  tr('Selesai {date}', {'date': formatDate(endDate)}),
+                ),
                 onPressed: () async {
                   final picked = await pick(dialogContext, endDate);
                   if (picked != null) setState(() => endDate = picked);
@@ -285,17 +291,19 @@ Future<NewEventDraft?> showNewEventDialog(BuildContext context) {
               TextField(
                 controller: capacityController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Kapasitas peserta',
-                ),
+                decoration: InputDecoration(labelText: tr('Kapasitas peserta')),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: budgetController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Anggaran final (Rp)',
-                  helperText: 'Sponsor dan saldo awal diatur lewat Edit acara.',
+                decoration: InputDecoration(
+                  labelText: tr('Anggaran final ({currency})', {
+                    'currency': Money.currency,
+                  }),
+                  helperText: tr(
+                    'Sponsor dan saldo awal diatur lewat Edit acara.',
+                  ),
                   helperMaxLines: 2,
                 ),
               ),
@@ -314,7 +322,7 @@ Future<NewEventDraft?> showNewEventDialog(BuildContext context) {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Batal'),
+            child: Text(tr('Batal')),
           ),
           FilledButton(
             onPressed: () {
@@ -332,7 +340,7 @@ Future<NewEventDraft?> showNewEventDialog(BuildContext context) {
               }
               Navigator.pop(dialogContext, draft);
             },
-            child: const Text('Buat acara'),
+            child: Text(tr('Buat acara')),
           ),
         ],
       ),

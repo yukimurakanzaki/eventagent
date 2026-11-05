@@ -5,37 +5,24 @@ import 'package:pdf/widgets.dart' as pw;
 
 import 'cashbook_calculations.dart';
 import 'cashbook_models.dart';
+import 'formatting.dart';
+import 'l10n/l10n.dart';
 import 'report_service.dart';
 import 'transaction_log.dart';
 
 String filterLabel(TransactionFilter filter) {
   final range = filter.from == null && filter.to == null
-      ? 'Semua tanggal'
+      ? tr('Semua tanggal')
       : '${filter.from == null ? '...' : formatReportDate(filter.from!)} - ${filter.to == null ? '...' : formatReportDate(filter.to!)}';
   final types = filter.types.isEmpty
-      ? 'Semua kategori'
+      ? tr('Semua kategori')
       : filter.types.map(transactionTypeLabel).join(', ');
   return '$types, $range';
 }
 
-const _months = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'Mei',
-  'Jun',
-  'Jul',
-  'Agu',
-  'Sep',
-  'Okt',
-  'Nov',
-  'Des',
-];
-
 String _monthLabel(String key) {
   final parts = key.split('-');
-  return '${_months[int.parse(parts[1]) - 1]} ${parts[0]}';
+  return formatMonthYear(DateTime(int.parse(parts[0]), int.parse(parts[1])));
 }
 
 pw.Widget _table(
@@ -71,7 +58,7 @@ Future<Uint8List> buildLedgerPdf(CashbookReport report) {
   final summary = summarize(rows);
   final names = {for (final p in snapshot.participants) p.id: p.name};
   final byId = {for (final t in snapshot.transactions) t.id: t};
-  final title = portfolio ? 'Portofolio acara' : 'Riwayat transaksi';
+  final title = portfolio ? tr('Portofolio acara') : tr('Riwayat transaksi');
   final document = pw.Document(
     title: '$title - ${event.name}',
     author: reportRoleLabel(report.creatorRole),
@@ -82,13 +69,23 @@ Future<Uint8List> buildLedgerPdf(CashbookReport report) {
     if (names[t.participantId] != null)
       sanitizeReportText(names[t.participantId]!),
     if (t.type == TransactionType.correction)
-      'membatalkan ${sanitizeReportText(byId[t.relatedTransactionId]?.description ?? 'transaksi')}',
+      tr('membatalkan {name}', {
+        'name': sanitizeReportText(
+          byId[t.relatedTransactionId]?.description ?? tr('transaksi'),
+        ),
+      }),
   ].join(' - ');
 
   final ledgerTable = rows.isEmpty
-      ? pw.Text('Tidak ada transaksi pada filter ini.')
+      ? pw.Text(tr('Tidak ada transaksi pada filter ini.'))
       : _table(
-          ['Tanggal', 'Kategori', 'Keterangan', 'Nominal', 'Saldo'],
+          [
+            tr('Tanggal'),
+            tr('Kategori'),
+            tr('Keterangan'),
+            tr('Nominal'),
+            tr('Saldo'),
+          ],
           [
             for (final entry in rows)
               [
@@ -97,7 +94,9 @@ Future<Uint8List> buildLedgerPdf(CashbookReport report) {
                 detail(entry.transaction),
                 entry.counted
                     ? '${isOutflow(entry.transaction.type) ? '-' : ''}${formatReportRupiah(entry.transaction.amount)}'
-                    : '(${formatReportRupiah(entry.transaction.amount)}) tidak dihitung',
+                    : tr('({amount}) tidak dihitung', {
+                        'amount': formatReportRupiah(entry.transaction.amount),
+                      }),
                 formatReportRupiah(entry.balanceAfter),
               ],
           ],
@@ -124,7 +123,9 @@ Future<Uint8List> buildLedgerPdf(CashbookReport report) {
         return [
           sanitizeReportText(p.name),
           p.state == ParticipantState.cancelled
-              ? 'Dibatalkan - ${refundPolicyLabelForReport(p.refundPolicy)}'
+              ? tr('Dibatalkan - {policy}', {
+                  'policy': refundPolicyLabelForReport(p.refundPolicy),
+                })
               : paymentStatus(paid - refunds, report.target),
           formatReportRupiah(paid),
           formatReportRupiah(refunds),
@@ -165,11 +166,17 @@ Future<Uint8List> buildLedgerPdf(CashbookReport report) {
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
           pw.Text(
-            'Dibuat ${formatReportDateTime(report.generatedAt)} oleh ${reportRoleLabel(report.creatorRole)}',
+            tr('Dibuat {date} oleh {role}', {
+              'date': formatReportDateTime(report.generatedAt),
+              'role': reportRoleLabel(report.creatorRole),
+            }),
             style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
           ),
           pw.Text(
-            'Halaman ${context.pageNumber} dari ${context.pagesCount}',
+            tr('Halaman {page} dari {pages}', {
+              'page': context.pageNumber,
+              'pages': context.pagesCount,
+            }),
             style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
           ),
         ],
@@ -181,42 +188,53 @@ Future<Uint8List> buildLedgerPdf(CashbookReport report) {
           style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
         ),
         pw.Text(
-          'Periode ${formatReportDate(event.startDate)} - ${formatReportDate(event.endDate)}',
+          tr('Periode {start} - {end}', {
+            'start': formatReportDate(event.startDate),
+            'end': formatReportDate(event.endDate),
+          }),
         ),
-        if (!portfolio) pw.Text('Filter: ${filterLabel(report.filter)}'),
-        _section(portfolio ? 'Ikhtisar keuangan' : 'Ringkasan filter'),
+        if (!portfolio)
+          pw.Text(
+            tr('Filter: {filter}', {'filter': filterLabel(report.filter)}),
+          ),
+        _section(portfolio ? tr('Ikhtisar keuangan') : tr('Ringkasan filter')),
         _table(
-          ['Komponen', 'Nilai'],
+          [tr('Komponen'), tr('Nilai')],
           [
             if (portfolio) ...[
-              ['Anggaran final', formatReportRupiah(event.finalBudget)],
-              ['Saldo awal', formatReportRupiah(event.openingBalance)],
+              [tr('Anggaran final'), formatReportRupiah(event.finalBudget)],
+              [tr('Saldo awal'), formatReportRupiah(event.openingBalance)],
               [
-                'Sponsor (${sanitizeReportText(event.sponsorName)})',
+                tr('Sponsor ({name})', {
+                  'name': sanitizeReportText(event.sponsorName),
+                }),
                 formatReportRupiah(event.sponsorContribution),
               ],
               [
-                'Peserta aktif',
-                '${activeParticipantCount(snapshot.participants)} dari ${event.participantCapacity}',
+                tr('Peserta aktif'),
+                tr('{active} dari {capacity}', {
+                  'active': activeParticipantCount(snapshot.participants),
+                  'capacity': event.participantCapacity,
+                }),
               ],
-              ['Target per peserta', formatReportRupiah(report.target)],
+              [tr('Target per peserta'), formatReportRupiah(report.target)],
             ],
-            ['Jumlah transaksi', '${summary.count}'],
-            ['Total pemasukan', formatReportRupiah(summary.inflow)],
-            ['Total pengeluaran', formatReportRupiah(summary.outflow)],
-            ['Selisih', formatReportRupiah(summary.net)],
+            [tr('Jumlah transaksi'), '${summary.count}'],
+            [tr('Total pemasukan'), formatReportRupiah(summary.inflow)],
+            [tr('Total pengeluaran'), formatReportRupiah(summary.outflow)],
+            [tr('Selisih'), formatReportRupiah(summary.net)],
             if (portfolio)
-              ['Saldo akhir', formatReportRupiah(report.endingBalance)],
+              [tr('Saldo akhir'), formatReportRupiah(report.endingBalance)],
           ],
         ),
         if (byType.isNotEmpty) ...[
-          _section('Per kategori'),
-          _table(['Kategori', 'Total'], byType),
+          _section(tr('Per kategori')),
+          _table([tr('Kategori'), tr('Total')], byType),
         ],
         if (portfolio && months.isNotEmpty) ...[
-          _section('Arus kas per bulan'),
+          _section(tr('Arus kas per bulan')),
           _table(
-            ['Bulan', 'Pemasukan', 'Pengeluaran', 'Selisih'],
+            [tr('Bulan'), tr('Pemasukan'), tr('Pengeluaran'), tr('Selisih')],
             [
               for (final m in months.entries)
                 [
@@ -229,26 +247,28 @@ Future<Uint8List> buildLedgerPdf(CashbookReport report) {
           ),
         ],
         if (portfolio) ...[
-          _section('Peserta'),
+          _section(tr('Peserta')),
           if (participantRows.isEmpty)
-            pw.Text('Belum ada peserta.')
+            pw.Text(tr('Belum ada peserta.'))
           else
             _table([
-              'Nama',
-              'Status',
-              'Bayar',
-              'Refund',
-              'Bersih',
+              tr('Nama'),
+              tr('Status'),
+              tr('Bayar'),
+              tr('Refund'),
+              tr('Bersih'),
             ], participantRows),
         ],
-        _section(portfolio ? 'Buku kas lengkap' : 'Daftar transaksi'),
+        _section(portfolio ? tr('Buku kas lengkap') : tr('Daftar transaksi')),
         ledgerTable,
         pw.SizedBox(height: 10),
         pw.Container(
           padding: const pw.EdgeInsets.all(10),
           color: PdfColors.grey200,
           child: pw.Text(
-            'Privasi: laporan ini tidak memuat nomor rekening, kredensial, nomor telepon, token, atau dokumen identitas. Saldo pada daftar dihitung dari seluruh riwayat, bukan hanya baris yang difilter. Periksa penerima sebelum membagikan.',
+            tr(
+              'Privasi: laporan ini tidak memuat nomor rekening, kredensial, nomor telepon, token, atau dokumen identitas. Saldo pada daftar dihitung dari seluruh riwayat, bukan hanya baris yang difilter. Periksa penerima sebelum membagikan.',
+            ),
             style: const pw.TextStyle(fontSize: 10),
           ),
         ),

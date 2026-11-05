@@ -36,7 +36,7 @@ class SummaryPage extends StatelessWidget {
               color: theme.colorScheme.errorContainer,
               child: ListTile(
                 leading: const Icon(Icons.sync_problem_outlined),
-                title: const Text('Sinkronisasi perlu diperiksa'),
+                title: Text(tr('Sinkronisasi perlu diperiksa')),
                 subtitle: Text(controller.syncError!),
               ),
             ),
@@ -46,8 +46,10 @@ class SummaryPage extends StatelessWidget {
         _BalanceHero(
           balance: formatMoney(controller.balance),
           contribution: formatMoney(controller.contributionTarget),
-          helper:
-              '(Anggaran − sponsor − saldo awal) ÷ $activeCount peserta aktif',
+          helper: tr(
+            '(Anggaran − sponsor − saldo awal) ÷ {count} peserta aktif',
+            {'count': activeCount},
+          ),
           progress: progress,
         ),
         const SizedBox(height: 12),
@@ -76,16 +78,17 @@ class SummaryPage extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         _SectionHeader(
-          title: 'Aktivitas terakhir',
-          actionLabel: recent.isEmpty ? null : 'Lihat semua',
+          title: tr('Aktivitas terakhir'),
+          actionLabel: recent.isEmpty ? null : tr('Lihat semua'),
           onAction: onShowMoney,
         ),
         if (recent.isEmpty)
-          const _EmptyState(
+          _EmptyState(
             icon: Icons.receipt_long_outlined,
-            title: 'Belum ada transaksi',
-            message:
-                'Ketuk Catat transaksi untuk mencatat uang masuk atau keluar.',
+            title: tr('Belum ada transaksi'),
+            message: tr(
+              'Ketuk Catat transaksi untuk mencatat uang masuk atau keluar.',
+            ),
           )
         else
           Card(
@@ -107,18 +110,20 @@ class SummaryPage extends StatelessWidget {
           ),
         const SizedBox(height: 24),
         _SectionHeader(
-          title: 'Pengingat',
-          actionLabel: 'Tambah',
+          title: tr('Pengingat'),
+          actionLabel: tr('Tambah'),
           actionIcon: Icons.add_alert_outlined,
           onAction: controller.isReadOnly
               ? null
               : () => showReminderDialog(context, controller),
         ),
         if (reminders.isEmpty)
-          const _EmptyState(
+          _EmptyState(
             icon: Icons.notifications_none,
-            title: 'Belum ada pengingat',
-            message: 'Tambahkan tenggat pembayaran atau rencana perjalanan.',
+            title: tr('Belum ada pengingat'),
+            message: tr(
+              'Tambahkan tenggat pembayaran atau rencana perjalanan.',
+            ),
           )
         else
           for (final reminder in reminders.take(3))
@@ -220,8 +225,13 @@ class _SyncStatusBanner extends StatelessWidget {
               Expanded(
                 child: Text(
                   synced
-                      ? 'Tersimpan di perangkat • tidak ada perubahan menunggu sinkronisasi.'
-                      : '$pendingCount perubahan tersimpan dan menunggu sinkronisasi.',
+                      ? tr(
+                          'Tersimpan di perangkat • tidak ada perubahan menunggu sinkronisasi.',
+                        )
+                      : tr(
+                          '{count} perubahan tersimpan dan menunggu sinkronisasi.',
+                          {'count': pendingCount},
+                        ),
                   style: TextStyle(color: onTone),
                 ),
               ),
@@ -252,8 +262,14 @@ class _BalanceHero extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final percent = (progress.fraction * 100).floor();
-    final summary =
-        'Iuran terkumpul ${formatMoney(progress.collected)} dari ${formatMoney(progress.expected)} ($percent%)';
+    final summary = tr(
+      'Iuran terkumpul {collected} dari {expected} ({percent}%)',
+      {
+        'collected': formatMoney(progress.collected),
+        'expected': formatMoney(progress.expected),
+        'percent': percent,
+      },
+    );
     return Card(
       color: theme.colorScheme.primaryContainer,
       child: DefaultTextStyle.merge(
@@ -265,7 +281,7 @@ class _BalanceHero extends StatelessWidget {
             children: [
               _SummaryAmount(
                 icon: Icons.account_balance_wallet_outlined,
-                label: 'Saldo saat ini',
+                label: tr('Saldo saat ini'),
                 value: balance,
               ),
               const SizedBox(height: 16),
@@ -294,7 +310,7 @@ class _BalanceHero extends StatelessWidget {
               const Divider(height: 32),
               _SummaryAmount(
                 icon: Icons.calculate_outlined,
-                label: 'Iuran per peserta',
+                label: tr('Iuran per peserta'),
                 value: contribution,
               ),
               const SizedBox(height: 6),
@@ -326,8 +342,8 @@ class _CountTile extends StatelessWidget {
     final label = PayStateChip.textFor(state);
     return Semantics(
       button: onTap != null,
-      label: '$label: $count peserta',
-      hint: onTap == null ? null : 'Ketuk untuk melihat daftar',
+      label: tr('{label}: {count} peserta', {'label': label, 'count': count}),
+      hint: onTap == null ? null : tr('Ketuk untuk melihat daftar'),
       excludeSemantics: true,
       child: Material(
         color: tone,

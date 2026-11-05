@@ -3,24 +3,24 @@ part of '../main.dart';
 String roleLabel(String? role) {
   switch (role) {
     case 'treasurer':
-      return 'Bendahara';
+      return tr('Bendahara');
     case 'chairperson':
-      return 'Ketua acara';
+      return tr('Ketua acara');
     default:
-      return 'Anggota acara';
+      return tr('Anggota acara');
   }
 }
 
 String refundPolicyLabel(RefundPolicy policy) {
   switch (policy) {
     case RefundPolicy.undecided:
-      return 'Belum diputuskan';
+      return tr('Belum diputuskan');
     case RefundPolicy.none:
-      return 'Tidak ada refund';
+      return tr('Tidak ada refund');
     case RefundPolicy.partial:
-      return 'Refund sebagian';
+      return tr('Refund sebagian');
     case RefundPolicy.full:
-      return 'Refund penuh';
+      return tr('Refund penuh');
   }
 }
 

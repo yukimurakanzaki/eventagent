@@ -60,23 +60,23 @@ class MoneyPage extends StatelessWidget {
                 children: [
                   _SummaryAmount(
                     icon: Icons.account_balance_wallet_outlined,
-                    label: 'Saldo saat ini',
+                    label: tr('Saldo saat ini'),
                     value: formatMoney(controller.balance),
                   ),
                   const Divider(height: 28),
                   _FlowRow(
                     icon: Icons.arrow_downward,
-                    label: 'Pembayaran peserta',
+                    label: tr('Pembayaran peserta'),
                     value: '+${formatMoney(participantIncome)}',
                   ),
                   _FlowRow(
                     icon: Icons.arrow_downward,
-                    label: 'Kontribusi tambahan',
+                    label: tr('Kontribusi tambahan'),
                     value: '+${formatMoney(additionalIncome)}',
                   ),
                   _FlowRow(
                     icon: Icons.arrow_upward,
-                    label: 'Pengeluaran bersih',
+                    label: tr('Pengeluaran bersih'),
                     value: '−${formatMoney(expense)}',
                   ),
                 ],
@@ -92,11 +92,11 @@ class MoneyPage extends StatelessWidget {
               onTap: onShowUnpaid,
               leading: Icon(Icons.groups_outlined, color: colors.onInfo),
               title: Text(
-                '$unpaid peserta belum bayar',
+                tr('{count} peserta belum bayar', {'count': unpaid}),
                 style: TextStyle(color: colors.onInfo),
               ),
               subtitle: Text(
-                'Lihat daftar sebelum mengirim pengingat.',
+                tr('Lihat daftar sebelum mengirim pengingat.'),
                 style: TextStyle(color: colors.onInfo),
               ),
               trailing: Icon(Icons.chevron_right, color: colors.onInfo),
@@ -108,19 +108,19 @@ class MoneyPage extends StatelessWidget {
           child: ExpansionTile(
             shape: const Border(),
             collapsedShape: const Border(),
-            title: const Text('Anggaran dan dana awal'),
+            title: Text(tr('Anggaran dan dana awal')),
             childrenPadding: const EdgeInsets.symmetric(horizontal: 16),
             children: [
               _MoneyRow(
-                label: 'Anggaran final',
+                label: tr('Anggaran final'),
                 value: formatMoney(controller.event.finalBudget),
               ),
               _MoneyRow(
-                label: 'Sponsor',
+                label: tr('Sponsor'),
                 value: formatMoney(controller.event.sponsorContribution),
               ),
               _MoneyRow(
-                label: 'Saldo awal',
+                label: tr('Saldo awal'),
                 value: formatMoney(controller.event.openingBalance),
               ),
             ],
@@ -128,24 +128,25 @@ class MoneyPage extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         _SectionHeader(
-          title: 'Riwayat transaksi',
-          actionLabel: 'Filter & laporan rinci',
+          title: tr('Riwayat transaksi'),
+          actionLabel: tr('Filter & laporan rinci'),
           actionIcon: Icons.filter_list,
           onAction: () => _openLog(context),
         ),
         Text(
-          'Salah catat? Ketuk transaksinya untuk koreksi.',
+          tr('Salah catat? Ketuk transaksinya untuk koreksi.'),
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: 8),
         if (history.isEmpty)
-          const _EmptyState(
+          _EmptyState(
             icon: Icons.receipt_long_outlined,
-            title: 'Belum ada transaksi',
-            message:
-                'Ketuk Catat transaksi untuk mencatat uang masuk atau keluar.',
+            title: tr('Belum ada transaksi'),
+            message: tr(
+              'Ketuk Catat transaksi untuk mencatat uang masuk atau keluar.',
+            ),
           ),
         for (var i = 0; i < shown.length; i++) ...[
           if (i == 0 || !_sameDay(shown[i - 1].createdAt, shown[i].createdAt))
@@ -178,7 +179,9 @@ class MoneyPage extends StatelessWidget {
             padding: const EdgeInsets.only(top: 8),
             child: OutlinedButton(
               onPressed: () => _openLog(context),
-              child: Text('Lihat semua ${history.length} transaksi'),
+              child: Text(
+                tr('Lihat semua {count} transaksi', {'count': history.length}),
+              ),
             ),
           ),
       ],
@@ -293,14 +296,17 @@ class _TransactionTile extends StatelessWidget {
         .where((item) => item.id == transaction.relatedTransactionId)
         .firstOrNull;
     final title = isCorrection
-        ? 'Koreksi: ${original?.description ?? 'transaksi'}'
+        ? tr('Koreksi: {name}', {
+            'name': original?.description ?? tr('transaksi'),
+          })
         : transaction.description;
     final detail = [
       transactionTypeLabel(transaction.type),
       if (participant != null) participant.name,
       if (showDate) formatDate(transaction.createdAt),
-      if (isCorrection) 'Alasan: ${transaction.description}',
-      if (corrected) 'Dikoreksi, tidak dihitung',
+      if (isCorrection)
+        tr('Alasan: {reason}', {'reason': transaction.description}),
+      if (corrected) tr('Dikoreksi, tidak dihitung'),
     ].join(' • ');
     final struck = corrected
         ? const TextStyle(decoration: TextDecoration.lineThrough)
@@ -357,7 +363,7 @@ Future<void> showCorrectTransactionDialog(
     context: context,
     builder: (context) => AlertDialog(
       scrollable: true,
-      title: const Text('Koreksi transaksi'),
+      title: Text(tr('Koreksi transaksi')),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -366,16 +372,16 @@ Future<void> showCorrectTransactionDialog(
             '${transaction.description} • ${formatMoney(transaction.amount)}',
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Transaksi ini tidak dihapus. Ia tetap terlihat dicoret di riwayat '
-            'dan laporan, dan tidak dihitung lagi. Setelah itu catat ulang '
-            'transaksi yang benar.',
+          Text(
+            tr(
+              'Transaksi ini tidak dihapus. Ia tetap terlihat dicoret di riwayat dan laporan, dan tidak dihitung lagi. Setelah itu catat ulang transaksi yang benar.',
+            ),
           ),
           TextField(
             onChanged: (value) => reason = value,
-            decoration: const InputDecoration(
-              labelText: 'Alasan koreksi',
-              hintText: 'Contoh: salah ketik nominal',
+            decoration: InputDecoration(
+              labelText: tr('Alasan koreksi'),
+              hintText: tr('Contoh: salah ketik nominal'),
             ),
           ),
         ],
@@ -383,7 +389,7 @@ Future<void> showCorrectTransactionDialog(
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Batal'),
+          child: Text(tr('Batal')),
         ),
         FilledButton(
           onPressed: () async {
@@ -393,13 +399,13 @@ Future<void> showCorrectTransactionDialog(
             );
             if (error != null) {
               if (context.mounted) {
-                await showInfo(context, 'Koreksi belum disimpan', error);
+                await showInfo(context, tr('Koreksi belum disimpan'), error);
               }
               return;
             }
             if (context.mounted) Navigator.pop(context);
           },
-          child: const Text('Simpan koreksi'),
+          child: Text(tr('Simpan koreksi')),
         ),
       ],
     ),

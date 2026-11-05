@@ -9,6 +9,7 @@ import 'package:share_plus/share_plus.dart';
 import 'cashbook_calculations.dart';
 import 'cashbook_models.dart';
 import 'formatting.dart';
+import 'l10n/l10n.dart';
 import 'money.dart';
 import 'ledger_pdf.dart';
 import 'transaction_log.dart';
@@ -52,19 +53,45 @@ class CashbookReport {
   String get whatsappText {
     final event = snapshot.event;
     final buffer = StringBuffer()
-      ..writeln('*Laporan Wargakas - ${sanitizeReportText(event.name)}*')
+      ..writeln(
+        tr('*Laporan Wargakas - {name}*', {
+          'name': sanitizeReportText(event.name),
+        }),
+      )
       ..writeln(
         '${formatReportDate(event.startDate)} - ${formatReportDate(event.endDate)}',
       )
       ..writeln()
-      ..writeln('Saldo awal: ${formatReportRupiah(event.openingBalance)}')
-      ..writeln('Sponsor: ${formatReportRupiah(sponsorIncome)}')
-      ..writeln('Pembayaran peserta: ${formatReportRupiah(participantIncome)}')
-      ..writeln('Iuran tambahan: ${formatReportRupiah(additionalIncome)}')
-      ..writeln('Refund dan pengeluaran: ${formatReportRupiah(expenses)}')
-      ..writeln('*Saldo akhir: ${formatReportRupiah(endingBalance)}*')
+      ..writeln(
+        tr('Saldo awal: {amount}', {
+          'amount': formatReportRupiah(event.openingBalance),
+        }),
+      )
+      ..writeln(
+        tr('Sponsor: {amount}', {'amount': formatReportRupiah(sponsorIncome)}),
+      )
+      ..writeln(
+        tr('Pembayaran peserta: {amount}', {
+          'amount': formatReportRupiah(participantIncome),
+        }),
+      )
+      ..writeln(
+        tr('Iuran tambahan: {amount}', {
+          'amount': formatReportRupiah(additionalIncome),
+        }),
+      )
+      ..writeln(
+        tr('Refund dan pengeluaran: {amount}', {
+          'amount': formatReportRupiah(expenses),
+        }),
+      )
+      ..writeln(
+        tr('*Saldo akhir: {amount}*', {
+          'amount': formatReportRupiah(endingBalance),
+        }),
+      )
       ..writeln()
-      ..writeln('*Status peserta*');
+      ..writeln(tr('*Status peserta*'));
     for (final participant in snapshot.participants) {
       final grossPaid = participantPaid(snapshot.transactions, participant.id);
       final refunds = refundTotalForParticipant(
@@ -73,19 +100,30 @@ class CashbookReport {
       );
       final netPaid = grossPaid - refunds;
       final status = participant.state == ParticipantState.cancelled
-          ? 'Dibatalkan - ${refundPolicyLabelForReport(participant.refundPolicy)}'
+          ? tr('Dibatalkan - {policy}', {
+              'policy': refundPolicyLabelForReport(participant.refundPolicy),
+            })
           : paymentStatus(netPaid, target);
+      final breakdown = refunds == 0
+          ? ''
+          : ' ${tr('(bayar {paid}, refund {refund})', {'paid': formatReportRupiah(grossPaid), 'refund': formatReportRupiah(refunds)})}';
       buffer.writeln(
-        '- ${sanitizeReportText(participant.name)}: $status, ${formatReportRupiah(netPaid)}${refunds == 0 ? '' : ' (bayar ${formatReportRupiah(grossPaid)}, refund ${formatReportRupiah(refunds)})'}',
+        '- ${sanitizeReportText(participant.name)}: $status, ${formatReportRupiah(netPaid)}$breakdown',
       );
     }
     buffer
       ..writeln()
-      ..writeln('Dibuat oleh: ${reportRoleLabel(creatorRole)}')
-      ..writeln('Dibuat: ${formatReportDateTime(generatedAt)}')
+      ..writeln(
+        tr('Dibuat oleh: {role}', {'role': reportRoleLabel(creatorRole)}),
+      )
+      ..writeln(
+        tr('Dibuat: {date}', {'date': formatReportDateTime(generatedAt)}),
+      )
       ..writeln()
       ..writeln(
-        'Privasi: jangan teruskan nomor rekening, kredensial, nomor telepon, atau dokumen identitas.',
+        tr(
+          'Privasi: jangan teruskan nomor rekening, kredensial, nomor telepon, atau dokumen identitas.',
+        ),
       );
     return buffer.toString().trimRight();
   }
@@ -95,12 +133,12 @@ class CashbookReport {
           .where((item) => item.id == transactionId)
           .firstOrNull
           ?.description ??
-      'transaksi';
+      tr('transaksi');
 
   Future<Uint8List> buildPdf() async {
     if (kind != ReportKind.summary) return buildLedgerPdf(this);
     final document = pw.Document(
-      title: 'Laporan Wargakas - ${snapshot.event.name}',
+      title: tr('Laporan Wargakas - {name}', {'name': snapshot.event.name}),
       author: reportRoleLabel(creatorRole),
     );
     final event = snapshot.event;
@@ -112,14 +150,20 @@ class CashbookReport {
       );
       final netPaid = grossPaid - refunds;
       final status = participant.state == ParticipantState.cancelled
-          ? 'Dibatalkan - ${refundPolicyLabelForReport(participant.refundPolicy)}'
+          ? tr('Dibatalkan - {policy}', {
+              'policy': refundPolicyLabelForReport(participant.refundPolicy),
+            })
           : paymentStatus(netPaid, target);
       return [
         sanitizeReportText(participant.name),
         status,
         refunds == 0
             ? formatReportRupiah(netPaid)
-            : '${formatReportRupiah(netPaid)}\nBayar ${formatReportRupiah(grossPaid)} • Refund ${formatReportRupiah(refunds)}',
+            : tr('{net}\nBayar {paid} • Refund {refund}', {
+                'net': formatReportRupiah(netPaid),
+                'paid': formatReportRupiah(grossPaid),
+                'refund': formatReportRupiah(refunds),
+              }),
       ];
     }).toList();
     final corrected = correctedTransactionIds(snapshot.transactions);
@@ -131,10 +175,17 @@ class CashbookReport {
         formatReportDate(transaction.createdAt),
         transactionTypeLabel(transaction.type),
         transaction.type == TransactionType.correction
-            ? 'Membatalkan ${sanitizeReportText(_describe(transaction.relatedTransactionId))}. Alasan: ${sanitizeReportText(transaction.description)}'
-            : '${sanitizeReportText(transaction.description)}${corrected.contains(transaction.id) ? ' (dikoreksi)' : ''}',
+            ? tr('Membatalkan {name}. Alasan: {reason}', {
+                'name': sanitizeReportText(
+                  _describe(transaction.relatedTransactionId),
+                ),
+                'reason': sanitizeReportText(transaction.description),
+              })
+            : '${sanitizeReportText(transaction.description)}${corrected.contains(transaction.id) ? ' ${tr('(dikoreksi)')}' : ''}',
         voided
-            ? '(${formatReportRupiah(transaction.amount)}) tidak dihitung'
+            ? tr('({amount}) tidak dihitung', {
+                'amount': formatReportRupiah(transaction.amount),
+              })
             : formatReportRupiah(transaction.amount),
       ];
     }).toList();
@@ -163,7 +214,7 @@ class CashbookReport {
                   fontWeight: pw.FontWeight.bold,
                 ),
               ),
-              pw.Text('Laporan kas acara'),
+              pw.Text(tr('Laporan kas acara')),
             ],
           ),
         ),
@@ -171,11 +222,14 @@ class CashbookReport {
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
             pw.Text(
-              'Dibuat ${formatReportDateTime(generatedAt)}',
+              tr('Dibuat {date}', {'date': formatReportDateTime(generatedAt)}),
               style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
             ),
             pw.Text(
-              'Halaman ${context.pageNumber} dari ${context.pagesCount}',
+              tr('Halaman {page} dari {pages}', {
+                'page': context.pageNumber,
+                'pages': context.pagesCount,
+              }),
               style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
             ),
           ],
@@ -188,11 +242,16 @@ class CashbookReport {
           ),
           pw.SizedBox(height: 4),
           pw.Text(
-            'Periode ${formatReportDate(event.startDate)} - ${formatReportDate(event.endDate)}',
+            tr('Periode {start} - {end}', {
+              'start': formatReportDate(event.startDate),
+              'end': formatReportDate(event.endDate),
+            }),
           ),
-          pw.Text('Dibuat oleh ${reportRoleLabel(creatorRole)}'),
+          pw.Text(
+            tr('Dibuat oleh {role}', {'role': reportRoleLabel(creatorRole)}),
+          ),
           pw.SizedBox(height: 12),
-          _reportSectionTitle('Ringkasan'),
+          _reportSectionTitle(tr('Ringkasan')),
           pw.TableHelper.fromTextArray(
             headerDecoration: const pw.BoxDecoration(color: PdfColors.teal50),
             headerStyle: pw.TextStyle(
@@ -204,20 +263,20 @@ class CashbookReport {
               horizontal: 4,
               vertical: 3,
             ),
-            headers: const ['Komponen', 'Nilai'],
+            headers: [tr('Komponen'), tr('Nilai')],
             data: [
-              ['Saldo awal', formatReportRupiah(event.openingBalance)],
-              ['Sponsor', formatReportRupiah(sponsorIncome)],
-              ['Pembayaran peserta', formatReportRupiah(participantIncome)],
-              ['Iuran tambahan', formatReportRupiah(additionalIncome)],
-              ['Refund dan pengeluaran', formatReportRupiah(expenses)],
-              ['Saldo akhir', formatReportRupiah(endingBalance)],
+              [tr('Saldo awal'), formatReportRupiah(event.openingBalance)],
+              [tr('Sponsor'), formatReportRupiah(sponsorIncome)],
+              [tr('Pembayaran peserta'), formatReportRupiah(participantIncome)],
+              [tr('Iuran tambahan'), formatReportRupiah(additionalIncome)],
+              [tr('Refund dan pengeluaran'), formatReportRupiah(expenses)],
+              [tr('Saldo akhir'), formatReportRupiah(endingBalance)],
             ],
           ),
           pw.SizedBox(height: 12),
-          _reportSectionTitle('Peserta'),
+          _reportSectionTitle(tr('Peserta')),
           if (participantRows.isEmpty)
-            pw.Text('Belum ada peserta.')
+            pw.Text(tr('Belum ada peserta.'))
           else
             pw.TableHelper.fromTextArray(
               headerDecoration: const pw.BoxDecoration(color: PdfColors.teal50),
@@ -230,13 +289,13 @@ class CashbookReport {
                 horizontal: 4,
                 vertical: 3,
               ),
-              headers: const ['Nama', 'Status', 'Dibayar'],
+              headers: [tr('Nama'), tr('Status'), tr('Dibayar')],
               data: participantRows,
             ),
           pw.SizedBox(height: 12),
-          _reportSectionTitle('Transaksi'),
+          _reportSectionTitle(tr('Transaksi')),
           if (transactionRows.isEmpty)
-            pw.Text('Belum ada transaksi.')
+            pw.Text(tr('Belum ada transaksi.'))
           else
             pw.TableHelper.fromTextArray(
               headerDecoration: const pw.BoxDecoration(color: PdfColors.teal50),
@@ -249,7 +308,12 @@ class CashbookReport {
                 horizontal: 4,
                 vertical: 3,
               ),
-              headers: const ['Tanggal', 'Jenis', 'Keterangan', 'Nominal'],
+              headers: [
+                tr('Tanggal'),
+                tr('Jenis'),
+                tr('Keterangan'),
+                tr('Nominal'),
+              ],
               data: transactionRows,
               columnWidths: {
                 0: const pw.FlexColumnWidth(1.2),
@@ -263,7 +327,9 @@ class CashbookReport {
             padding: const pw.EdgeInsets.all(10),
             color: PdfColors.grey200,
             child: pw.Text(
-              'Privasi: laporan ini tidak memuat nomor rekening, kredensial, nomor telepon, token, atau dokumen identitas. Periksa penerima sebelum membagikan laporan.',
+              tr(
+                'Privasi: laporan ini tidak memuat nomor rekening, kredensial, nomor telepon, token, atau dokumen identitas. Periksa penerima sebelum membagikan laporan.',
+              ),
               style: const pw.TextStyle(fontSize: 11),
             ),
           ),
@@ -309,7 +375,9 @@ class PlatformReportShareGateway implements ReportShareGateway {
     await SharePlus.instance.share(
       ShareParams(
         files: [XFile(file.path, mimeType: 'application/pdf')],
-        subject: 'Laporan Wargakas - ${report.snapshot.event.name}',
+        subject: tr('Laporan Wargakas - {name}', {
+          'name': report.snapshot.event.name,
+        }),
       ),
     );
     return savedPath;
@@ -332,48 +400,49 @@ pw.Widget _reportSectionTitle(String title) => pw.Padding(
 );
 
 String reportRoleLabel(String role) => switch (role) {
-  'treasurer' => 'Bendahara',
-  'chairperson' => 'Ketua acara',
-  _ => 'Pengguna Wargakas',
+  'treasurer' => tr('Bendahara'),
+  'chairperson' => tr('Ketua acara'),
+  _ => tr('Pengguna Wargakas'),
 };
 
 String transactionTypeLabel(TransactionType type) => switch (type) {
-  TransactionType.participantPayment => 'Pembayaran peserta',
-  TransactionType.sponsor => 'Sponsor',
-  TransactionType.additionalContribution => 'Iuran tambahan',
-  TransactionType.expense => 'Pengeluaran',
-  TransactionType.refund => 'Refund',
-  TransactionType.refundReversal => 'Koreksi refund',
-  TransactionType.correction => 'Koreksi',
+  TransactionType.participantPayment => tr('Pembayaran peserta'),
+  TransactionType.sponsor => tr('Sponsor'),
+  TransactionType.additionalContribution => tr('Iuran tambahan'),
+  TransactionType.expense => tr('Pengeluaran'),
+  TransactionType.refund => tr('Refund'),
+  TransactionType.refundReversal => tr('Koreksi refund'),
+  TransactionType.correction => tr('Koreksi'),
 };
 
 String refundPolicyLabelForReport(RefundPolicy policy) => switch (policy) {
-  RefundPolicy.none => 'tanpa refund',
-  RefundPolicy.partial => 'refund sebagian',
-  RefundPolicy.full => 'refund penuh',
-  RefundPolicy.undecided => 'refund belum diputuskan',
+  RefundPolicy.none => tr('tanpa refund'),
+  RefundPolicy.partial => tr('refund sebagian'),
+  RefundPolicy.full => tr('refund penuh'),
+  RefundPolicy.undecided => tr('refund belum diputuskan'),
 };
 
 String sanitizeReportText(String value) {
   var sanitized = value.trim();
   sanitized = sanitized.replaceAll(
     RegExp(r'[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}'),
-    '[email disembunyikan]',
+    tr('[email disembunyikan]'),
   );
   // ponytail: a rupiah amount is strictly 1-3 digits then .ddd groups; anything
   // else that long (accounts, phones, card numbers) gets redacted.
   final rupiahAmount = RegExp(r'^\d{1,3}(\.\d{3})+$');
   sanitized = sanitized.replaceAllMapped(
     RegExp(r'(?<!\d)\+?\d[\d\s.-]{7,}\d(?!\d)'),
-    (match) =>
-        rupiahAmount.hasMatch(match[0]!) ? match[0]! : '[nomor disembunyikan]',
+    (match) => rupiahAmount.hasMatch(match[0]!)
+        ? match[0]!
+        : tr('[nomor disembunyikan]'),
   );
   sanitized = sanitized.replaceAll(
     RegExp(
       r'(password|kata\s+sandi|token|api\s*key)\s*[:=]\s*\S+',
       caseSensitive: false,
     ),
-    '[kredensial disembunyikan]',
+    tr('[kredensial disembunyikan]'),
   );
   return sanitized;
 }

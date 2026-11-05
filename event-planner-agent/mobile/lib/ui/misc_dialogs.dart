@@ -12,21 +12,17 @@ Future<void> showReminderDialog(
     builder: (context) => StatefulBuilder(
       builder: (context, setState) => AlertDialog(
         scrollable: true,
-        title: const Text('Tambah pengingat'),
+        title: Text(tr('Tambah pengingat')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: titleController,
-              decoration: const InputDecoration(
-                labelText: 'Yang perlu diingat',
-              ),
+              decoration: InputDecoration(labelText: tr('Yang perlu diingat')),
             ),
             TextField(
               controller: noteController,
-              decoration: const InputDecoration(
-                labelText: 'Catatan (opsional)',
-              ),
+              decoration: InputDecoration(labelText: tr('Catatan (opsional)')),
             ),
             const SizedBox(height: 12),
             OutlinedButton.icon(
@@ -49,22 +45,24 @@ Future<void> showReminderDialog(
                 }
               },
               icon: const Icon(Icons.event_outlined),
-              label: Text('Jatuh tempo ${formatDateTime(dueAt)}'),
+              label: Text(
+                tr('Jatuh tempo {date}', {'date': formatDateTime(dueAt)}),
+              ),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
+            child: Text(tr('Batal')),
           ),
           FilledButton(
             onPressed: () async {
               if (titleController.text.trim().isEmpty) {
                 await showInfo(
                   context,
-                  'Judul belum diisi',
-                  'Tulis hal yang perlu diingat terlebih dahulu.',
+                  tr('Judul belum diisi'),
+                  tr('Tulis hal yang perlu diingat terlebih dahulu.'),
                 );
                 return;
               }
@@ -75,13 +73,17 @@ Future<void> showReminderDialog(
               );
               if (error != null) {
                 if (context.mounted) {
-                  await showInfo(context, 'Pengingat belum disimpan', error);
+                  await showInfo(
+                    context,
+                    tr('Pengingat belum disimpan'),
+                    error,
+                  );
                 }
                 return;
               }
               if (context.mounted) Navigator.pop(context);
             },
-            child: const Text('Simpan pengingat'),
+            child: Text(tr('Simpan pengingat')),
           ),
         ],
       ),
@@ -100,23 +102,23 @@ Future<void> showInviteChairpersonDialog(
     builder: (dialogContext) => StatefulBuilder(
       builder: (dialogContext, setState) => AlertDialog(
         scrollable: true,
-        title: const Text('Tambah ketua acara'),
+        title: Text(tr('Tambah ketua acara')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Masukkan email akun yang sudah dibuat di Wargakas.'),
+            Text(tr('Masukkan email akun yang sudah dibuat di Wargakas.')),
             const SizedBox(height: 12),
             TextField(
               controller: emailController,
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(labelText: 'Email ketua acara'),
+              decoration: InputDecoration(labelText: tr('Email ketua acara')),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: busy ? null : () => Navigator.pop(dialogContext),
-            child: const Text('Batal'),
+            child: Text(tr('Batal')),
           ),
           FilledButton(
             onPressed: busy
@@ -126,8 +128,8 @@ Future<void> showInviteChairpersonDialog(
                     if (!email.contains('@')) {
                       await showInfo(
                         dialogContext,
-                        'Email belum benar',
-                        'Masukkan email akun ketua acara.',
+                        tr('Email belum benar'),
+                        tr('Masukkan email akun ketua acara.'),
                       );
                       return;
                     }
@@ -138,20 +140,23 @@ Future<void> showInviteChairpersonDialog(
                       Navigator.pop(dialogContext);
                       await showInfo(
                         context,
-                        'Akses diberikan',
-                        '$email sekarang dapat membuka acara ini sebagai ketua acara.',
+                        tr('Akses diberikan'),
+                        tr(
+                          '{email} sekarang dapat membuka acara ini sebagai ketua acara.',
+                          {'email': email},
+                        ),
                       );
                     } catch (error) {
                       if (!dialogContext.mounted) return;
                       setState(() => busy = false);
                       await showInfo(
                         dialogContext,
-                        'Belum berhasil',
+                        tr('Belum berhasil'),
                         error.toString(),
                       );
                     }
                   },
-            child: Text(busy ? 'Menyimpan…' : 'Berikan akses'),
+            child: Text(busy ? tr('Menyimpan…') : tr('Berikan akses')),
           ),
         ],
       ),
@@ -170,7 +175,7 @@ Future<void> showAccountDialog(
     context: context,
     builder: (dialogContext) => AlertDialog(
       scrollable: true,
-      title: const Text('Akun'),
+      title: Text(tr('Akun')),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,9 +192,9 @@ Future<void> showAccountDialog(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Email akun'),
+                    Text(tr('Email akun')),
                     Text(
-                      email ?? 'Akun Wargakas',
+                      email ?? tr('Akun Wargakas'),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(dialogContext).textTheme.titleMedium,
@@ -202,20 +207,22 @@ Future<void> showAccountDialog(
             ],
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Data acara tetap tersimpan di Supabase dan di perangkat ini untuk digunakan saat sinyal lemah.',
+          Text(
+            tr(
+              'Data acara tetap tersimpan di Supabase dan di perangkat ini untuk digunakan saat sinyal lemah.',
+            ),
           ),
         ],
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(dialogContext),
-          child: const Text('Tutup'),
+          child: Text(tr('Tutup')),
         ),
         FilledButton.icon(
           onPressed: () => Navigator.pop(dialogContext, 'signOut'),
           icon: const Icon(Icons.logout),
-          label: const Text('Keluar'),
+          label: Text(tr('Keluar')),
         ),
       ],
     ),
@@ -228,18 +235,21 @@ Future<void> showAccountDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
         scrollable: true,
-        title: const Text('Perubahan belum tersinkron'),
+        title: Text(tr('Perubahan belum tersinkron')),
         content: Text(
-          '$pendingCount perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.',
+          tr(
+            '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.',
+            {'count': pendingCount},
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Tetap di sini'),
+            child: Text(tr('Tetap di sini')),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Keluar'),
+            child: Text(tr('Keluar')),
           ),
         ],
       ),
@@ -251,7 +261,11 @@ Future<void> showAccountDialog(
     await onSignOut();
   } catch (error) {
     if (context.mounted) {
-      await showInfo(context, 'Belum berhasil keluar', authErrorMessage(error));
+      await showInfo(
+        context,
+        tr('Belum berhasil keluar'),
+        authErrorMessage(error),
+      );
     }
   }
 }
@@ -266,7 +280,7 @@ Future<void> showInfo(BuildContext context, String title, String message) {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Mengerti'),
+          child: Text(tr('Mengerti')),
         ),
       ],
     ),

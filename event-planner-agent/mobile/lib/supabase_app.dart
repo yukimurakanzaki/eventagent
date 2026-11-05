@@ -9,6 +9,7 @@ import 'auth_forms.dart';
 import 'auth_support.dart';
 import 'cashbook_controller.dart';
 import 'event_directory.dart';
+import 'l10n/l10n.dart';
 import 'app_shell.dart';
 import 'main.dart' show EventHomePage;
 import 'supabase_backend.dart';
@@ -51,8 +52,9 @@ class _SupabaseAppState extends State<SupabaseApp> implements EventDirectory {
           if (_session == null) {
             if (state.signOutReason != null &&
                 state.signOutReason != SignOutReason.userInitiated) {
-              _authError =
-                  'Sesi sudah berakhir. Masuk kembali untuk melanjutkan.';
+              _authError = tr(
+                'Sesi sudah berakhir. Masuk kembali untuk melanjutkan.',
+              );
             }
             _passwordRecovery = false;
             _clearController();
@@ -115,7 +117,7 @@ class _SupabaseAppState extends State<SupabaseApp> implements EventDirectory {
           generation != _loadGeneration ||
           _session?.user.id != userId) {
         opened.controller.dispose();
-        throw StateError('Pemuatan akun sebelumnya dibatalkan.');
+        throw StateError(tr('Pemuatan akun sebelumnya dibatalkan.'));
       }
       _workspaceId = opened.workspaceId;
       _role = opened.role;
@@ -134,7 +136,7 @@ class _SupabaseAppState extends State<SupabaseApp> implements EventDirectory {
       const Duration(seconds: 30),
       onTimeout: () {
         if (generation == _loadGeneration) _loadGeneration++;
-        throw TimeoutException('Pemuatan acara terlalu lama.');
+        throw TimeoutException(tr('Pemuatan acara terlalu lama.'));
       },
     );
   }
@@ -157,7 +159,7 @@ class _SupabaseAppState extends State<SupabaseApp> implements EventDirectory {
   @override
   Future<List<EventSummary>> list() {
     final workspaceId = _workspaceId;
-    if (workspaceId == null) throw StateError('workspace belum siap');
+    if (workspaceId == null) throw StateError(tr('workspace belum siap'));
     return widget.backend.listEvents(workspaceId);
   }
 
@@ -173,7 +175,7 @@ class _SupabaseAppState extends State<SupabaseApp> implements EventDirectory {
   @override
   Future<void> create(NewEventDraft draft) async {
     final workspaceId = _workspaceId;
-    if (workspaceId == null) throw StateError('workspace belum siap');
+    if (workspaceId == null) throw StateError(tr('workspace belum siap'));
     final eventId = await widget.backend.createEvent(workspaceId, draft);
     await select(eventId);
   }
@@ -196,7 +198,7 @@ class _SupabaseAppState extends State<SupabaseApp> implements EventDirectory {
 
   Future<void> _inviteChairperson(String email) async {
     final workspaceId = _workspaceId;
-    if (workspaceId == null) throw StateError('workspace belum siap');
+    if (workspaceId == null) throw StateError(tr('workspace belum siap'));
     await widget.backend.inviteChairperson(
       workspaceId: workspaceId,
       email: email,
@@ -216,7 +218,7 @@ class _SupabaseAppState extends State<SupabaseApp> implements EventDirectory {
                   actions: [
                     TextButton(
                       onPressed: () => setState(() => _authError = null),
-                      child: const Text('Tutup'),
+                      child: Text(tr('Tutup')),
                     ),
                   ],
                 ),
@@ -286,7 +288,9 @@ class _SupabaseAppState extends State<SupabaseApp> implements EventDirectory {
 /// reported; the pilot treasurer is the audience, not the public.
 String loadErrorMessage(Object error) {
   if (error is TimeoutException || error is SocketException) {
-    return 'Periksa koneksi internet lalu coba lagi. Jika tetap gagal, hubungi pengelola Wargakas.';
+    return tr(
+      'Periksa koneksi internet lalu coba lagi. Jika tetap gagal, hubungi pengelola Wargakas.',
+    );
   }
   final detail = switch (error) {
     PostgrestException(:final code, :final message) =>
@@ -296,7 +300,10 @@ String loadErrorMessage(Object error) {
   final shortened = detail.length > 160
       ? '${detail.substring(0, 160)}…'
       : detail;
-  return 'Terjadi kesalahan saat membuka acara. Hubungi pengelola Wargakas dan kirim pesan ini:\n$shortened';
+  return tr(
+    'Terjadi kesalahan saat membuka acara. Hubungi pengelola Wargakas dan kirim pesan ini:\n{detail}',
+    {'detail': shortened},
+  );
 }
 
 class SetupErrorPage extends StatefulWidget {
@@ -348,8 +355,8 @@ class _SetupErrorPageState extends State<SetupErrorPage> {
               children: [
                 const Icon(Icons.cloud_off_outlined, size: 56),
                 const SizedBox(height: 16),
-                const Text(
-                  'Acara bersama belum dapat dibuka.',
+                Text(
+                  tr('Acara bersama belum dapat dibuka.'),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
@@ -362,11 +369,11 @@ class _SetupErrorPageState extends State<SetupErrorPage> {
                 const SizedBox(height: 20),
                 FilledButton(
                   onPressed: _busy ? null : widget.onRetry,
-                  child: const Text('Coba lagi'),
+                  child: Text(tr('Coba lagi')),
                 ),
                 TextButton(
                   onPressed: _busy ? null : _signOut,
-                  child: Text(_busy ? 'Memproses…' : 'Keluar'),
+                  child: Text(_busy ? tr('Memproses…') : tr('Keluar')),
                 ),
               ],
             ),

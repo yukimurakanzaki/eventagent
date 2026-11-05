@@ -4,6 +4,7 @@ import 'cashbook_models.dart';
 import 'cashbook_controller.dart';
 import 'cashbook_sync.dart';
 import 'event_directory.dart';
+import 'l10n/l10n.dart';
 
 class SupabaseBackend {
   SupabaseBackend(this.client);
@@ -31,7 +32,9 @@ class SupabaseBackend {
 
   static String? get configurationError {
     if (isDemoMode || isConfigured) return null;
-    return 'Build ini belum terhubung ke Supabase. Gunakan build hosted dengan SUPABASE_URL dan SUPABASE_PUBLISHABLE_KEY.';
+    return tr(
+      'Build ini belum terhubung ke Supabase. Gunakan build hosted dengan SUPABASE_URL dan SUPABASE_PUBLISHABLE_KEY.',
+    );
   }
 
   static Future<SupabaseBackend?> initializeFromEnvironment() async {
@@ -146,7 +149,9 @@ class SupabaseBackend {
     final events = await listEvents(workspaceId);
     if (events.isEmpty) {
       throw StateError(
-        'Akun belum memiliki acara. Buat acara pertama melalui dashboard Supabase.',
+        tr(
+          'Akun belum memiliki acara. Buat acara pertama melalui dashboard Supabase.',
+        ),
       );
     }
     final event = events.firstWhere(

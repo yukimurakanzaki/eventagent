@@ -49,7 +49,7 @@ class ParticipantsPage extends StatelessWidget {
               ? null
               : () => showParticipantDialog(context, controller),
           icon: const Icon(Icons.person_add_alt_1),
-          label: const Text('Tambah peserta'),
+          label: Text(tr('Tambah peserta')),
         ),
         const SizedBox(height: 12),
         Wrap(
@@ -66,7 +66,12 @@ class ParticipantsPage extends StatelessWidget {
                       : PayStateChip.iconFor(state),
                 ),
                 label: Text(
-                  '${state == null ? 'Semua' : PayStateChip.textFor(state)} (${countOf(state)})',
+                  tr('{label} ({count})', {
+                    'label': state == null
+                        ? tr('Semua')
+                        : PayStateChip.textFor(state),
+                    'count': countOf(state),
+                  }),
                 ),
                 selected: filter == state,
                 showCheckmark: false,
@@ -78,25 +83,31 @@ class ParticipantsPage extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          '${active.length} peserta aktif • kapasitas ${controller.event.participantCapacity}',
+          tr('{active} peserta aktif • kapasitas {capacity}', {
+            'active': active.length,
+            'capacity': controller.event.participantCapacity,
+          }),
           style: Theme.of(context).textTheme.bodyMedium
               ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: 8),
         if (controller.participants.isEmpty)
-          const _EmptyState(
+          _EmptyState(
             icon: Icons.groups_outlined,
-            title: 'Belum ada peserta',
-            message: 'Tambahkan nama peserta untuk mulai mencatat pembayaran.',
+            title: tr('Belum ada peserta'),
+            message: tr(
+              'Tambahkan nama peserta untuk mulai mencatat pembayaran.',
+            ),
           )
         else ...[
           if (shown.isEmpty && filter != null)
             _EmptyState(
               icon: Icons.filter_alt_off_outlined,
-              title:
-                  'Tidak ada peserta ${PayStateChip.textFor(filter!).toLowerCase()}',
-              message: 'Ubah filter untuk melihat peserta lain.',
-              actionLabel: 'Tampilkan semua',
+              title: tr('Tidak ada peserta {state}', {
+                'state': PayStateChip.textFor(filter!).toLowerCase(),
+              }),
+              message: tr('Ubah filter untuk melihat peserta lain.'),
+              actionLabel: tr('Tampilkan semua'),
               onAction: onFilterChanged == null
                   ? null
                   : () => onFilterChanged!(null),
@@ -104,15 +115,17 @@ class ParticipantsPage extends StatelessWidget {
           else
             _ParticipantSection(
               title: filter == null
-                  ? 'Peserta aktif'
-                  : 'Peserta ${PayStateChip.textFor(filter!).toLowerCase()}',
+                  ? tr('Peserta aktif')
+                  : tr('Peserta {state}', {
+                      'state': PayStateChip.textFor(filter!).toLowerCase(),
+                    }),
               participants: shown,
               controller: controller,
             ),
           if (cancelled.isNotEmpty && filter == null) ...[
             const SizedBox(height: 16),
             _ParticipantSection(
-              title: 'Dibatalkan',
+              title: tr('Dibatalkan'),
               participants: cancelled,
               controller: controller,
             ),
@@ -145,14 +158,16 @@ class _ParticipantSection extends StatelessWidget {
       initialType: TransactionType.participantPayment,
       initialParticipantId: participant.id,
       initialAmount: remaining,
-      initialDescription: 'Iuran peserta',
+      initialDescription: tr('Iuran peserta'),
     );
     if (!saved || !context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Semantics(
           liveRegion: true,
-          child: Text('Pembayaran ${participant.name} disimpan.'),
+          child: Text(
+            tr('Pembayaran {name} disimpan.', {'name': participant.name}),
+          ),
         ),
       ),
     );
@@ -166,7 +181,10 @@ class _ParticipantSection extends StatelessWidget {
         Semantics(
           header: true,
           child: Text(
-            '$title (${participants.length})',
+            tr('{title} ({count})', {
+              'title': title,
+              'count': participants.length,
+            }),
             style: Theme.of(context).textTheme.titleMedium,
           ),
         ),
@@ -265,23 +283,39 @@ class _ParticipantTile extends StatelessWidget {
                   if (cancelled)
                     Text(
                       refundAmount == 0
-                          ? 'Dibayar ${formatMoney(grossPaidAmount)}'
-                          : 'Bayar ${formatMoney(grossPaidAmount)} • Refund ${formatMoney(refundAmount)}',
+                          ? tr('Dibayar {amount}', {
+                              'amount': formatMoney(grossPaidAmount),
+                            })
+                          : tr('Bayar {paid} • Refund {refund}', {
+                              'paid': formatMoney(grossPaidAmount),
+                              'refund': formatMoney(refundAmount),
+                            }),
                       style: muted,
                     )
                   else ...[
                     Text(
-                      '${refundAmount == 0 ? 'Dibayar' : 'Bersih'} ${formatMoney(netPaidAmount)} dari ${formatMoney(target)}',
+                      tr('{label} {amount} dari {target}', {
+                        'label': refundAmount == 0
+                            ? tr('Dibayar')
+                            : tr('Bersih'),
+                        'amount': formatMoney(netPaidAmount),
+                        'target': formatMoney(target),
+                      }),
                       style: muted,
                     ),
                     if (refundAmount > 0)
                       Text(
-                        'Bayar ${formatMoney(grossPaidAmount)} • Refund ${formatMoney(refundAmount)}',
+                        tr('Bayar {paid} • Refund {refund}', {
+                          'paid': formatMoney(grossPaidAmount),
+                          'refund': formatMoney(refundAmount),
+                        }),
                         style: muted,
                       ),
                     if (remaining > 0)
                       Text(
-                        'Kurang ${formatMoney(remaining)}',
+                        tr('Kurang {amount}', {
+                          'amount': formatMoney(remaining),
+                        }),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
@@ -295,8 +329,11 @@ class _ParticipantTile extends StatelessWidget {
                     children: [
                       if (cancelled)
                         StatusPill(
-                          label:
-                              'Dibatalkan • ${refundPolicyLabel(participant.refundPolicy)}',
+                          label: tr('Dibatalkan • {policy}', {
+                            'policy': refundPolicyLabel(
+                              participant.refundPolicy,
+                            ),
+                          }),
                           icon: Icons.history,
                           tone: theme.colorScheme.surfaceContainerHighest,
                           onTone: theme.colorScheme.onSurfaceVariant,
@@ -307,7 +344,7 @@ class _ParticipantTile extends StatelessWidget {
                         TextButton.icon(
                           onPressed: () => onPay!(remaining),
                           icon: const Icon(Icons.add_card_outlined),
-                          label: const Text('Catat bayar'),
+                          label: Text(tr('Catat bayar')),
                         ),
                     ],
                   ),

@@ -33,11 +33,11 @@ class _EventHomePageState extends State<EventHomePage> {
     _selectedIndex = 1;
   });
 
-  static const _destinations = [
-    ('Ringkasan', Icons.dashboard_outlined),
-    ('Peserta', Icons.groups_outlined),
-    ('Uang', Icons.account_balance_wallet_outlined),
-    ('Laporan', Icons.description_outlined),
+  static List<(String, IconData)> get _destinations => [
+    (tr('Ringkasan'), Icons.dashboard_outlined),
+    (tr('Peserta'), Icons.groups_outlined),
+    (tr('Uang'), Icons.account_balance_wallet_outlined),
+    (tr('Laporan'), Icons.description_outlined),
   ];
 
   /// Material "expanded" width: side rail instead of bottom bar.
@@ -55,7 +55,7 @@ class _EventHomePageState extends State<EventHomePage> {
         Money.currency = widget.controller.event.currency;
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Acara Saya'),
+            title: Text(tr('Acara Saya')),
             actions: [
               if (widget.onInviteChairperson != null)
                 IconButton(
@@ -63,12 +63,12 @@ class _EventHomePageState extends State<EventHomePage> {
                     context,
                     widget.onInviteChairperson!,
                   ),
-                  tooltip: 'Tambah ketua acara',
+                  tooltip: tr('Tambah ketua acara'),
                   icon: const Icon(Icons.person_add_outlined),
                 ),
               IconButton(
                 onPressed: () => _showHelp(context),
-                tooltip: 'Bantuan',
+                tooltip: tr('Bantuan'),
                 icon: const Icon(Icons.help_outline),
               ),
               if (widget.onSignOut != null)
@@ -80,7 +80,7 @@ class _EventHomePageState extends State<EventHomePage> {
                     email: widget.accountEmail,
                     role: widget.accountRole,
                   ),
-                  tooltip: 'Akun',
+                  tooltip: tr('Akun'),
                   icon: const Icon(Icons.account_circle_outlined),
                 ),
             ],
@@ -185,10 +185,10 @@ class _EventHomePageState extends State<EventHomePage> {
       SnackBar(
         content: Semantics(
           liveRegion: true,
-          child: Text('Transaksi berhasil disimpan.'),
+          child: Text(tr('Transaksi berhasil disimpan.')),
         ),
         action: SnackBarAction(
-          label: 'Lihat di Uang',
+          label: tr('Lihat di Uang'),
           onPressed: () => setState(() => _selectedIndex = 2),
         ),
       ),
@@ -231,17 +231,18 @@ class _EventHomePageState extends State<EventHomePage> {
       context: context,
       builder: (context) => AlertDialog(
         scrollable: true,
-        title: const Text('Bantuan singkat'),
-        content: const SingleChildScrollView(
+        title: Text(tr('Bantuan singkat')),
+        content: SingleChildScrollView(
           child: Text(
-            'Gunakan empat menu di bawah untuk mengelola peserta, uang, dan laporan. '
-            'Perubahan disimpan di perangkat dan masuk antrean sinkronisasi saat offline.',
+            tr(
+              'Gunakan empat menu di bawah untuk mengelola peserta, uang, dan laporan. Perubahan disimpan di perangkat dan masuk antrean sinkronisasi saat offline.',
+            ),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Mengerti'),
+            child: Text(tr('Mengerti')),
           ),
         ],
       ),
@@ -274,7 +275,7 @@ class _EventHeader extends StatelessWidget {
               Expanded(
                 child: Semantics(
                   button: onSwitch != null,
-                  hint: onSwitch == null ? null : 'Ganti acara',
+                  hint: onSwitch == null ? null : tr('Ganti acara'),
                   child: InkWell(
                     onTap: onSwitch,
                     borderRadius: BorderRadius.circular(8),
@@ -293,8 +294,14 @@ class _EventHeader extends StatelessWidget {
                                   style: theme.textTheme.titleLarge,
                                 ),
                                 Text(
-                                  '${formatDateRange(event.startDate, event.endDate)}'
-                                  ' • $activeCount/${event.participantCapacity} peserta',
+                                  tr('{range} • {active}/{capacity} peserta', {
+                                    'range': formatDateRange(
+                                      event.startDate,
+                                      event.endDate,
+                                    ),
+                                    'active': activeCount,
+                                    'capacity': event.participantCapacity,
+                                  }),
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     color: theme.colorScheme.onSurfaceVariant,
                                   ),
@@ -314,8 +321,8 @@ class _EventHeader extends StatelessWidget {
               ),
               Tooltip(
                 message: onEdit == null
-                    ? 'Selesaikan konflik sebelum mengedit acara'
-                    : 'Edit acara',
+                    ? tr('Selesaikan konflik sebelum mengedit acara')
+                    : tr('Edit acara'),
                 // Icon-only at large text so the event name keeps its width.
                 child: MediaQuery.textScalerOf(context).scale(1) > 1.3
                     ? IconButton(
@@ -325,7 +332,7 @@ class _EventHeader extends StatelessWidget {
                     : TextButton.icon(
                         onPressed: onEdit,
                         icon: const Icon(Icons.edit_calendar_outlined),
-                        label: const Text('Edit'),
+                        label: Text(tr('Edit')),
                       ),
               ),
             ],
@@ -351,13 +358,15 @@ class _ConflictNotice extends StatelessWidget {
         color: Theme.of(context).colorScheme.errorContainer,
         child: ListTile(
           leading: const Icon(Icons.compare_arrows_outlined),
-          title: const Text('Pilih versi data sebelum melanjutkan'),
-          subtitle: const Text(
-            'Pengeditan dihentikan agar perubahan dari dua perangkat tidak saling menimpa.',
+          title: Text(tr('Pilih versi data sebelum melanjutkan')),
+          subtitle: Text(
+            tr(
+              'Pengeditan dihentikan agar perubahan dari dua perangkat tidak saling menimpa.',
+            ),
           ),
           trailing: FilledButton(
             onPressed: () => showConflictDialog(context, controller),
-            child: const Text('Bandingkan'),
+            child: Text(tr('Bandingkan')),
           ),
         ),
       ),
@@ -376,7 +385,9 @@ class _TransactionShortcut extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = hasConflict ? 'Selesaikan konflik' : 'Catat transaksi';
+    final label = hasConflict
+        ? tr('Selesaikan konflik')
+        : tr('Catat transaksi');
     return FloatingActionButton.extended(
       key: const Key('global-transaction-shortcut'),
       tooltip: label,

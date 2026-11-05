@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'app_settings.dart';
@@ -57,15 +56,17 @@ Future<void> main() async {
     }
   } catch (_) {
     runApp(
-      const ConfigurationErrorApp(
-        message: 'Tidak dapat memulai koneksi Supabase. Periksa build hosted.',
+      ConfigurationErrorApp(
+        message: tr(
+          'Tidak dapat memulai koneksi Supabase. Periksa build hosted.',
+        ),
       ),
     );
     return;
   }
   runApp(
-    const ConfigurationErrorApp(
-      message: 'Supabase belum siap. Periksa konfigurasi build.',
+    ConfigurationErrorApp(
+      message: tr('Supabase belum siap. Periksa konfigurasi build.'),
     ),
   );
 }
@@ -88,8 +89,8 @@ class ConfigurationErrorApp extends StatelessWidget {
             children: [
               const Icon(Icons.settings_outlined, size: 56),
               const SizedBox(height: 16),
-              const Text(
-                'Aplikasi belum dikonfigurasi untuk login.',
+              Text(
+                tr('Aplikasi belum dikonfigurasi untuk login.'),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),

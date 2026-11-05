@@ -12,25 +12,28 @@ Future<void> showConflictDialog(
     context: context,
     barrierDismissible: false,
     builder: (dialogContext) => AlertDialog(
-      title: const Text('Bandingkan perubahan'),
+      title: Text(tr('Bandingkan perubahan')),
       content: SizedBox(
         width: 560,
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                'Tidak ada penggabungan otomatis. Pilih satu versi untuk seluruh kas acara.',
+              Text(
+                tr(
+                  'Tidak ada penggabungan otomatis. Pilih satu versi untuk seluruh kas acara.',
+                ),
               ),
               const SizedBox(height: 12),
               _ConflictVersionCard(
-                title: 'Perangkat ini',
+                title: tr('Perangkat ini'),
                 snapshot: local,
-                detail:
-                    'Perubahan lokal ${formatDateTime(conflict.operation.createdAt)}',
+                detail: tr('Perubahan lokal {date}', {
+                  'date': formatDateTime(conflict.operation.createdAt),
+                }),
               ),
               _ConflictVersionCard(
-                title: 'Data online',
+                title: tr('Data online'),
                 snapshot: remote,
                 detail: _remoteConflictDetail(conflict),
               ),
@@ -41,15 +44,15 @@ Future<void> showConflictDialog(
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(dialogContext),
-          child: const Text('Tutup'),
+          child: Text(tr('Tutup')),
         ),
         OutlinedButton(
           onPressed: () => Navigator.pop(dialogContext, 'remote'),
-          child: const Text('Gunakan data online'),
+          child: Text(tr('Gunakan data online')),
         ),
         FilledButton(
           onPressed: () => Navigator.pop(dialogContext, 'local'),
-          child: const Text('Gunakan perangkat ini'),
+          child: Text(tr('Gunakan perangkat ini')),
         ),
       ],
     ),
@@ -59,20 +62,24 @@ Future<void> showConflictDialog(
     context: context,
     builder: (confirmContext) => AlertDialog(
       scrollable: true,
-      title: const Text('Konfirmasi pilihan'),
+      title: Text(tr('Konfirmasi pilihan')),
       content: Text(
         choice == 'remote'
-            ? 'Perubahan lokal yang bertentangan akan dibuang dan data online dipakai.'
-            : 'Seluruh data perangkat ini akan dikirim sebagai versi baru dan dicatat dalam audit.',
+            ? tr(
+                'Perubahan lokal yang bertentangan akan dibuang dan data online dipakai.',
+              )
+            : tr(
+                'Seluruh data perangkat ini akan dikirim sebagai versi baru dan dicatat dalam audit.',
+              ),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(confirmContext, false),
-          child: const Text('Batal'),
+          child: Text(tr('Batal')),
         ),
         FilledButton(
           onPressed: () => Navigator.pop(confirmContext, true),
-          child: const Text('Ya, lanjutkan'),
+          child: Text(tr('Ya, lanjutkan')),
         ),
       ],
     ),
@@ -115,13 +122,25 @@ class _ConflictVersionCard extends StatelessWidget {
             Text(title, style: Theme.of(context).textTheme.titleMedium),
             Text(detail),
             const SizedBox(height: 6),
-            Text('$active peserta aktif'),
-            Text('Pemasukan tercatat ${formatMoney(income)}'),
-            Text('Refund dan pengeluaran ${formatMoney(expenses)}'),
+            Text(tr('{count} peserta aktif', {'count': active})),
             Text(
-              'Saldo ${formatMoney(currentBalance(snapshot.event, snapshot.transactions))}',
+              tr('Pemasukan tercatat {amount}', {
+                'amount': formatMoney(income),
+              }),
             ),
-            Text('$openReminders pengingat terbuka'),
+            Text(
+              tr('Refund dan pengeluaran {amount}', {
+                'amount': formatMoney(expenses),
+              }),
+            ),
+            Text(
+              tr('Saldo {amount}', {
+                'amount': formatMoney(
+                  currentBalance(snapshot.event, snapshot.transactions),
+                ),
+              }),
+            ),
+            Text(tr('{count} pengingat terbuka', {'count': openReminders})),
           ],
         ),
       ),
@@ -132,12 +151,18 @@ class _ConflictVersionCard extends StatelessWidget {
 String _remoteConflictDetail(SyncConflict conflict) {
   final actor = conflict.remoteUpdatedBy;
   final shortActor = actor == null || actor.isEmpty
-      ? 'akun lain'
-      : 'akun ${actor.substring(0, actor.length < 8 ? actor.length : 8)}';
+      ? tr('akun lain')
+      : tr('akun {id}', {
+          'id': actor.substring(0, actor.length < 8 ? actor.length : 8),
+        });
   final time = conflict.remoteUpdatedAt == null
-      ? 'waktu tidak tersedia'
+      ? tr('waktu tidak tersedia')
       : formatDateTime(conflict.remoteUpdatedAt!.toLocal());
-  return 'Versi ${conflict.remoteVersion} oleh $shortActor - $time';
+  return tr('Versi {version} oleh {actor} - {time}', {
+    'version': conflict.remoteVersion,
+    'actor': shortActor,
+    'time': time,
+  });
 }
 
 int? _parseWholeNumber(String value) {
@@ -148,38 +173,62 @@ int? _parseWholeNumber(String value) {
 List<String> _eventChangeSummary(EventRecord before, EventRecord after) {
   final changes = <String>[];
   if (before.name != after.name.trim()) {
-    changes.add('Nama: ${before.name} -> ${after.name.trim()}');
+    changes.add(
+      tr('Nama: {before} -> {after}', {
+        'before': before.name,
+        'after': after.name.trim(),
+      }),
+    );
   }
   if (before.startDate != after.startDate) {
     changes.add(
-      'Mulai: ${formatDate(before.startDate)} -> ${formatDate(after.startDate)}',
+      tr('Mulai: {before} -> {after}', {
+        'before': formatDate(before.startDate),
+        'after': formatDate(after.startDate),
+      }),
     );
   }
   if (before.endDate != after.endDate) {
     changes.add(
-      'Selesai: ${formatDate(before.endDate)} -> ${formatDate(after.endDate)}',
+      tr('Selesai: {before} -> {after}', {
+        'before': formatDate(before.endDate),
+        'after': formatDate(after.endDate),
+      }),
     );
   }
   if (before.participantCapacity != after.participantCapacity) {
     changes.add(
-      'Kapasitas: ${before.participantCapacity} -> ${after.participantCapacity}',
+      tr('Kapasitas: {before} -> {after}', {
+        'before': before.participantCapacity,
+        'after': after.participantCapacity,
+      }),
     );
   }
   if (before.finalBudget != after.finalBudget) {
     changes.add(
-      'Anggaran: ${formatMoney(before.finalBudget)} -> ${formatMoney(after.finalBudget)}',
+      tr('Anggaran: {before} -> {after}', {
+        'before': formatMoney(before.finalBudget),
+        'after': formatMoney(after.finalBudget),
+      }),
     );
   }
   if (before.sponsorName != after.sponsorName ||
       before.sponsorContribution != after.sponsorContribution) {
     changes.add(
-      'Sponsor: ${before.sponsorName} ${formatMoney(before.sponsorContribution)} -> '
-      '${after.sponsorName} ${formatMoney(after.sponsorContribution)}',
+      tr('Sponsor: {before} -> {after}', {
+        'before':
+            '${before.sponsorName} ${formatMoney(before.sponsorContribution)}',
+        'after':
+            '${after.sponsorName} ${formatMoney(after.sponsorContribution)}',
+      }),
     );
   }
   if (before.openingBalance != after.openingBalance) {
     changes.add(
-      'Saldo awal: ${formatMoney(before.openingBalance)} -> ${formatMoney(after.openingBalance)}',
+      tr('Saldo awal: {before} -> {after}', {
+        'before': formatMoney(before.openingBalance),
+        'after': formatMoney(after.openingBalance),
+      }),
     );
   }
   return changes;

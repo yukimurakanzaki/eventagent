@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'cashbook_calculations.dart';
+import 'l10n/l10n.dart';
 import 'status_colors.dart';
 
 /// Pay state as icon + label + tone. The label always carries the meaning, so
@@ -12,9 +13,9 @@ class PayStateChip extends StatelessWidget {
   final String? label;
 
   static String textFor(PayState state) => switch (state) {
-    PayState.paid => 'Lunas',
-    PayState.partial => 'Sebagian',
-    PayState.unpaid => 'Belum bayar',
+    PayState.paid => tr('Lunas'),
+    PayState.partial => tr('Sebagian'),
+    PayState.unpaid => tr('Belum bayar'),
   };
 
   static IconData iconFor(PayState state) => switch (state) {

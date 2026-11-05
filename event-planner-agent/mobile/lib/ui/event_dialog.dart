@@ -31,7 +31,7 @@ Future<void> showEventDialog(
     builder: (dialogContext) => StatefulBuilder(
       builder: (dialogContext, setState) => AlertDialog(
         scrollable: true,
-        title: const Text('Edit acara'),
+        title: Text(tr('Edit acara')),
         insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         contentPadding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
         actionsPadding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
@@ -44,16 +44,16 @@ Future<void> showEventDialog(
               children: [
                 TextField(
                   controller: nameController,
-                  decoration: const InputDecoration(labelText: 'Nama acara'),
+                  decoration: InputDecoration(labelText: tr('Nama acara')),
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Tanggal acara',
+                  tr('Tanggal acara'),
                   style: Theme.of(dialogContext).textTheme.titleSmall,
                 ),
                 const SizedBox(height: 8),
                 _EventDateButton(
-                  label: 'Mulai',
+                  label: tr('Mulai'),
                   value: startDate,
                   icon: Icons.event_outlined,
                   onPressed: () async {
@@ -68,7 +68,7 @@ Future<void> showEventDialog(
                 ),
                 const SizedBox(height: 8),
                 _EventDateButton(
-                  label: 'Selesai',
+                  label: tr('Selesai'),
                   value: endDate,
                   icon: Icons.event_available_outlined,
                   onPressed: () async {
@@ -85,23 +85,25 @@ Future<void> showEventDialog(
                 TextField(
                   controller: capacityController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Kapasitas peserta',
+                  decoration: InputDecoration(
+                    labelText: tr('Kapasitas peserta'),
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: budgetController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Anggaran final (Rp)',
+                  decoration: InputDecoration(
+                    labelText: tr('Anggaran final ({currency})', {
+                      'currency': Money.spec.symbol,
+                    }),
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: sponsorNameController,
                   enabled: !sponsorLocked,
-                  decoration: const InputDecoration(labelText: 'Nama sponsor'),
+                  decoration: InputDecoration(labelText: tr('Nama sponsor')),
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -109,9 +111,11 @@ Future<void> showEventDialog(
                   enabled: !sponsorLocked,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
-                    labelText: 'Kontribusi sponsor (Rp)',
+                    labelText: tr('Kontribusi sponsor ({currency})', {
+                      'currency': Money.spec.symbol,
+                    }),
                     helperText: sponsorLocked
-                        ? 'Dikunci karena pembayaran peserta sudah dimulai.'
+                        ? tr('Dikunci karena pembayaran peserta sudah dimulai.')
                         : null,
                   ),
                 ),
@@ -119,8 +123,10 @@ Future<void> showEventDialog(
                 TextField(
                   controller: openingController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Saldo awal (Rp)',
+                  decoration: InputDecoration(
+                    labelText: tr('Saldo awal ({currency})', {
+                      'currency': Money.spec.symbol,
+                    }),
                   ),
                 ),
                 if (error.isNotEmpty) ...[
@@ -139,7 +145,7 @@ Future<void> showEventDialog(
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Batal'),
+            child: Text(tr('Batal')),
           ),
           FilledButton(
             onPressed: () async {
@@ -148,7 +154,9 @@ Future<void> showEventDialog(
               final sponsor = _parseWholeNumber(sponsorAmountController.text);
               final opening = _parseWholeNumber(openingController.text);
               if ([capacity, budget, sponsor, opening].contains(null)) {
-                setState(() => error = 'Gunakan angka bulat pada semua nilai.');
+                setState(
+                  () => error = tr('Gunakan angka bulat pada semua nilai.'),
+                );
                 return;
               }
               final next = current.copyWith(
@@ -175,18 +183,21 @@ Future<void> showEventDialog(
                 context: dialogContext,
                 builder: (confirmContext) => AlertDialog(
                   scrollable: true,
-                  title: const Text('Simpan perubahan acara?'),
+                  title: Text(tr('Simpan perubahan acara?')),
                   content: Text(
-                    '${changes.join('\n')}\n\nPerubahan akan dicatat dalam riwayat audit.',
+                    tr(
+                      '{changes}\n\nPerubahan akan dicatat dalam riwayat audit.',
+                      {'changes': changes.join('\n')},
+                    ),
                   ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(confirmContext, false),
-                      child: const Text('Periksa lagi'),
+                      child: Text(tr('Periksa lagi')),
                     ),
                     FilledButton(
                       onPressed: () => Navigator.pop(confirmContext, true),
-                      child: const Text('Simpan'),
+                      child: Text(tr('Simpan')),
                     ),
                   ],
                 ),
@@ -200,7 +211,7 @@ Future<void> showEventDialog(
               }
               Navigator.pop(dialogContext);
             },
-            child: const Text('Tinjau perubahan'),
+            child: Text(tr('Tinjau perubahan')),
           ),
         ],
       ),
@@ -226,7 +237,10 @@ class _EventDateButton extends StatelessWidget {
     final date = formatDate(value);
     return Semantics(
       button: true,
-      label: 'Pilih tanggal $label, $date',
+      label: tr('Pilih tanggal {label}, {date}', {
+        'label': label,
+        'date': date,
+      }),
       child: OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(

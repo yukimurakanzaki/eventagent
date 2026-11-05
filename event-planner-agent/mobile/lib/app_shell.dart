@@ -7,7 +7,7 @@ import 'main.dart' show wargakasTheme;
 
 /// The single MaterialApp configuration every entry point uses, so language,
 /// theme, accent, contrast and text size apply the same way everywhere.
-class WargakasMaterialApp extends StatelessWidget {
+class WargakasMaterialApp extends StatefulWidget {
   const WargakasMaterialApp({
     required this.home,
     this.settings,
@@ -18,6 +18,25 @@ class WargakasMaterialApp extends StatelessWidget {
   final Widget home;
   final AppSettings? settings;
   final GlobalKey<NavigatorState>? navigatorKey;
+
+  @override
+  State<WargakasMaterialApp> createState() => _WargakasMaterialAppState();
+}
+
+class _WargakasMaterialAppState extends State<WargakasMaterialApp> {
+  String? _language;
+
+  /// tr() strings are not inherited-widget dependents, so a language switch
+  /// marks every element dirty once. Unlike re-keying the app this keeps the
+  /// open screen (e.g. Settings) and its navigation stack.
+  void _rebuildEverything() {
+    void visit(Element element) {
+      element.markNeedsBuild();
+      element.visitChildren(visit);
+    }
+
+    if (mounted) (context as Element).visitChildren(visit);
+  }
 
   static const _materialLocales = <Locale>[
     Locale('en'),
@@ -37,18 +56,21 @@ class WargakasMaterialApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final settings = this.settings ?? AppSettings.instance;
+    final settings = widget.settings ?? AppSettings.instance;
     return ListenableBuilder(
       listenable: settings,
       builder: (context, _) {
         final deviceLocale = WidgetsBinding.instance.platformDispatcher.locale;
         final language = settings.effectiveLanguage(deviceLocale);
         L10n.code = language;
+        if (_language != null && _language != language) {
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => _rebuildEverything(),
+          );
+        }
+        _language = language;
         return MaterialApp(
-          // Rebuild the whole tree when the language changes so const
-          // widgets pick up new strings.
-          key: ValueKey('app-$language'),
-          navigatorKey: navigatorKey,
+          navigatorKey: widget.navigatorKey,
           title: 'Wargakas',
           debugShowCheckedModeBanner: false,
           locale: Locale(language),
@@ -81,7 +103,7 @@ class WargakasMaterialApp extends StatelessWidget {
               child: child ?? const SizedBox.shrink(),
             );
           },
-          home: home,
+          home: widget.home,
         );
       },
     );
