@@ -4,12 +4,14 @@
 
 const Map<String, String> hi = {
   '(Anggaran − sponsor − saldo awal) ÷ {count} peserta aktif':
-      '(बजट − प्रायोजक − आरंभिक शेष) ÷ {count} सक्रिय प्रतिभागी',
+      '(बजट − प्रायोजक − आरंभिक शेष राशि) ÷ {count} सक्रिय प्रतिभागी',
+  '(Anggaran − sponsor − saldo awal) ÷ {count} peserta aktif|one':
+      '(बजट − प्रायोजक − आरंभिक शेष राशि) ÷ {count} सक्रिय प्रतिभागी',
   '(bayar {paid}, refund {refund})': '(भुगतान {paid}, रिफंड {refund})',
   '(dikoreksi)': '(सुधारा गया)',
   '({amount}) tidak dihitung': '({amount}) गिनती में नहीं',
   '*Laporan Wargakas - {name}*': '*Wargakas रिपोर्ट - {name}*',
-  '*Saldo akhir: {amount}*': '*अंतिम शेष: {amount}*',
+  '*Saldo akhir: {amount}*': '*अंतिम शेष राशि: {amount}*',
   '*Status peserta*': '*प्रतिभागियों की स्थिति*',
   'Acara': 'कार्यक्रम',
   'Acara Saya': 'मेरे कार्यक्रम',
@@ -46,7 +48,7 @@ const Map<String, String> hi = {
   'Bagikan pesan WhatsApp': 'WhatsApp संदेश साझा करें',
   'Bagikan tautan': 'लिंक साझा करें',
   'Bahasa': 'भाषा',
-  'Bahasa & tampilan': 'भाषा और रूप',
+  'Bahasa & tampilan': 'भाषा और दिखावट',
   'Bahasa aplikasi': 'ऐप की भाषा',
   'Bandingkan': 'तुलना करें',
   'Bandingkan perubahan': 'बदलावों की तुलना करें',
@@ -100,7 +102,7 @@ const Map<String, String> hi = {
   'Coba lagi saat tersambung internet. Detail: {detail}':
       'इंटरनेट जुड़ने पर फिर प्रयास करें। विवरण: {detail}',
   'Contoh: 125.000': 'उदाहरण: 125,000',
-  'Contoh: Saldo kas sekarang': 'उदाहरण: वर्तमान नकद शेष',
+  'Contoh: Saldo kas sekarang': 'उदाहरण: वर्तमान शेष राशि',
   'Contoh: Uang muka bus': 'उदाहरण: बस का अग्रिम',
   'Contoh: salah ketik nominal': 'उदाहरण: राशि गलत लिख दी',
   'Contoh: {example}': 'उदाहरण: {example}',
@@ -187,7 +189,7 @@ const Map<String, String> hi = {
   'Iuran terkumpul {collected} dari {expected} ({percent}%)':
       '{expected} में से {collected} अंशदान जमा हुआ ({percent}%)',
   'Jatuh tempo sudah lewat. Pilih tanggal dan jam yang belum lewat.':
-      'देय तिथि निकल चुकी है। ऐसी तारीख और समय चुनें जो निकला न हो।',
+      'देय तिथि बीत चुकी है। ऐसी तारीख और समय चुनें जो बीत न चुका हो।',
   'Jatuh tempo {date}': 'देय तिथि {date}',
   'Jenis': 'प्रकार',
   'Judul belum diisi': 'शीर्षक नहीं भरा गया',
@@ -198,8 +200,12 @@ const Map<String, String> hi = {
   'Kapasitas peserta': 'प्रतिभागी क्षमता',
   'Kapasitas tidak boleh kurang dari {count} peserta aktif.':
       'क्षमता {count} सक्रिय प्रतिभागियों से कम नहीं हो सकती।',
+  'Kapasitas tidak boleh kurang dari {count} peserta aktif.|one':
+      'क्षमता {count} सक्रिय प्रतिभागी से कम नहीं हो सकती।',
   'Kapasitas {count} peserta aktif sudah penuh.':
       '{count} सक्रिय प्रतिभागियों की क्षमता पूरी भर चुकी है।',
+  'Kapasitas {count} peserta aktif sudah penuh.|one':
+      '{count} सक्रिय प्रतिभागी की क्षमता पूरी भर चुकी है।',
   'Kapasitas: {before} -> {after}': 'क्षमता: {before} -> {after}',
   'Kata sandi': 'पासवर्ड',
   'Kata sandi baru': 'नया पासवर्ड',
@@ -216,8 +222,8 @@ const Map<String, String> hi = {
   'Ketua acara dapat melihat dan mencatat semua transaksi.':
       'कार्यक्रम प्रमुख सभी लेन-देन देख और दर्ज कर सकते हैं।',
   'Ketuk Catat transaksi untuk mencatat uang masuk atau keluar.':
-      'पैसे आने या जाने को दर्ज करने के लिए लेन-देन दर्ज करें दबाएँ।',
-  'Ketuk untuk melihat daftar': 'सूची देखने के लिए दबाएँ',
+      'पैसे आने या जाने को दर्ज करने के लिए लेन-देन दर्ज करें पर टैप करें।',
+  'Ketuk untuk melihat daftar': 'सूची देखने के लिए टैप करें',
   'Kirim link pemulihan': 'रिकवरी लिंक भेजें',
   'Kirim pengingat': 'रिमाइंडर भेजें',
   'Kirim ulang email konfirmasi': 'पुष्टि ईमेल दोबारा भेजें',
@@ -227,12 +233,13 @@ const Map<String, String> hi = {
   'Konflik ditemukan, tetapi data online tidak dapat dibaca.':
       'टकराव मिला, लेकिन ऑनलाइन डेटा पढ़ा नहीं जा सका।',
   'Kontras tinggi': 'उच्च कंट्रास्ट',
-  'Kontribusi sponsor ({currency})': 'प्रायोजक का योगदान ({currency})',
-  'Kontribusi tambahan': 'अतिरिक्त योगदान',
+  'Kontribusi sponsor ({currency})': 'प्रायोजक का अंशदान ({currency})',
+  'Kontribusi tambahan': 'अतिरिक्त अंशदान',
   'Koreksi': 'सुधार',
   'Koreksi belum disimpan': 'सुधार अभी सहेजा नहीं गया',
   'Koreksi refund': 'रिफंड का सुधार',
-  'Koreksi tidak bisa dikoreksi lagi.': 'सुधार को दोबारा नहीं सुधारा जा सकता।',
+  'Koreksi tidak bisa dikoreksi lagi.':
+      'किसी सुधार में दोबारा सुधार नहीं किया जा सकता।',
   'Koreksi transaksi': 'लेन-देन में सुधार',
   'Koreksi: membatalkan transaksi lain': 'सुधार: दूसरे लेन-देन को रद्द करना',
   'Koreksi: {name}': 'सुधार: {name}',
@@ -247,11 +254,11 @@ const Map<String, String> hi = {
   'Laporan Wargakas - {name}': 'Wargakas रिपोर्ट - {name}',
   'Laporan kas acara': 'कार्यक्रम की नकद रिपोर्ट',
   'Laporan kas untuk peserta': 'प्रतिभागियों के लिए नकद रिपोर्ट',
-  'Layanan email belum dapat mengirim ke alamat ini. Hubungi pengelola Wargakas untuk memeriksa pengaturan pengiriman email.': 'ईमेल सेवा अभी इस पते पर नहीं भेज सकती। ईमेल भेजने की सेटिंग जाँचने के लिए Wargakas के प्रबंधक से संपर्क करें।',
+  'Layanan email belum dapat mengirim ke alamat ini. Hubungi pengelola Wargakas untuk memeriksa pengaturan pengiriman email.': 'ईमेल सेवा अभी इस पते पर नहीं भेज सकती। ईमेल भेजने की सेटिंग जाँचने के लिए Wargakas संचालक से संपर्क करें।',
   'Lewati': 'छोड़ें',
   'Lihat daftar sebelum mengirim pengingat.':
       'रिमाइंडर भेजने से पहले सूची देखें।',
-  'Lihat di Uang': 'पैसों में देखें',
+  'Lihat di Uang': 'पैसे टैब में देखें',
   'Lihat laporan kas {name} di sini: {link}':
       '{name} की नकद रिपोर्ट यहाँ देखें: {link}',
   'Lihat nota': 'रसीद देखें',
@@ -263,7 +270,7 @@ const Map<String, String> hi = {
   'Lunasi {amount}': '{amount} चुकाएँ',
   'Lupa kata sandi': 'पासवर्ड भूल गए',
   'Lupa kata sandi?': 'पासवर्ड भूल गए?',
-  'Makan & minum': 'खाना और पेय',
+  'Makan & minum': 'खान-पान',
   'Maksimum refund peserta ini: {amount}.':
       'इस प्रतिभागी का अधिकतम रिफंड: {amount}।',
   'Maksimum refund: {amount}.': 'अधिकतम रिफंड: {amount}।',
@@ -287,7 +294,7 @@ const Map<String, String> hi = {
   'Masukkan nominal dari {min} sampai {max}.':
       '{min} से {max} के बीच राशि दर्ज करें।',
   'Mata uang': 'मुद्रा',
-  'Mata uang hanya bisa diganti ke mata uang dengan jumlah desimal yang sama setelah ada nominal tercatat.': 'लेन-देन दर्ज होने के बाद मुद्रा केवल उसी दशमलव अंकों वाली मुद्रा में बदली जा सकती है।',
+  'Mata uang hanya bisa diganti ke mata uang dengan jumlah desimal yang sama setelah ada nominal tercatat.': 'लेन-देन दर्ज होने के बाद मुद्रा केवल उतने ही दशमलव अंकों वाली मुद्रा में बदली जा सकती है।',
   'Mata uang untuk acara baru': 'नए कार्यक्रमों के लिए मुद्रा',
   'Mata uang: {before} -> {after}': 'मुद्रा: {before} -> {after}',
   'Mata uang: {currency}': 'मुद्रा: {currency}',
@@ -297,7 +304,7 @@ const Map<String, String> hi = {
   'Membatalkan {name}. Alasan: {reason}':
       '{name} को रद्द किया जा रहा है। कारण: {reason}',
   'Memproses…': 'प्रक्रिया जारी है…',
-  'Mengerti': 'समझ गया',
+  'Mengerti': 'ठीक है',
   'Menggantikan peserta (opsional)': 'प्रतिभागी का स्थान लेने वाला (वैकल्पिक)',
   'Menghapus…': 'हटाया जा रहा है…',
   'Menyiapkan...': 'तैयार हो रहा है...',
@@ -347,7 +354,8 @@ const Map<String, String> hi = {
   'Pemuatan acara terlalu lama.': 'कार्यक्रम लोड होने में बहुत देर लगी।',
   'Pemuatan akun sebelumnya dibatalkan.':
       'पिछला खाता लोड करना रद्द कर दिया गया।',
-  'Pendaftaran atau masuk dengan email sedang dinonaktifkan. Hubungi pengelola Wargakas.': 'ईमेल से पंजीकरण या लॉगिन अभी बंद है। Wargakas के प्रबंधक से संपर्क करें।',
+  'Pendaftaran atau masuk dengan email sedang dinonaktifkan. Hubungi pengelola Wargakas.':
+      'ईमेल से पंजीकरण या लॉगिन अभी बंद है। Wargakas संचालक से संपर्क करें।',
   'Pengaturan': 'सेटिंग',
   'Pengeditan dihentikan agar perubahan dari dua perangkat tidak saling menimpa.':
       'संपादन रोक दिया गया है, ताकि दो डिवाइस के बदलाव एक-दूसरे को मिटा न दें।',
@@ -362,7 +370,7 @@ const Map<String, String> hi = {
   'Pengingat acara Wargakas.': 'Wargakas कार्यक्रम रिमाइंडर।',
   'Pengingat belum disimpan': 'रिमाइंडर सहेजा नहीं गया',
   'Pengingat pembayaran, pengumpulan, dan persiapan acara.':
-      'भुगतान, वसूली और कार्यक्रम की तैयारी के रिमाइंडर।',
+      'भुगतान, अंशदान संग्रह और कार्यक्रम की तैयारी के रिमाइंडर।',
   'Per kategori': 'श्रेणी के अनुसार',
   'Perangkat ini': 'यह डिवाइस',
   'Perbaiki email pendaftaran': 'पंजीकरण का ईमेल सुधारें',
@@ -372,7 +380,7 @@ const Map<String, String> hi = {
       'अपना ईमेल दोबारा जाँचें कि सही लिखा है।',
   'Periksa koneksi internet lalu coba lagi.':
       'इंटरनेट कनेक्शन जाँचें और फिर प्रयास करें।',
-  'Periksa koneksi internet lalu coba lagi. Jika tetap gagal, hubungi pengelola Wargakas.': 'इंटरनेट कनेक्शन जाँचें और फिर प्रयास करें। फिर भी न हो तो Wargakas के प्रबंधक से संपर्क करें।',
+  'Periksa koneksi internet lalu coba lagi. Jika tetap gagal, hubungi pengelola Wargakas.': 'इंटरनेट कनेक्शन जाँचें और फिर प्रयास करें। फिर भी न हो तो Wargakas संचालक से संपर्क करें।',
   'Periksa lagi': 'फिर जाँचें',
   'Periksa nama, status, transaksi, dan saldo sebelum membagikan laporan.':
       'रिपोर्ट साझा करने से पहले नाम, स्थिति, लेन-देन और शेष राशि जाँच लें।',
@@ -380,9 +388,9 @@ const Map<String, String> hi = {
   'Periode {range}': 'अवधि {range}',
   'Periode {start} - {end}': 'अवधि {start} - {end}',
   'Perlengkapan': 'सामग्री',
-  'Permintaan belum berhasil. Coba lagi nanti. Jika tetap gagal, hubungi pengelola Wargakas.': 'अनुरोध सफल नहीं हुआ। थोड़ी देर बाद फिर प्रयास करें। फिर भी न हो तो Wargakas के प्रबंधक से संपर्क करें।',
+  'Permintaan belum berhasil. Coba lagi nanti. Jika tetap gagal, hubungi pengelola Wargakas.': 'अनुरोध सफल नहीं हुआ। थोड़ी देर बाद फिर प्रयास करें। फिर भी न हो तो Wargakas संचालक से संपर्क करें।',
   'Permintaan diproses. Jika akun masih menunggu konfirmasi, Anda akan menerima email baru. Jika sudah dikonfirmasi, pilih Masuk.': 'अनुरोध पर कार्रवाई हो रही है। यदि खाता पुष्टि की प्रतीक्षा में है, तो आपको नया ईमेल मिलेगा। यदि पुष्टि हो चुकी है, तो लॉगिन चुनें।',
-  'Permintaan diproses. Jika alamat ini memiliki akun yang dapat dipulihkan, Anda akan menerima email pemulihan. Jika belum punya akun, pilih Buat akun.': 'अनुरोध पर कार्रवाई हो रही है। यदि इस पते का कोई पुनःप्राप्त होने योग्य खाता है, तो आपको रिकवरी ईमेल मिलेगा। यदि खाता नहीं है, तो खाता बनाएँ चुनें।',
+  'Permintaan diproses. Jika alamat ini memiliki akun yang dapat dipulihkan, Anda akan menerima email pemulihan. Jika belum punya akun, pilih Buat akun.': 'अनुरोध पर कार्रवाई हो रही है। यदि इस पते पर रिकवर किया जा सकने वाला खाता है, तो आपको रिकवरी ईमेल मिलेगा। यदि खाता नहीं है, तो खाता बनाएँ चुनें।',
   'Permintaan diproses. Jika email ini belum terdaftar, periksa email untuk konfirmasi. Jika sudah punya akun, pilih Masuk dengan kata sandi lama atau Lupa kata sandi?.': 'अनुरोध पर कार्रवाई हो रही है। यदि यह ईमेल पंजीकृत नहीं है, तो पुष्टि के लिए अपना ईमेल देखें। यदि खाता पहले से है, तो पुराने पासवर्ड से लॉगिन करें या पासवर्ड भूल गए? चुनें।',
   'Perubahan belum tersinkron': 'बदलाव सिंक नहीं हुए',
   'Perubahan lokal yang bertentangan akan dibuang dan data online dipakai.':
@@ -397,7 +405,7 @@ const Map<String, String> hi = {
   'Peserta belum ditambahkan': 'प्रतिभागी अभी जोड़ा नहीं गया',
   'Peserta bisa membuka tautan ini di browser tanpa akun. Selalu menampilkan data terbaru. Nomor telepon dan foto nota tidak ditampilkan.': 'प्रतिभागी इस लिंक को बिना खाते के ब्राउज़र में खोल सकते हैं। यह हमेशा नवीनतम डेटा दिखाता है। फ़ोन नंबर और रसीद की फ़ोटो नहीं दिखाई जातीं।',
   'Peserta pengganti harus menggantikan peserta yang dibatalkan.':
-      'स्थान लेने वाला प्रतिभागी रद्द किए गए प्रतिभागी का स्थान लेना चाहिए।',
+      'नए प्रतिभागी को किसी रद्द किए गए प्रतिभागी का स्थान लेना होगा।',
   'Peserta {state}': 'प्रतिभागी {state}',
   'Pilih dari galeri': 'गैलरी से चुनें',
   'Pilih data online atau data perangkat ini.':
@@ -436,24 +444,24 @@ const Map<String, String> hi = {
       'भुगतान का इतिहास सुरक्षित रहेगा। रिफंड नीति चुनें:',
   'Riwayat transaksi': 'लेन-देन का इतिहास',
   'Salah catat? Ketuk transaksinya untuk koreksi.':
-      'गलत दर्ज हुआ? सुधार के लिए लेन-देन पर दबाएँ।',
+      'गलत दर्ज हुआ? सुधार के लिए लेन-देन पर टैप करें।',
   'Saldo': 'शेष राशि',
-  'Saldo akhir': 'अंतिम शेष',
-  'Saldo awal': 'आरंभिक शेष',
-  'Saldo awal ({currency})': 'आरंभिक शेष ({currency})',
-  'Saldo awal: {amount}': 'आरंभिक शेष: {amount}',
-  'Saldo awal: {before} -> {after}': 'आरंभिक शेष: {before} -> {after}',
-  'Saldo kas sekarang': 'वर्तमान नकद शेष',
+  'Saldo akhir': 'अंतिम शेष राशि',
+  'Saldo awal': 'आरंभिक शेष राशि',
+  'Saldo awal ({currency})': 'आरंभिक शेष राशि ({currency})',
+  'Saldo awal: {amount}': 'आरंभिक शेष राशि: {amount}',
+  'Saldo awal: {before} -> {after}': 'आरंभिक शेष राशि: {before} -> {after}',
+  'Saldo kas sekarang': 'वर्तमान शेष राशि',
   'Saldo saat ini': 'वर्तमान शेष राशि',
-  'Saldo setelah': 'इसके बाद शेष',
-  'Saldo {amount}': 'शेष {amount}',
+  'Saldo setelah': 'इसके बाद की शेष राशि',
+  'Saldo {amount}': 'शेष राशि {amount}',
   'Salinan PDF tersimpan di: {path}': 'PDF की प्रति यहाँ सहेजी गई: {path}',
   'Satu buku kas untuk seluruh rombongan': 'पूरे समूह के लिए एक नकद-बही',
   'Saya mengerti tindakan ini tidak bisa dibatalkan.':
-      'मैं समझता/समझती हूँ कि यह कार्रवाई पलटी नहीं जा सकती।',
-  'Sebagian': 'आंशिक',
+      'मुझे पता है कि यह कार्रवाई पलटी नहीं जा सकती।',
+  'Sebagian': 'आंशिक भुगतान',
   'Selamat datang di Wargakas': 'Wargakas में आपका स्वागत है',
-  'Selesai': 'पूरा',
+  'Selesai': 'पूरा हुआ',
   'Selesai {date}': '{date} को पूरा हुआ',
   'Selesai: {before} -> {after}': 'समाप्ति: {before} -> {after}',
   'Selesaikan konflik': 'टकराव सुलझाएँ',
@@ -478,7 +486,7 @@ const Map<String, String> hi = {
   'Semua': 'सभी',
   'Semua kategori': 'सभी श्रेणियाँ',
   'Semua tanggal': 'सभी तारीख़ें',
-  'Semua tautan yang sudah dibagikan tidak akan bisa dibuka lagi. Anda bisa membuat tautan baru kapan saja.': 'साझा किए जा चुके सभी लिंक फिर नहीं खुलेंगे। आप कभी भी नया लिंक बना सकते हैं।',
+  'Semua tautan yang sudah dibagikan tidak akan bisa dibuka lagi. Anda bisa membuat tautan baru kapan saja.': 'साझा किए जा चुके सभी लिंक दोबारा नहीं खुलेंगे। आप कभी भी नया लिंक बना सकते हैं।',
   'Semua transaksi ({count})': 'सभी लेन-देन ({count})',
   'Sertakan kode negara, misalnya +62 untuk Indonesia. Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.': 'देश कोड शामिल करें, जैसे भारत के लिए +91। केवल निजी रिमाइंडर के लिए उपयोग होता है, रिपोर्ट में कभी नहीं दिखता।',
   'Sesi sudah berakhir. Masuk kembali atau minta link pemulihan baru.':
@@ -497,9 +505,9 @@ const Map<String, String> hi = {
   'Sponsor': 'प्रायोजक',
   'Sponsor ({name})': 'प्रायोजक ({name})',
   'Sponsor dan saldo awal diatur lewat Edit acara.':
-      'प्रायोजक और आरंभिक शेष कार्यक्रम संपादित करें में तय होते हैं।',
+      'प्रायोजक और आरंभिक शेष राशि कार्यक्रम संपादित करें में तय होती है।',
   'Sponsor dan saldo awal tidak boleh melebihi anggaran final.':
-      'प्रायोजक और आरंभिक शेष अंतिम बजट से अधिक नहीं हो सकते।',
+      'प्रायोजक और आरंभिक शेष राशि अंतिम बजट से अधिक नहीं हो सकती।',
   'Sponsor: {amount}': 'प्रायोजक: {amount}',
   'Sponsor: {before} -> {after}': 'प्रायोजक: {before} -> {after}',
   'Sponsor: {name}': 'प्रायोजक: {name}',
@@ -520,7 +528,7 @@ const Map<String, String> hi = {
       'भुगतान दर्ज करना शुरू करने के लिए प्रतिभागियों के नाम जोड़ें।',
   'Tambahkan tenggat pembayaran atau rencana perjalanan.':
       'भुगतान की अंतिम तिथि या यात्रा की योजना जोड़ें।',
-  'Tampilan': 'रूप',
+  'Tampilan': 'दिखावट',
   'Tampilkan kata sandi': 'पासवर्ड दिखाएँ',
   'Tampilkan semua': 'सभी दिखाएँ',
   'Tanggal': 'तारीख़',
@@ -542,16 +550,15 @@ const Map<String, String> hi = {
       'लिंक अभी कॉपी नहीं हो सका। फिर प्रयास करें।',
   'Tautan dimatikan.': 'लिंक बंद कर दिया गया।',
   'Tautan disalin.': 'लिंक कॉपी हो गया।',
-  'Tautan mungkin sudah dimatikan oleh bendahara, atau internet sedang terputus. Minta tautan terbaru kepada bendahara.': 'हो सकता है कोषाध्यक्ष ने लिंक बंद कर दिया हो, या इंटरनेट टूटा हो। कोषाध्यक्ष से नवीनतम लिंक माँगें।',
+  'Tautan mungkin sudah dimatikan oleh bendahara, atau internet sedang terputus. Minta tautan terbaru kepada bendahara.': 'हो सकता है कोषाध्यक्ष ने लिंक बंद कर दिया हो, या इंटरनेट कट गया हो। कोषाध्यक्ष से नवीनतम लिंक माँगें।',
   'Tautan tidak dapat dibuka': 'लिंक नहीं खुल सकता',
-  'Teks laporan disalin. Jika WhatsApp tidak muncul, tempel manual.':
-      'रिपोर्ट का टेक्स्ट कॉपी हो गया। यदि WhatsApp न खुले, तो खुद पेस्ट करें।',
-  'Tentang': 'परिचय',
+  'Teks laporan disalin. Jika WhatsApp tidak muncul, tempel manual.': 'रिपोर्ट का टेक्स्ट कॉपी हो गया। यदि WhatsApp न खुले, तो हाथ से पेस्ट करें।',
+  'Tentang': 'ऐप के बारे में',
   'Terang': 'हल्का',
   'Terapkan': 'लागू करें',
   'Terbuka untuk semua peserta': 'सभी प्रतिभागियों के लिए खुला',
   'Terjadi kendala: {detail}': 'कोई समस्या आई: {detail}',
-  'Terjadi kesalahan saat membuka acara. Hubungi pengelola Wargakas dan kirim pesan ini:\n{detail}': 'कार्यक्रम खोलते समय त्रुटि हुई। Wargakas के प्रबंधक से संपर्क करें और यह संदेश भेजें:\n{detail}',
+  'Terjadi kesalahan saat membuka acara. Hubungi pengelola Wargakas dan kirim pesan ini:\n{detail}': 'कार्यक्रम खोलते समय त्रुटि हुई। Wargakas संचालक से संपर्क करें और यह संदेश भेजें:\n{detail}',
   'Terlalu banyak permintaan. Tunggu sebelum mencoba lagi. Jika email tetap dibatasi, coba lagi nanti; batas pengiriman berlaku untuk seluruh aplikasi.': 'बहुत अधिक अनुरोध हुए। फिर प्रयास करने से पहले प्रतीक्षा करें। यदि ईमेल अब भी सीमित है, तो बाद में प्रयास करें; भेजने की सीमा पूरे ऐप पर लागू होती है।',
   'Tersimpan di perangkat • tidak ada perubahan menunggu sinkronisasi.':
       'डिवाइस में सुरक्षित • सिंक के लिए कोई बदलाव प्रतीक्षा में नहीं है।',
@@ -564,7 +571,7 @@ const Map<String, String> hi = {
   'Tidak ada refund': 'कोई रिफंड नहीं',
   'Tidak ada transaksi pada filter ini.': 'इस फ़िल्टर में कोई लेन-देन नहीं है।',
   'Tidak ada yang dihapus. Kesalahan dikoreksi dengan alasan, dan foto nota bisa dilampirkan pada pengeluaran.': 'कुछ भी हटाया नहीं गया है। गलतियाँ कारण के साथ सुधारी जाती हैं, और खर्च के साथ रसीद की फ़ोटो संलग्न की जा सकती है।',
-  'Tidak dapat membuka tautan: {url}': 'लिंक नहीं खोल सके: {url}',
+  'Tidak dapat membuka tautan: {url}': 'लिंक नहीं खोला जा सका: {url}',
   'Tidak dapat memulai koneksi Supabase. Periksa build hosted.':
       'Supabase कनेक्शन शुरू नहीं हो सका। होस्टेड बिल्ड जाँचें।',
   'Tidak dapat terhubung. Periksa koneksi internet, lalu coba lagi.':
@@ -587,6 +594,8 @@ const Map<String, String> hi = {
       'पहले वह बात लिखें जो याद रखनी है।',
   'Tunggu {count} detik sebelum meminta email lagi.':
       'दोबारा ईमेल माँगने से पहले {count} सेकंड प्रतीक्षा करें।',
+  'Tunggu {count} detik sebelum meminta email lagi.|one':
+      'दोबारा ईमेल माँगने से पहले {count} सेकंड प्रतीक्षा करें।',
   'Tutup': 'बंद करें',
   'Uang': 'पैसे',
   'Ubah filter untuk melihat peserta lain.':
@@ -599,7 +608,7 @@ const Map<String, String> hi = {
   'Ulangi kata sandi baru': 'नया पासवर्ड दोबारा लिखें',
   'Unduh laporan PDF atau CSV dulu jika Anda memerlukan salinan.':
       'यदि आपको प्रति चाहिए, तो पहले PDF या CSV रिपोर्ट डाउनलोड कर लें।',
-  'Verifikasi keamanan belum berhasil. Coba lagi atau hubungi pengelola Wargakas.': 'सुरक्षा सत्यापन सफल नहीं हुआ। फिर प्रयास करें या Wargakas के प्रबंधक से संपर्क करें।',
+  'Verifikasi keamanan belum berhasil. Coba lagi atau hubungi pengelola Wargakas.': 'सुरक्षा सत्यापन सफल नहीं हुआ। फिर प्रयास करें या Wargakas संचालक से संपर्क करें।',
   'Verifikasi ulang diperlukan. Minta link pemulihan baru sebelum mengganti kata sandi.':
       'दोबारा सत्यापन आवश्यक है। पासवर्ड बदलने से पहले नया रिकवरी लिंक माँगें।',
   'Versi aplikasi': 'ऐप का संस्करण',
@@ -637,16 +646,28 @@ const Map<String, String> hi = {
       '{amount} पूरे रिफंड के रूप में दर्ज होगा।',
   '{changes}\n\nPerubahan akan dicatat dalam riwayat audit.':
       '{changes}\n\nबदलाव ऑडिट इतिहास में दर्ज किए जाएँगे।',
-  '{count} pengeluaran belum memiliki nota.': '{count} खर्चों की रसीद नहीं है।',
+  '{count} pengeluaran belum memiliki nota.':
+      '{count} खर्चों के साथ रसीद नहीं है।',
+  '{count} pengeluaran belum memiliki nota.|one':
+      '{count} खर्च के साथ रसीद नहीं है।',
   '{count} pengingat terbuka': '{count} रिमाइंडर खुले हैं',
+  '{count} pengingat terbuka|one': '{count} रिमाइंडर खुला है',
   '{count} perubahan di perangkat ini belum terkirim dan akan hilang.':
       'इस डिवाइस पर {count} बदलाव भेजे नहीं गए हैं और खो जाएँगे।',
+  '{count} perubahan di perangkat ini belum terkirim dan akan hilang.|one':
+      'इस डिवाइस पर {count} बदलाव भेजा नहीं गया है और खो जाएगा।',
   '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.': '{count} बदलाव अभी भेजे जाने बाकी हैं। अभी लॉग आउट करने पर बदलाव सुरक्षित रहेंगे और इस खाते में दोबारा लॉगिन होने पर भेजने का प्रयास होगा।',
+  '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.|one': '{count} बदलाव अभी भेजा जाना बाकी है। अभी लॉग आउट करने पर बदलाव सुरक्षित रहेगा और इस खाते में दोबारा लॉगिन होने पर भेजने का प्रयास होगा।',
   '{count} perubahan tersimpan dan menunggu sinkronisasi.':
       '{count} बदलाव सहेजे गए हैं और सिंक की प्रतीक्षा में हैं।',
+  '{count} perubahan tersimpan dan menunggu sinkronisasi.|one':
+      '{count} बदलाव सहेजा गया है और सिंक की प्रतीक्षा में है।',
   '{count} peserta aktif': '{count} सक्रिय प्रतिभागी',
-  '{count} peserta belum bayar': '{count} प्रतिभागियों का भुगतान बाकी',
+  '{count} peserta aktif|one': '{count} सक्रिय प्रतिभागी',
+  '{count} peserta belum bayar': '{count} प्रतिभागियों का भुगतान बाकी है',
+  '{count} peserta belum bayar|one': '{count} प्रतिभागी का भुगतान बाकी है',
   '{count} transaksi': '{count} लेन-देन',
+  '{count} transaksi|one': '{count} लेन-देन',
   '{date}. Alasan: {reason}': '{date}। कारण: {reason}',
   '{email} sekarang dapat membuka acara ini sebagai ketua acara.':
       '{email} अब इस कार्यक्रम को कार्यक्रम प्रमुख के रूप में खोल सकते हैं।',
@@ -656,6 +677,7 @@ const Map<String, String> hi = {
   '{label} ({count})': '{label} ({count})',
   '{label} {amount} dari {target}': '{target} में से {label} {amount}',
   '{label}: {count} peserta': '{label}: {count} प्रतिभागी',
+  '{label}: {count} peserta|one': '{label}: {count} प्रतिभागी',
   '{name} ({amount}, {date})': '{name} ({amount}, {date})',
   '{name} disembunyikan dari daftar acara aktif. Data dan riwayat tetap tersimpan dan bisa dipulihkan kapan saja.': '{name} को सक्रिय कार्यक्रमों की सूची से छिपा दिया गया है। डेटा और इतिहास सुरक्षित हैं और कभी भी वापस लाए जा सकते हैं।',
   '{name} • tersedia {amount}': '{name} • {amount} उपलब्ध',

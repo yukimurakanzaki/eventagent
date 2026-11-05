@@ -25,7 +25,7 @@ const Map<String, String> es = {
   'Akun Wargakas': 'Cuenta de Wargakas',
   'Akun belum memiliki acara. Buat acara pertama melalui dashboard Supabase.': 'Su cuenta aún no tiene eventos. Cree el primer evento desde el panel de Supabase.',
   'Akun belum terhapus': 'La cuenta no se eliminó',
-  'Akun dan akses Anda akan dihapus. Jika ada ketua acara atau panitia, peran bendahara diserahkan kepada mereka dan riwayat kas tetap tersimpan untuk kelompok. Jika tidak ada pengurus lain, semua acara di akun ini ikut terhapus.': 'Su cuenta y su acceso se eliminarán. Si hay un presidente del evento o miembros del comité, el rol de tesorero se les transferirá y el historial de caja se conservará para el grupo. Si no hay otros administradores, todos los eventos de esta cuenta también se eliminarán.',
+  'Akun dan akses Anda akan dihapus. Jika ada ketua acara atau panitia, peran bendahara diserahkan kepada mereka dan riwayat kas tetap tersimpan untuk kelompok. Jika tidak ada pengurus lain, semua acara di akun ini ikut terhapus.': 'Su cuenta y su acceso se eliminarán. Si hay un presidente del evento o miembros del comité, el rol de tesorero se les transferirá y el historial de caja se conservará para el grupo. Si no hay otros responsables, todos los eventos de esta cuenta también se eliminarán.',
   'Akun dan akses Anda akan dihapus. Riwayat kas tetap tersimpan untuk kelompok tanpa nama akun Anda.': 'Su cuenta y su acceso se eliminarán. El historial de caja se conservará para el grupo sin el nombre de su cuenta.',
   'Alasan koreksi': 'Motivo de la corrección',
   'Alasan koreksi wajib diisi.': 'El motivo de la corrección es obligatorio.',
@@ -164,7 +164,7 @@ const Map<String, String> es = {
   'Halaman {page} dari {pages}': 'Página {page} de {pages}',
   'Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!': 'Hola {name}, recordatorio de la contribución de {event}: ha pagado {paid} de {target}, falta {remaining}. ¡Gracias!',
   'Hanya bendahara yang dapat menambah pengurus.':
-      'Solo el tesorero puede agregar administradores.',
+      'Solo el tesorero puede agregar responsables del evento.',
   'Hanya-baca. Diperbarui {date}.': 'Solo lectura. Actualizado el {date}.',
   'Hanya-baca: data langsung dari buku kas bendahara.':
       'Solo lectura: datos en vivo del libro de caja del tesorero.',
@@ -210,7 +210,7 @@ const Map<String, String> es = {
   'Kata sandi minimal 6 karakter. Gunakan kata sandi yang sulit ditebak.': 'La contraseña debe tener al menos 6 caracteres. Use una que sea difícil de adivinar.',
   'Kategori': 'Categoría',
   'Kebijakan privasi': 'Política de privacidad',
-  'Keluar': 'Salir',
+  'Keluar': 'Cerrar sesión',
   'Keterangan': 'Descripción',
   'Ketua acara': 'Presidente del evento',
   'Ketua acara dapat melihat dan mencatat semua transaksi.':
@@ -228,7 +228,7 @@ const Map<String, String> es = {
       'Se encontró un conflicto, pero no se pueden leer los datos en línea.',
   'Kontras tinggi': 'Alto contraste',
   'Kontribusi sponsor ({currency})': 'Aporte de patrocinadores ({currency})',
-  'Kontribusi tambahan': 'Aporte adicional',
+  'Kontribusi tambahan': 'Contribución adicional',
   'Koreksi': 'Corrección',
   'Koreksi belum disimpan': 'La corrección no se guardó',
   'Koreksi refund': 'Corrección de reembolso',
@@ -261,7 +261,7 @@ const Map<String, String> es = {
   'Link email sudah kedaluwarsa atau tidak valid. Minta link baru, lalu coba lagi. Buka hanya email terbaru di perangkat yang meminta link.': 'El enlace del correo caducó o no es válido. Solicite un enlace nuevo e intente de nuevo. Abra solo el correo más reciente en el dispositivo que solicitó el enlace.',
   'Link tidak dapat dibuka di perangkat ini atau sudah digunakan. Minta link baru dari aplikasi ini, lalu buka email terbaru di perangkat yang sama.': 'El enlace no se puede abrir en este dispositivo o ya fue utilizado. Solicite un enlace nuevo desde esta aplicación y abra el correo más reciente en el mismo dispositivo.',
   'Lunas': 'Pagado en su totalidad',
-  'Lunasi {amount}': 'Pagar {amount}',
+  'Lunasi {amount}': 'Saldar {amount}',
   'Lupa kata sandi': 'Olvidé mi contraseña',
   'Lupa kata sandi?': '¿Olvidó su contraseña?',
   'Makan & minum': 'Comida y bebida',
@@ -384,7 +384,7 @@ const Map<String, String> es = {
   'Permintaan belum berhasil. Coba lagi nanti. Jika tetap gagal, hubungi pengelola Wargakas.': 'La solicitud no se completó. Inténtelo más tarde. Si sigue sin funcionar, comuníquese con el administrador de Wargakas.',
   'Permintaan diproses. Jika akun masih menunggu konfirmasi, Anda akan menerima email baru. Jika sudah dikonfirmasi, pilih Masuk.': 'Su solicitud se está procesando. Si la cuenta aún espera confirmación, recibirá un correo nuevo. Si ya está confirmada, elija Iniciar sesión.',
   'Permintaan diproses. Jika alamat ini memiliki akun yang dapat dipulihkan, Anda akan menerima email pemulihan. Jika belum punya akun, pilih Buat akun.': 'Su solicitud se está procesando. Si esta dirección tiene una cuenta recuperable, recibirá un correo de recuperación. Si aún no tiene cuenta, elija Crear cuenta.',
-  'Permintaan diproses. Jika email ini belum terdaftar, periksa email untuk konfirmasi. Jika sudah punya akun, pilih Masuk dengan kata sandi lama atau Lupa kata sandi?.': 'Su solicitud se está procesando. Si este correo aún no está registrado, revise su correo para confirmarlo. Si ya tiene cuenta, elija Iniciar sesión con su contraseña anterior o ¿Olvidó su contraseña?.',
+  'Permintaan diproses. Jika email ini belum terdaftar, periksa email untuk konfirmasi. Jika sudah punya akun, pilih Masuk dengan kata sandi lama atau Lupa kata sandi?.': 'Su solicitud se está procesando. Si este correo aún no está registrado, revise su correo para confirmarlo. Si ya tiene cuenta, elija Iniciar sesión con su contraseña anterior o ¿Olvidó su contraseña?',
   'Perubahan belum tersinkron': 'Cambios sin sincronizar',
   'Perubahan lokal yang bertentangan akan dibuang dan data online dipakai.': 'Los cambios locales en conflicto se descartarán y se usarán los datos en línea.',
   'Perubahan lokal {date}': 'Cambios locales del {date}',
@@ -486,7 +486,7 @@ const Map<String, String> es = {
   'Sesi sudah berakhir. Masuk kembali atau minta link pemulihan baru.': 'La sesión ha caducado. Inicie sesión de nuevo o solicite un nuevo enlace de recuperación.',
   'Sesi sudah berakhir. Masuk kembali untuk melanjutkan.':
       'La sesión ha caducado. Inicie sesión de nuevo para continuar.',
-  'Setiap rupiah bisa ditelusuri': 'Cada moneda se puede rastrear',
+  'Setiap rupiah bisa ditelusuri': 'Cada centavo se puede rastrear',
   'Simpan': 'Guardar',
   'Simpan kata sandi': 'Guardar contraseña',
   'Simpan koreksi': 'Guardar corrección',
@@ -514,7 +514,7 @@ const Map<String, String> es = {
   'Tambah': 'Agregar',
   'Tambah ketua acara': 'Agregar presidente del evento',
   'Tambah pengingat': 'Agregar recordatorio',
-  'Tambah pengurus acara': 'Agregar administrador del evento',
+  'Tambah pengurus acara': 'Agregar responsable del evento',
   'Tambah peserta': 'Agregar participante',
   'Tambahkan nama peserta untuk mulai mencatat pembayaran.':
       'Agregue el nombre de un participante para comenzar a registrar pagos.',
@@ -529,7 +529,7 @@ const Map<String, String> es = {
       'La fecha de fin no puede ser anterior a la de inicio.',
   'Tanpa nota': 'Sin recibo',
   'Tanyakan kepada bendahara jika Anda ingin melihat buktinya.':
-      'Pregunte al tesorero si desea ver el comprobante.',
+      'Pregunte al tesorero si desea ver los recibos.',
   'Target per peserta': 'Meta por participante',
   'Tautan baca-saja untuk peserta': 'Enlace de solo lectura para participantes',
   'Tautan belum dapat dibagikan. Coba lagi.':

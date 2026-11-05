@@ -3,13 +3,14 @@
 // ignore_for_file: lines_longer_than_80_chars
 
 const Map<String, String> vi = {
-  '(Anggaran − sponsor − saldo awal) ÷ {count} peserta aktif': '(Ngân sách − nhà tài trợ − số dư đầu kỳ) ÷ {count} người tham gia đang hoạt động',
+  '(Anggaran − sponsor − saldo awal) ÷ {count} peserta aktif':
+      '(Ngân sách − nhà tài trợ − số dư đầu kỳ) ÷ {count} người đang tham gia',
   '(bayar {paid}, refund {refund})': '(đã đóng {paid}, hoàn tiền {refund})',
-  '(dikoreksi)': '(đã sửa)',
+  '(dikoreksi)': '(đã điều chỉnh)',
   '({amount}) tidak dihitung': '({amount}) không được tính',
   '*Laporan Wargakas - {name}*': '*Báo cáo Wargakas - {name}*',
   '*Saldo akhir: {amount}*': '*Số dư cuối: {amount}*',
-  '*Status peserta*': '*Tình trạng người tham gia*',
+  '*Status peserta*': '*Trạng thái người tham gia*',
   'Acara': 'Sự kiện',
   'Acara Saya': 'Sự kiện của tôi',
   'Acara baru': 'Sự kiện mới',
@@ -26,8 +27,8 @@ const Map<String, String> vi = {
   'Akun belum terhapus': 'Chưa xóa được tài khoản',
   'Akun dan akses Anda akan dihapus. Jika ada ketua acara atau panitia, peran bendahara diserahkan kepada mereka dan riwayat kas tetap tersimpan untuk kelompok. Jika tidak ada pengurus lain, semua acara di akun ini ikut terhapus.': 'Tài khoản và quyền truy cập của bạn sẽ bị xóa. Nếu có trưởng ban tổ chức hoặc thành viên ban tổ chức, vai trò thủ quỹ sẽ được chuyển cho họ và lịch sử quỹ vẫn được giữ lại cho nhóm. Nếu không có người quản lý nào khác, tất cả sự kiện trong tài khoản này cũng sẽ bị xóa.',
   'Akun dan akses Anda akan dihapus. Riwayat kas tetap tersimpan untuk kelompok tanpa nama akun Anda.': 'Tài khoản và quyền truy cập của bạn sẽ bị xóa. Lịch sử quỹ vẫn được giữ lại cho nhóm mà không có tên tài khoản của bạn.',
-  'Alasan koreksi': 'Lý do sửa',
-  'Alasan koreksi wajib diisi.': 'Cần nhập lý do sửa.',
+  'Alasan koreksi': 'Lý do điều chỉnh',
+  'Alasan koreksi wajib diisi.': 'Cần nhập lý do điều chỉnh.',
   'Alasan: {reason}': 'Lý do: {reason}',
   'Ambil foto nota': 'Chụp ảnh biên nhận',
   'Anggaran dan dana awal': 'Ngân sách và vốn ban đầu',
@@ -92,7 +93,7 @@ const Map<String, String> vi = {
   'Cari peserta': 'Tìm người tham gia',
   'Catat bayar': 'Ghi khoản đóng',
   'Catat iuran, sponsor, dan pengeluaran di satu tempat. Target per orang dihitung otomatis dari peserta yang aktif.': 'Ghi lại khoản đóng góp, tài trợ và chi tiêu ở một nơi. Mức đóng của mỗi người được tính tự động dựa trên những người đang tham gia.',
-  'Catat pembayaran': 'Ghi khoản thanh toán',
+  'Catat pembayaran': 'Ghi khoản đóng',
   'Catat transaksi': 'Ghi giao dịch',
   'Catatan (opsional)': 'Ghi chú (không bắt buộc)',
   'Coba lagi': 'Thử lại',
@@ -113,7 +114,7 @@ const Map<String, String> vi = {
   'Dibatalkan • {policy}': 'Đã hủy • {policy}',
   'Dibayar': 'Đã đóng',
   'Dibayar {amount}': 'Đã đóng {amount}',
-  'Dibayar {paid} dari {target}': 'Đã đóng {paid} trên {target}',
+  'Dibayar {paid} dari {target}': 'Đã đóng {paid} trên tổng {target}',
   'Dibuat dengan Wargakas, buku kas bersama yang transparan. Nomor telepon dan foto nota tidak ditampilkan di halaman ini.': 'Được tạo bằng Wargakas, sổ quỹ chung minh bạch. Số điện thoại và ảnh biên nhận không hiển thị trên trang này.',
   'Dibuat oleh {role}': 'Tạo bởi {role}',
   'Dibuat oleh: {role}': 'Tạo bởi: {role}',
@@ -121,14 +122,14 @@ const Map<String, String> vi = {
   'Dibuat {date} oleh {role}': 'Tạo ngày {date} bởi {role}',
   'Dibuat: {date}': 'Tạo ngày: {date}',
   'Dihitung dalam saldo': 'Được tính vào số dư',
-  'Dikoreksi pada': 'Sửa lúc',
-  'Dikoreksi, tidak dihitung': 'Đã sửa, không được tính',
+  'Dikoreksi pada': 'Điều chỉnh lúc',
+  'Dikoreksi, tidak dihitung': 'Đã điều chỉnh, không được tính',
   'Disusun {date}': 'Lập ngày {date}',
   'Donasi & sosial': 'Quyên góp & từ thiện',
-  'Edit': 'Sửa',
-  'Edit acara': 'Sửa sự kiện',
-  'Edit nama': 'Sửa tên',
-  'Edit peserta': 'Sửa người tham gia',
+  'Edit': 'Chỉnh sửa',
+  'Edit acara': 'Chỉnh sửa sự kiện',
+  'Edit nama': 'Đổi tên',
+  'Edit peserta': 'Chỉnh sửa người tham gia',
   'Ekspor CSV (Excel)': 'Xuất CSV (Excel)',
   'Ekspor hasil filter (PDF)': 'Xuất kết quả đã lọc (PDF)',
   'Email': 'Email',
@@ -161,8 +162,8 @@ const Map<String, String> vi = {
       'Hãy dùng email đang sử dụng. Đã có tài khoản? Chọn Đăng nhập.',
   'Gunakan empat menu di bawah untuk mengelola peserta, uang, dan laporan. Perubahan disimpan di perangkat dan masuk antrean sinkronisasi saat offline.': 'Dùng bốn mục ở bên dưới để quản lý người tham gia, tiền và báo cáo. Thay đổi được lưu trên thiết bị và vào hàng chờ đồng bộ khi không có mạng.',
   'Gunakan perangkat ini': 'Dùng thiết bị này',
-  'Halaman {page} dari {pages}': 'Trang {page} trên {pages}',
-  'Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!': 'Chào {name}, nhắc đóng khoản {event}: đã đóng {paid} trên {target}, còn lại {remaining}. Xin cảm ơn!',
+  'Halaman {page} dari {pages}': 'Trang {page}/{pages}',
+  'Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!': 'Chào {name}, nhắc đóng khoản {event}: đã đóng {paid} trên tổng {target}, còn lại {remaining}. Xin cảm ơn!',
   'Hanya bendahara yang dapat menambah pengurus.':
       'Chỉ thủ quỹ mới có thể thêm người quản lý.',
   'Hanya-baca. Diperbarui {date}.': 'Chỉ xem. Cập nhật {date}.',
@@ -180,7 +181,7 @@ const Map<String, String> vi = {
   'Iuran tambahan': 'Khoản đóng thêm',
   'Iuran tambahan: {amount}': 'Khoản đóng thêm: {amount}',
   'Iuran terkumpul {collected} dari {expected} ({percent}%)':
-      'Đã thu {collected} trên {expected} ({percent}%)',
+      'Đã thu {collected} trên tổng {expected} ({percent}%)',
   'Jatuh tempo sudah lewat. Pilih tanggal dan jam yang belum lewat.':
       'Đã quá hạn. Hãy chọn ngày và giờ chưa qua.',
   'Jatuh tempo {date}': 'Hạn {date}',
@@ -192,9 +193,9 @@ const Map<String, String> vi = {
   'Kapasitas harus lebih dari 0.': 'Sức chứa phải lớn hơn 0.',
   'Kapasitas peserta': 'Sức chứa người tham gia',
   'Kapasitas tidak boleh kurang dari {count} peserta aktif.':
-      'Sức chứa không được ít hơn {count} người tham gia đang hoạt động.',
+      'Sức chứa không được ít hơn {count} người đang tham gia.',
   'Kapasitas {count} peserta aktif sudah penuh.':
-      'Sức chứa {count} người tham gia đang hoạt động đã đầy.',
+      'Sức chứa {count} người đang tham gia đã đầy.',
   'Kapasitas: {before} -> {after}': 'Sức chứa: {before} -> {after}',
   'Kata sandi': 'Mật khẩu',
   'Kata sandi baru': 'Mật khẩu mới',
@@ -224,15 +225,17 @@ const Map<String, String> vi = {
   'Konflik ditemukan, tetapi data online tidak dapat dibaca.':
       'Phát hiện xung đột, nhưng không thể đọc dữ liệu trực tuyến.',
   'Kontras tinggi': 'Tương phản cao',
-  'Kontribusi sponsor ({currency})': 'Đóng góp của nhà tài trợ ({currency})',
-  'Kontribusi tambahan': 'Đóng góp thêm',
-  'Koreksi': 'Sửa',
-  'Koreksi belum disimpan': 'Chưa lưu được bản sửa',
-  'Koreksi refund': 'Sửa khoản hoàn tiền',
-  'Koreksi tidak bisa dikoreksi lagi.': 'Không thể sửa một bản sửa nữa.',
-  'Koreksi transaksi': 'Sửa giao dịch',
-  'Koreksi: membatalkan transaksi lain': 'Sửa: hủy một giao dịch khác',
-  'Koreksi: {name}': 'Sửa: {name}',
+  'Kontribusi sponsor ({currency})':
+      'Khoản đóng góp của nhà tài trợ ({currency})',
+  'Kontribusi tambahan': 'Khoản đóng thêm',
+  'Koreksi': 'Điều chỉnh',
+  'Koreksi belum disimpan': 'Chưa lưu được điều chỉnh',
+  'Koreksi refund': 'Điều chỉnh khoản hoàn tiền',
+  'Koreksi tidak bisa dikoreksi lagi.':
+      'Không thể điều chỉnh một điều chỉnh khác.',
+  'Koreksi transaksi': 'Điều chỉnh giao dịch',
+  'Koreksi: membatalkan transaksi lain': 'Điều chỉnh: hủy một giao dịch khác',
+  'Koreksi: {name}': 'Điều chỉnh: {name}',
   'Kurang {amount}': 'Thiếu {amount}',
   'Kurangi animasi': 'Giảm hiệu ứng chuyển động',
   'Lainnya': 'Khác',
@@ -287,8 +290,8 @@ const Map<String, String> vi = {
   'Mata uang': 'Loại tiền tệ',
   'Mata uang hanya bisa diganti ke mata uang dengan jumlah desimal yang sama setelah ada nominal tercatat.': 'Chỉ có thể đổi sang loại tiền có cùng số chữ số thập phân sau khi đã có số tiền được ghi.',
   'Mata uang untuk acara baru': 'Loại tiền tệ cho sự kiện mới',
-  'Mata uang: {before} -> {after}': 'Tiền tệ: {before} -> {after}',
-  'Mata uang: {currency}': 'Tiền tệ: {currency}',
+  'Mata uang: {before} -> {after}': 'Loại tiền tệ: {before} -> {after}',
+  'Mata uang: {currency}': 'Loại tiền tệ: {currency}',
   'Matikan tautan': 'Tắt liên kết',
   'Matikan tautan?': 'Tắt liên kết?',
   'Membatalkan': 'Đang hủy',
@@ -335,7 +338,7 @@ const Map<String, String> vi = {
   'Pemasukan tercatat {amount}': 'Đã ghi nhận thu {amount}',
   'Pemasukan: {amount}': 'Thu: {amount}',
   'Pembayaran ini sudah direfund. Koreksi refund-nya dulu.':
-      'Khoản đóng này đã được hoàn tiền. Hãy sửa khoản hoàn tiền trước.',
+      'Khoản đóng này đã được hoàn tiền. Hãy điều chỉnh khoản hoàn tiền trước.',
   'Pembayaran peserta': 'Khoản đóng của người tham gia',
   'Pembayaran peserta: {amount}': 'Khoản đóng của người tham gia: {amount}',
   'Pembayaran {name} disimpan.': 'Đã lưu khoản đóng của {name}.',
@@ -379,13 +382,13 @@ const Map<String, String> vi = {
   'Permintaan diproses. Jika alamat ini memiliki akun yang dapat dipulihkan, Anda akan menerima email pemulihan. Jika belum punya akun, pilih Buat akun.': 'Yêu cầu đang được xử lý. Nếu địa chỉ này có tài khoản có thể khôi phục, bạn sẽ nhận được email khôi phục. Nếu chưa có tài khoản, hãy chọn Tạo tài khoản.',
   'Permintaan diproses. Jika email ini belum terdaftar, periksa email untuk konfirmasi. Jika sudah punya akun, pilih Masuk dengan kata sandi lama atau Lupa kata sandi?.': 'Yêu cầu đang được xử lý. Nếu email này chưa được đăng ký, hãy kiểm tra email để xác nhận. Nếu đã có tài khoản, hãy chọn Đăng nhập bằng mật khẩu cũ hoặc Quên mật khẩu?.',
   'Perubahan belum tersinkron': 'Thay đổi chưa được đồng bộ',
-  'Perubahan lokal yang bertentangan akan dibuang dan data online dipakai.': 'Các thay đổi cục bộ xung đột sẽ bị bỏ và dữ liệu trực tuyến sẽ được dùng.',
-  'Perubahan lokal {date}': 'Thay đổi cục bộ {date}',
+  'Perubahan lokal yang bertentangan akan dibuang dan data online dipakai.': 'Các thay đổi trên thiết bị bị xung đột sẽ bị bỏ và dữ liệu trực tuyến sẽ được dùng.',
+  'Perubahan lokal {date}': 'Thay đổi trên thiết bị {date}',
   'Pesan belum dapat dibagikan. Coba lagi.':
       'Chưa thể chia sẻ tin nhắn. Vui lòng thử lại.',
   'Peserta': 'Người tham gia',
   'Peserta ({count})': 'Người tham gia ({count})',
-  'Peserta aktif': 'Người tham gia đang hoạt động',
+  'Peserta aktif': 'Người đang tham gia',
   'Peserta belum diperbarui': 'Chưa cập nhật được người tham gia',
   'Peserta belum ditambahkan': 'Chưa thêm được người tham gia',
   'Peserta bisa membuka tautan ini di browser tanpa akun. Selalu menampilkan data terbaru. Nomor telepon dan foto nota tidak ditampilkan.': 'Người tham gia có thể mở liên kết này trên trình duyệt mà không cần tài khoản. Luôn hiển thị dữ liệu mới nhất. Số điện thoại và ảnh biên nhận không được hiển thị.',
@@ -404,8 +407,8 @@ const Map<String, String> vi = {
   'Pilih tanggal {label}, {date}': 'Chọn ngày {label}, {date}',
   'Pilih versi data sebelum melanjutkan':
       'Hãy chọn phiên bản dữ liệu trước khi tiếp tục',
-  'Portofolio acara': 'Danh mục sự kiện',
-  'Portofolio acara lengkap (PDF)': 'Danh mục sự kiện đầy đủ (PDF)',
+  'Portofolio acara': 'Tổng hợp sự kiện',
+  'Portofolio acara lengkap (PDF)': 'Tổng hợp sự kiện đầy đủ (PDF)',
   'Preview laporan': 'Xem trước báo cáo',
   'Privasi: jangan teruskan nomor rekening, kredensial, nomor telepon, atau dokumen identitas.': 'Quyền riêng tư: đừng chuyển tiếp số tài khoản ngân hàng, thông tin đăng nhập, số điện thoại hoặc giấy tờ tùy thân.',
   'Privasi: laporan ini tidak memuat nomor rekening, kredensial, nomor telepon, token, atau dokumen identitas. Periksa penerima sebelum membagikan laporan.': 'Quyền riêng tư: báo cáo này không chứa số tài khoản ngân hàng, thông tin đăng nhập, số điện thoại, mã token hay giấy tờ tùy thân. Hãy kiểm tra người nhận trước khi chia sẻ báo cáo.',
@@ -430,7 +433,7 @@ const Map<String, String> vi = {
       'Lịch sử đóng tiền vẫn được giữ lại. Hãy chọn chính sách hoàn tiền:',
   'Riwayat transaksi': 'Lịch sử giao dịch',
   'Salah catat? Ketuk transaksinya untuk koreksi.':
-      'Ghi nhầm? Chạm vào giao dịch để sửa.',
+      'Ghi nhầm? Chạm vào giao dịch để điều chỉnh.',
   'Saldo': 'Số dư',
   'Saldo akhir': 'Số dư cuối',
   'Saldo awal': 'Số dư đầu kỳ',
@@ -445,14 +448,14 @@ const Map<String, String> vi = {
   'Satu buku kas untuk seluruh rombongan': 'Một sổ quỹ cho cả đoàn',
   'Saya mengerti tindakan ini tidak bisa dibatalkan.':
       'Tôi hiểu rằng hành động này không thể hoàn tác.',
-  'Sebagian': 'Một phần',
+  'Sebagian': 'Đóng một phần',
   'Selamat datang di Wargakas': 'Chào mừng đến với Wargakas',
   'Selesai': 'Xong',
   'Selesai {date}': 'Kết thúc {date}',
   'Selesai: {before} -> {after}': 'Kết thúc: {before} -> {after}',
   'Selesaikan konflik': 'Giải quyết xung đột',
   'Selesaikan konflik data sebelum koreksi.':
-      'Hãy giải quyết xung đột dữ liệu trước khi sửa.',
+      'Hãy giải quyết xung đột dữ liệu trước khi điều chỉnh.',
   'Selesaikan konflik data sebelum melampirkan nota.':
       'Hãy giải quyết xung đột dữ liệu trước khi đính kèm biên nhận.',
   'Selesaikan konflik data sebelum menambah pengingat.':
@@ -460,11 +463,11 @@ const Map<String, String> vi = {
   'Selesaikan konflik data sebelum menambah peserta.':
       'Hãy giải quyết xung đột dữ liệu trước khi thêm người tham gia.',
   'Selesaikan konflik data sebelum mengedit acara.':
-      'Hãy giải quyết xung đột dữ liệu trước khi sửa sự kiện.',
+      'Hãy giải quyết xung đột dữ liệu trước khi chỉnh sửa sự kiện.',
   'Selesaikan konflik data sebelum mengedit peserta.':
-      'Hãy giải quyết xung đột dữ liệu trước khi sửa người tham gia.',
+      'Hãy giải quyết xung đột dữ liệu trước khi chỉnh sửa người tham gia.',
   'Selesaikan konflik sebelum mengedit acara':
-      'Hãy giải quyết xung đột trước khi sửa sự kiện',
+      'Hãy giải quyết xung đột trước khi chỉnh sửa sự kiện',
   'Selisih': 'Chênh lệch',
   'Selisih: {amount}': 'Chênh lệch: {amount}',
   'Seluruh data perangkat ini akan dikirim sebagai versi baru dan dicatat dalam audit.': 'Toàn bộ dữ liệu của thiết bị này sẽ được gửi lên như một phiên bản mới và được ghi vào nhật ký kiểm tra.',
@@ -481,7 +484,7 @@ const Map<String, String> vi = {
   'Setiap rupiah bisa ditelusuri': 'Mọi đồng tiền đều có thể truy vết',
   'Simpan': 'Lưu',
   'Simpan kata sandi': 'Lưu mật khẩu',
-  'Simpan koreksi': 'Lưu bản sửa',
+  'Simpan koreksi': 'Lưu điều chỉnh',
   'Simpan pembatalan': 'Lưu việc hủy',
   'Simpan pengingat': 'Lưu lời nhắc',
   'Simpan perubahan acara?': 'Lưu thay đổi sự kiện?',
@@ -490,14 +493,14 @@ const Map<String, String> vi = {
   'Sponsor': 'Nhà tài trợ',
   'Sponsor ({name})': 'Nhà tài trợ ({name})',
   'Sponsor dan saldo awal diatur lewat Edit acara.':
-      'Nhà tài trợ và số dư đầu kỳ được đặt trong mục Sửa sự kiện.',
+      'Nhà tài trợ và số dư đầu kỳ được đặt trong mục Chỉnh sửa sự kiện.',
   'Sponsor dan saldo awal tidak boleh melebihi anggaran final.':
       'Nhà tài trợ và số dư đầu kỳ không được vượt quá ngân sách cuối cùng.',
   'Sponsor: {amount}': 'Nhà tài trợ: {amount}',
   'Sponsor: {before} -> {after}': 'Nhà tài trợ: {before} -> {after}',
   'Sponsor: {name}': 'Nhà tài trợ: {name}',
   'Status': 'Trạng thái',
-  'Status peserta': 'Tình trạng người tham gia',
+  'Status peserta': 'Trạng thái người tham gia',
   'Sudah pernah mendaftar? Anda bisa langsung mencoba Masuk.':
       'Đã từng đăng ký? Bạn có thể thử Đăng nhập ngay.',
   'Sudah punya akun? Masuk': 'Đã có tài khoản? Đăng nhập',
@@ -522,7 +525,7 @@ const Map<String, String> vi = {
       'Ngày kết thúc không được trước ngày bắt đầu.',
   'Tanpa nota': 'Không có biên nhận',
   'Tanyakan kepada bendahara jika Anda ingin melihat buktinya.':
-      'Hãy hỏi thủ quỹ nếu bạn muốn xem chứng từ.',
+      'Hãy hỏi thủ quỹ nếu bạn muốn xem biên nhận.',
   'Target per peserta': 'Mức đóng mỗi người tham gia',
   'Tautan baca-saja untuk peserta': 'Liên kết chỉ xem cho người tham gia',
   'Tautan belum dapat dibagikan. Coba lagi.':
@@ -551,14 +554,13 @@ const Map<String, String> vi = {
   'Tetap di sini': 'Ở lại đây',
   'Tidak ada pembayaran bersih yang dapat direfund.':
       'Không có khoản đóng ròng nào có thể hoàn tiền.',
-  'Tidak ada penggabungan otomatis. Pilih satu versi untuk seluruh kas acara.':
-      'Không có tự động gộp. Hãy chọn một phiên bản cho toàn bộ quỹ sự kiện.',
+  'Tidak ada penggabungan otomatis. Pilih satu versi untuk seluruh kas acara.': 'Không tự động gộp dữ liệu. Hãy chọn một phiên bản cho toàn bộ quỹ sự kiện.',
   'Tidak ada peserta yang cocok': 'Không có người tham gia phù hợp',
   'Tidak ada peserta {state}': 'Không có người tham gia {state}',
   'Tidak ada refund': 'Không hoàn tiền',
   'Tidak ada transaksi pada filter ini.':
       'Không có giao dịch nào với bộ lọc này.',
-  'Tidak ada yang dihapus. Kesalahan dikoreksi dengan alasan, dan foto nota bisa dilampirkan pada pengeluaran.': 'Không có gì bị xóa. Lỗi được sửa kèm lý do, và có thể đính kèm ảnh biên nhận cho khoản chi.',
+  'Tidak ada yang dihapus. Kesalahan dikoreksi dengan alasan, dan foto nota bisa dilampirkan pada pengeluaran.': 'Không có gì bị xóa. Lỗi được điều chỉnh kèm lý do, và có thể đính kèm ảnh biên nhận cho khoản chi.',
   'Tidak dapat membuka tautan: {url}': 'Không thể mở liên kết: {url}',
   'Tidak dapat memulai koneksi Supabase. Periksa build hosted.':
       'Không thể khởi động kết nối Supabase. Hãy kiểm tra bản dựng hosted.',
@@ -573,11 +575,11 @@ const Map<String, String> vi = {
   'Total refund peserta': 'Tổng hoàn tiền cho người tham gia',
   'Transaksi': 'Giao dịch',
   'Transaksi berhasil disimpan.': 'Đã lưu giao dịch.',
-  'Transaksi ini sudah dikoreksi.': 'Giao dịch này đã được sửa.',
+  'Transaksi ini sudah dikoreksi.': 'Giao dịch này đã được điều chỉnh.',
   'Transaksi ini tidak dihapus. Ia tetap terlihat dicoret di riwayat dan laporan, dan tidak dihitung lagi. Setelah itu catat ulang transaksi yang benar.': 'Giao dịch này không bị xóa. Nó vẫn hiển thị với nét gạch ngang trong lịch sử và báo cáo, và không còn được tính nữa. Sau đó hãy ghi lại giao dịch đúng.',
   'Transaksi tidak dapat disimpan.': 'Không thể lưu giao dịch.',
   'Transaksi tidak ditemukan.': 'Không tìm thấy giao dịch.',
-  'Transportasi': 'Đi lại',
+  'Transportasi': 'Di chuyển',
   'Tulis hal yang perlu diingat terlebih dahulu.':
       'Hãy ghi điều cần nhớ trước.',
   'Tunggu {count} detik sebelum meminta email lagi.':
@@ -610,7 +612,7 @@ const Map<String, String> vi = {
   'ada nota': 'có biên nhận',
   'akun lain': 'tài khoản khác',
   'akun {id}': 'tài khoản {id}',
-  'dikoreksi, tidak dihitung': 'đã sửa, không được tính',
+  'dikoreksi, tidak dihitung': 'đã điều chỉnh, không được tính',
   'kurang {amount}': 'thiếu {amount}',
   'membatalkan {name}': 'hủy {name}',
   'refund belum diputuskan': 'chưa quyết định hoàn tiền',
@@ -624,13 +626,13 @@ const Map<String, String> vi = {
   'waktu tidak tersedia': 'không có thông tin thời gian',
   'workspace belum siap': 'không gian làm việc chưa sẵn sàng',
   'ya': 'có',
-  '{active} dari {capacity}': '{active} trên {capacity}',
+  '{active} dari {capacity}': '{active}/{capacity}',
   '{active} peserta aktif • kapasitas {capacity}':
-      '{active} người tham gia đang hoạt động • sức chứa {capacity}',
+      '{active} người đang tham gia • sức chứa {capacity}',
   '{amount} akan dicatat sebagai refund penuh.':
       '{amount} sẽ được ghi là hoàn tiền toàn bộ.',
   '{changes}\n\nPerubahan akan dicatat dalam riwayat audit.':
-      '{changes}\n\nThay đổi sẽ được ghi vào lịch sử kiểm tra.',
+      '{changes}\n\nThay đổi sẽ được ghi vào nhật ký kiểm tra.',
   '{count} pengeluaran belum memiliki nota.':
       '{count} khoản chi chưa có biên nhận.',
   '{count} pengingat terbuka': '{count} lời nhắc đang mở',
@@ -639,7 +641,7 @@ const Map<String, String> vi = {
   '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.': '{count} thay đổi vẫn đang chờ gửi. Nếu đăng xuất bây giờ, thay đổi vẫn được lưu và sẽ được thử lại khi tài khoản này đăng nhập lại.',
   '{count} perubahan tersimpan dan menunggu sinkronisasi.':
       '{count} thay đổi đã lưu và đang chờ đồng bộ.',
-  '{count} peserta aktif': '{count} người tham gia đang hoạt động',
+  '{count} peserta aktif': '{count} người đang tham gia',
   '{count} peserta belum bayar': '{count} người tham gia chưa đóng',
   '{count} transaksi': '{count} giao dịch',
   '{date}. Alasan: {reason}': '{date}. Lý do: {reason}',
@@ -649,7 +651,7 @@ const Map<String, String> vi = {
       '{email} hiện có thể mở sự kiện này với vai trò thành viên ban tổ chức.',
   '{from} - {to}': '{from} - {to}',
   '{label} ({count})': '{label} ({count})',
-  '{label} {amount} dari {target}': '{label} {amount} trên {target}',
+  '{label} {amount} dari {target}': '{label} {amount} trên tổng {target}',
   '{label}: {count} peserta': '{label}: {count} người tham gia',
   '{name} ({amount}, {date})': '{name} ({amount}, {date})',
   '{name} disembunyikan dari daftar acara aktif. Data dan riwayat tetap tersimpan dan bisa dipulihkan kapan saja.': '{name} đã được ẩn khỏi danh sách sự kiện đang hoạt động. Dữ liệu và lịch sử vẫn được lưu và có thể khôi phục bất cứ lúc nào.',

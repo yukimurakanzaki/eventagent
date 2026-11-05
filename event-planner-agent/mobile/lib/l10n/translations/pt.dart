@@ -28,7 +28,7 @@ const Map<String, String> pt = {
   'Akun Wargakas': 'Conta Wargakas',
   'Akun belum memiliki acara. Buat acara pertama melalui dashboard Supabase.': 'Esta conta ainda não tem eventos. Crie o primeiro evento pelo painel do Supabase.',
   'Akun belum terhapus': 'A conta não foi excluída',
-  'Akun dan akses Anda akan dihapus. Jika ada ketua acara atau panitia, peran bendahara diserahkan kepada mereka dan riwayat kas tetap tersimpan untuk kelompok. Jika tidak ada pengurus lain, semua acara di akun ini ikut terhapus.': 'Sua conta e seus acessos serão excluídos. Se houver presidente do evento ou comissão, a função de tesoureiro será passada a eles e o histórico do caixa continuará guardado para o grupo. Se não houver outro responsável, todos os eventos desta conta também serão excluídos.',
+  'Akun dan akses Anda akan dihapus. Jika ada ketua acara atau panitia, peran bendahara diserahkan kepada mereka dan riwayat kas tetap tersimpan untuk kelompok. Jika tidak ada pengurus lain, semua acara di akun ini ikut terhapus.': 'Sua conta e seus acessos serão excluídos. Se houver coordenador do evento ou comissão, a função de tesoureiro será passada a eles e o histórico do caixa continuará guardado para o grupo. Se não houver outro responsável, todos os eventos desta conta também serão excluídos.',
   'Akun dan akses Anda akan dihapus. Riwayat kas tetap tersimpan untuk kelompok tanpa nama akun Anda.': 'Sua conta e seus acessos serão excluídos. O histórico do caixa continuará guardado para o grupo, sem o nome da sua conta.',
   'Alasan koreksi': 'Motivo da correção',
   'Alasan koreksi wajib diisi.': 'O motivo da correção é obrigatório.',
@@ -57,7 +57,7 @@ const Map<String, String> pt = {
   'Bantuan & masukan': 'Ajuda e sugestões',
   'Bantuan singkat': 'Ajuda rápida',
   'Batal': 'Cancelar',
-  'Batal dan kembali ke masuk': 'Cancelar e voltar para entrar',
+  'Batal dan kembali ke masuk': 'Cancelar e voltar ao login',
   'Batalkan peserta': 'Cancelar participante',
   'Bayar': 'Pagar',
   'Bayar {paid} • Refund {refund}': 'Pago {paid} • Reembolso {refund}',
@@ -86,7 +86,7 @@ const Map<String, String> pt = {
   'Buat akun Wargakas': 'Criar conta Wargakas',
   'Buat dan bagikan PDF': 'Criar e compartilhar PDF',
   'Buat kata sandi baru': 'Criar nova senha',
-  'Buat ulang kata sandi': 'Recriar senha',
+  'Buat ulang kata sandi': 'Criar a senha novamente',
   'Build ini belum terhubung ke Supabase. Gunakan build hosted dengan SUPABASE_URL dan SUPABASE_PUBLISHABLE_KEY.': 'Esta versão do aplicativo ainda não está conectada ao Supabase. Use a versão hospedada com SUPABASE_URL e SUPABASE_PUBLISHABLE_KEY.',
   'Buku kas bersama untuk acara komunitas: jujur, rapi, dan mudah dibagikan.': 'Caixa compartilhado para eventos da comunidade: honesto, organizado e fácil de compartilhar.',
   'Buku kas lengkap': 'Livro-caixa completo',
@@ -142,7 +142,7 @@ const Map<String, String> pt = {
   'Email belum benar': 'E-mail incorreto',
   'Email belum dikonfirmasi. Buka email konfirmasi terbaru atau kirim ulang di bawah.': 'E-mail ainda não confirmado. Abra o e-mail de confirmação mais recente ou reenvie abaixo.',
   'Email ini sudah terdaftar. Pilih Masuk, atau Lupa kata sandi? jika tidak ingat kata sandi lama.': 'Este e-mail já está cadastrado. Escolha Entrar ou Esqueci a senha se não lembrar da senha anterior.',
-  'Email ketua acara': 'E-mail do presidente do evento',
+  'Email ketua acara': 'E-mail do coordenador do evento',
   'File CSV belum dapat dibuat atau dibagikan. Coba lagi.':
       'Não foi possível criar ou compartilhar o arquivo CSV. Tente novamente.',
   'Filter & laporan rinci': 'Filtros e relatório detalhado',
@@ -165,7 +165,7 @@ const Map<String, String> pt = {
   'Gunakan empat menu di bawah untuk mengelola peserta, uang, dan laporan. Perubahan disimpan di perangkat dan masuk antrean sinkronisasi saat offline.': 'Use os quatro menus abaixo para gerenciar participantes, dinheiro e relatórios. As alterações ficam salvas no aparelho e entram na fila de sincronização quando você está offline.',
   'Gunakan perangkat ini': 'Usar este aparelho',
   'Halaman {page} dari {pages}': 'Página {page} de {pages}',
-  'Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!': 'Olá, {name}, lembrete da contribuição do evento {event}: já foi pago {paid} de {target}, faltam {remaining}. Obrigado!',
+  'Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!': 'Olá, {name}! Lembrete da contribuição do evento {event}: já foram pagos {paid} de {target}, faltam {remaining}. Muito obrigado!',
   'Hanya bendahara yang dapat menambah pengurus.':
       'Somente o tesoureiro pode adicionar responsáveis.',
   'Hanya-baca. Diperbarui {date}.': 'Somente leitura. Atualizado em {date}.',
@@ -214,11 +214,11 @@ const Map<String, String> pt = {
   'Kebijakan privasi': 'Política de privacidade',
   'Keluar': 'Sair',
   'Keterangan': 'Descrição',
-  'Ketua acara': 'Presidente do evento',
+  'Ketua acara': 'Coordenador do evento',
   'Ketua acara dapat melihat dan mencatat semua transaksi.':
-      'Toque em Registrar transação para anotar dinheiro que entrou ou saiu.',
+      'O coordenador do evento pode ver e registrar todas as transações.',
   'Ketuk Catat transaksi untuk mencatat uang masuk atau keluar.':
-      'O presidente do evento pode ver e registrar todas as transações.',
+      'Toque em Registrar transação para anotar dinheiro que entrou ou saiu.',
   'Ketuk untuk melihat daftar': 'Toque para ver a lista',
   'Kirim link pemulihan': 'Enviar link de recuperação',
   'Kirim pengingat': 'Enviar lembrete',
@@ -279,7 +279,7 @@ const Map<String, String> pt = {
   'Masukkan email akun Anda untuk meminta link pemulihan.':
       'Digite o e-mail da sua conta para solicitar o link de recuperação.',
   'Masukkan email akun ketua acara.':
-      'Digite o e-mail da conta do presidente do evento.',
+      'Digite o e-mail da conta do coordenador do evento.',
   'Masukkan email akun yang sudah dibuat di Wargakas.':
       'Digite o e-mail de uma conta já criada no Wargakas.',
   'Masukkan email lengkap, misalnya nama@gmail.com.':
@@ -344,7 +344,7 @@ const Map<String, String> pt = {
   'Pemasukan tercatat {amount}': 'Entradas registradas: {amount}',
   'Pemasukan: {amount}': 'Entradas: {amount}',
   'Pembayaran ini sudah direfund. Koreksi refund-nya dulu.':
-      'Este pagamento já foi reembolsado. Corrija primeiro o reembolso.',
+      'Este pagamento já foi reembolsado. Corrija antes o reembolso.',
   'Pembayaran peserta': 'Pagamento do participante',
   'Pembayaran peserta: {amount}': 'Pagamento do participante: {amount}',
   'Pembayaran {name} disimpan.': 'Pagamento de {name} salvo.',
@@ -510,11 +510,10 @@ const Map<String, String> pt = {
   'Sudah pernah mendaftar? Anda bisa langsung mencoba Masuk.':
       'Já se cadastrou antes? Você pode tentar Entrar diretamente.',
   'Sudah punya akun? Masuk': 'Já tem conta? Entrar',
-  'Supabase belum siap. Periksa konfigurasi build.':
-      'O Supabase não está pronto. Verifique a configuração da versão.',
+  'Supabase belum siap. Periksa konfigurasi build.': 'O Supabase não está pronto. Verifique a configuração da versão do aplicativo.',
   'Syarat penggunaan': 'Termos de uso',
   'Tambah': 'Adicionar',
-  'Tambah ketua acara': 'Adicionar presidente do evento',
+  'Tambah ketua acara': 'Adicionar coordenador do evento',
   'Tambah pengingat': 'Adicionar lembrete',
   'Tambah pengurus acara': 'Adicionar responsável pelo evento',
   'Tambah peserta': 'Adicionar participante',
@@ -544,7 +543,7 @@ const Map<String, String> pt = {
       'Não foi possível copiar o link. Tente novamente.',
   'Tautan dimatikan.': 'Link desativado.',
   'Tautan disalin.': 'Link copiado.',
-  'Tautan mungkin sudah dimatikan oleh bendahara, atau internet sedang terputus. Minta tautan terbaru kepada bendahara.': 'O link pode ter sido desativado pelo tesoureiro, ou a internet está fora do ar. Peça o link mais recente ao tesoureiro.',
+  'Tautan mungkin sudah dimatikan oleh bendahara, atau internet sedang terputus. Minta tautan terbaru kepada bendahara.': 'O link pode ter sido desativado pelo tesoureiro, ou a conexão com a internet caiu. Peça o link mais recente ao tesoureiro.',
   'Tautan tidak dapat dibuka': 'Não foi possível abrir o link',
   'Teks laporan disalin. Jika WhatsApp tidak muncul, tempel manual.': 'O texto do relatório foi copiado. Se o WhatsApp não abrir, cole manualmente.',
   'Tentang': 'Sobre',
@@ -618,7 +617,7 @@ const Map<String, String> pt = {
   'akun {id}': 'conta {id}',
   'dikoreksi, tidak dihitung': 'corrigido, não contabilizado',
   'kurang {amount}': 'faltam {amount}',
-  'membatalkan {name}': 'anulando {name}',
+  'membatalkan {name}': 'cancelando {name}',
   'refund belum diputuskan': 'reembolso ainda não decidido',
   'refund penuh': 'reembolso total',
   'refund sebagian': 'reembolso parcial',
@@ -634,7 +633,7 @@ const Map<String, String> pt = {
   '{active} peserta aktif • kapasitas {capacity}':
       '{active} participantes ativos • capacidade {capacity}',
   '{amount} akan dicatat sebagai refund penuh.':
-      '{amount} serão registrados como reembolso total.',
+      '{amount} será registrado como reembolso total.',
   '{changes}\n\nPerubahan akan dicatat dalam riwayat audit.':
       '{changes}\n\nAs alterações serão registradas no histórico de auditoria.',
   '{count} pengeluaran belum memiliki nota.':
@@ -643,9 +642,10 @@ const Map<String, String> pt = {
       '{count} despesa ainda não tem comprovante.',
   '{count} pengingat terbuka': '{count} lembretes em aberto',
   '{count} pengingat terbuka|one': '{count} lembrete em aberto',
-  '{count} perubahan di perangkat ini belum terkirim dan akan hilang.': '{count} alterações neste dispositivo não foram enviadas e serão perdidas.',
+  '{count} perubahan di perangkat ini belum terkirim dan akan hilang.':
+      '{count} alterações neste aparelho não foram enviadas e serão perdidas.',
   '{count} perubahan di perangkat ini belum terkirim dan akan hilang.|one':
-      '{count} alteração neste dispositivo não foi enviada e será perdida.',
+      '{count} alteração neste aparelho não foi enviada e será perdida.',
   '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.': '{count} alterações ainda aguardam envio. Se sair agora, as alterações continuam salvas e serão enviadas quando esta conta entrar novamente.',
   '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.|one': '{count} alteração ainda aguarda envio. Se sair agora, a alteração continua salva e será enviada quando esta conta entrar novamente.',
   '{count} perubahan tersimpan dan menunggu sinkronisasi.':
@@ -660,9 +660,9 @@ const Map<String, String> pt = {
   '{count} transaksi|one': '{count} transação',
   '{date}. Alasan: {reason}': '{date}. Motivo: {reason}',
   '{email} sekarang dapat membuka acara ini sebagai ketua acara.':
-      '{email} agora pode abrir este evento como presidente do evento.',
+      '{email} agora pode abrir este evento como coordenador do evento.',
   '{email} sekarang dapat membuka acara ini sebagai panitia.':
-      '{email} agora pode abrir este evento como comissão.',
+      '{email} agora pode abrir este evento como membro da comissão.',
   '{from} - {to}': '{from} - {to}',
   '{label} ({count})': '{label} ({count})',
   '{label} {amount} dari {target}': '{label} {amount} de {target}',

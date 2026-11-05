@@ -57,7 +57,7 @@ const Map<String, String> th = {
   'Batal': 'ยกเลิก',
   'Batal dan kembali ke masuk': 'ยกเลิกและกลับไปหน้าเข้าสู่ระบบ',
   'Batalkan peserta': 'ยกเลิกผู้เข้าร่วม',
-  'Bayar': 'จ่ายแล้ว',
+  'Bayar': 'จ่าย',
   'Bayar {paid} • Refund {refund}': 'จ่าย {paid} • คืนเงิน {refund}',
   'Belum ada akun Wargakas dengan email ini. Minta orang tersebut mendaftar dulu, lalu coba lagi.': 'ยังไม่มีบัญชี Wargakas ที่ใช้อีเมลนี้ กรุณาให้เจ้าของอีเมลสมัครก่อน แล้วลองอีกครั้ง',
   'Belum ada pengingat': 'ยังไม่มีการเตือน',
@@ -167,7 +167,7 @@ const Map<String, String> th = {
   'Gunakan empat menu di bawah untuk mengelola peserta, uang, dan laporan. Perubahan disimpan di perangkat dan masuk antrean sinkronisasi saat offline.': 'ใช้เมนูสี่ปุ่มด้านล่างเพื่อจัดการผู้เข้าร่วม เงิน และรายงาน การเปลี่ยนแปลงจะบันทึกไว้ในเครื่องและเข้าคิวซิงค์เมื่อออฟไลน์',
   'Gunakan perangkat ini': 'ใช้ข้อมูลของเครื่องนี้',
   'Halaman {page} dari {pages}': 'หน้า {page} จาก {pages}',
-  'Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!': 'สวัสดีคุณ {name} ขอเตือนเรื่องเงินสมทบงาน {event}: จ่ายแล้ว {paid} จาก {target} คงเหลือ {remaining} ขอบคุณค่ะ',
+  'Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!': 'สวัสดีคุณ {name} ขอเตือนเรื่องเงินสมทบงาน {event}: จ่ายแล้ว {paid} จาก {target} คงเหลือ {remaining} ขอบคุณมาก',
   'Hanya bendahara yang dapat menambah pengurus.':
       'เฉพาะเหรัญญิกเท่านั้นที่เพิ่มผู้ดูแลได้',
   'Hanya-baca. Diperbarui {date}.': 'อ่านอย่างเดียว อัปเดตเมื่อ {date}',
@@ -249,7 +249,7 @@ const Map<String, String> th = {
   'Laporan Wargakas - {name}': 'รายงาน Wargakas - {name}',
   'Laporan kas acara': 'รายงานเงินสดของงาน',
   'Laporan kas untuk peserta': 'รายงานเงินสดสำหรับผู้เข้าร่วม',
-  'Layanan email belum dapat mengirim ke alamat ini. Hubungi pengelola Wargakas untuk memeriksa pengaturan pengiriman email.': 'บริการอีเมลยังส่งไปยังที่อยู่นี้ไม่ได้ กรุณาติดต่อผู้ดูแล Wargakas เพื่อตรวจสอบการตั้งค่าการส่งอีเมล',
+  'Layanan email belum dapat mengirim ke alamat ini. Hubungi pengelola Wargakas untuk memeriksa pengaturan pengiriman email.': 'บริการอีเมลยังส่งไปยังที่อยู่นี้ไม่ได้ กรุณาติดต่อผู้ดูแลระบบ Wargakas เพื่อตรวจสอบการตั้งค่าการส่งอีเมล',
   'Lewati': 'ข้าม',
   'Lihat daftar sebelum mengirim pengingat.': 'ดูรายชื่อก่อนส่งการเตือน',
   'Lihat di Uang': 'ดูในหน้าเงิน',
@@ -342,7 +342,7 @@ const Map<String, String> th = {
   'Pembayaran {name} disimpan.': 'บันทึกการชำระเงินของ {name} แล้ว',
   'Pemuatan acara terlalu lama.': 'โหลดงานนานเกินไป',
   'Pemuatan akun sebelumnya dibatalkan.': 'ยกเลิกการโหลดบัญชีครั้งก่อนแล้ว',
-  'Pendaftaran atau masuk dengan email sedang dinonaktifkan. Hubungi pengelola Wargakas.': 'การสมัครหรือเข้าสู่ระบบด้วยอีเมลถูกปิดใช้งานอยู่ กรุณาติดต่อผู้ดูแล Wargakas',
+  'Pendaftaran atau masuk dengan email sedang dinonaktifkan. Hubungi pengelola Wargakas.': 'การสมัครหรือเข้าสู่ระบบด้วยอีเมลถูกปิดใช้งานอยู่ กรุณาติดต่อผู้ดูแลระบบ Wargakas',
   'Pengaturan': 'การตั้งค่า',
   'Pengeditan dihentikan agar perubahan dari dua perangkat tidak saling menimpa.':
       'หยุดการแก้ไขเพื่อไม่ให้การเปลี่ยนแปลงจากสองเครื่องเขียนทับกัน',
@@ -367,7 +367,7 @@ const Map<String, String> th = {
       'กรุณาตรวจสอบการพิมพ์อีเมลของคุณอีกครั้ง',
   'Periksa koneksi internet lalu coba lagi.':
       'ตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วลองอีกครั้ง',
-  'Periksa koneksi internet lalu coba lagi. Jika tetap gagal, hubungi pengelola Wargakas.': 'ตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วลองอีกครั้ง หากยังไม่สำเร็จ กรุณาติดต่อผู้ดูแล Wargakas',
+  'Periksa koneksi internet lalu coba lagi. Jika tetap gagal, hubungi pengelola Wargakas.': 'ตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วลองอีกครั้ง หากยังไม่สำเร็จ กรุณาติดต่อผู้ดูแลระบบ Wargakas',
   'Periksa lagi': 'ตรวจอีกครั้ง',
   'Periksa nama, status, transaksi, dan saldo sebelum membagikan laporan.':
       'ตรวจสอบชื่อ สถานะ รายการ และยอดคงเหลือก่อนแชร์รายงาน',
@@ -375,13 +375,12 @@ const Map<String, String> th = {
   'Periode {range}': 'ช่วงเวลา {range}',
   'Periode {start} - {end}': 'ช่วงเวลา {start} - {end}',
   'Perlengkapan': 'อุปกรณ์และของใช้',
-  'Permintaan belum berhasil. Coba lagi nanti. Jika tetap gagal, hubungi pengelola Wargakas.': 'คำขอไม่สำเร็จ กรุณาลองใหม่ภายหลัง หากยังไม่สำเร็จ กรุณาติดต่อผู้ดูแล Wargakas',
+  'Permintaan belum berhasil. Coba lagi nanti. Jika tetap gagal, hubungi pengelola Wargakas.': 'คำขอไม่สำเร็จ กรุณาลองใหม่ภายหลัง หากยังไม่สำเร็จ กรุณาติดต่อผู้ดูแลระบบ Wargakas',
   'Permintaan diproses. Jika akun masih menunggu konfirmasi, Anda akan menerima email baru. Jika sudah dikonfirmasi, pilih Masuk.': 'ระบบกำลังดำเนินการตามคำขอ หากบัญชียังรอการยืนยัน คุณจะได้รับอีเมลฉบับใหม่ หากยืนยันแล้ว ให้เลือก เข้าสู่ระบบ',
   'Permintaan diproses. Jika alamat ini memiliki akun yang dapat dipulihkan, Anda akan menerima email pemulihan. Jika belum punya akun, pilih Buat akun.': 'ระบบกำลังดำเนินการตามคำขอ หากที่อยู่นี้มีบัญชีที่กู้คืนได้ คุณจะได้รับอีเมลกู้คืน หากยังไม่มีบัญชี ให้เลือก สร้างบัญชี',
   'Permintaan diproses. Jika email ini belum terdaftar, periksa email untuk konfirmasi. Jika sudah punya akun, pilih Masuk dengan kata sandi lama atau Lupa kata sandi?.': 'ระบบกำลังดำเนินการตามคำขอ หากอีเมลนี้ยังไม่ได้ลงทะเบียน กรุณาตรวจสอบอีเมลเพื่อยืนยัน หากมีบัญชีแล้ว ให้เลือก เข้าสู่ระบบ ด้วยรหัสผ่านเดิม หรือเลือก ลืมรหัสผ่าน?',
   'Perubahan belum tersinkron': 'การเปลี่ยนแปลงยังไม่ซิงค์',
-  'Perubahan lokal yang bertentangan akan dibuang dan data online dipakai.':
-      'การเปลี่ยนแปลงในเครื่องที่ขัดแย้งกันจะถูกทิ้ง และจะใช้ข้อมูลออนไลน์แทน',
+  'Perubahan lokal yang bertentangan akan dibuang dan data online dipakai.': 'การเปลี่ยนแปลงในเครื่องที่ขัดแย้งกันจะถูกละทิ้ง และจะใช้ข้อมูลออนไลน์แทน',
   'Perubahan lokal {date}': 'การเปลี่ยนแปลงในเครื่อง {date}',
   'Pesan belum dapat dibagikan. Coba lagi.':
       'ยังแชร์ข้อความไม่ได้ กรุณาลองอีกครั้ง',
@@ -479,7 +478,7 @@ const Map<String, String> th = {
       'เซสชันหมดอายุแล้ว กรุณาเข้าสู่ระบบอีกครั้ง หรือขอลิงก์กู้คืนใหม่',
   'Sesi sudah berakhir. Masuk kembali untuk melanjutkan.':
       'เซสชันหมดอายุแล้ว กรุณาเข้าสู่ระบบอีกครั้งเพื่อดำเนินการต่อ',
-  'Setiap rupiah bisa ditelusuri': 'ทุกเหรียญทุกจำนวนตรวจสอบย้อนหลังได้',
+  'Setiap rupiah bisa ditelusuri': 'ทุกยอดเงินตรวจสอบย้อนหลังได้',
   'Simpan': 'บันทึก',
   'Simpan kata sandi': 'บันทึกรหัสผ่าน',
   'Simpan koreksi': 'บันทึกการแก้ไข',
@@ -545,7 +544,7 @@ const Map<String, String> th = {
   'Terapkan': 'ใช้',
   'Terbuka untuk semua peserta': 'เปิดให้ผู้เข้าร่วมทุกคน',
   'Terjadi kendala: {detail}': 'เกิดปัญหา: {detail}',
-  'Terjadi kesalahan saat membuka acara. Hubungi pengelola Wargakas dan kirim pesan ini:\n{detail}': 'เกิดข้อผิดพลาดขณะเปิดงาน กรุณาติดต่อผู้ดูแล Wargakas และส่งข้อความนี้:\n{detail}',
+  'Terjadi kesalahan saat membuka acara. Hubungi pengelola Wargakas dan kirim pesan ini:\n{detail}': 'เกิดข้อผิดพลาดขณะเปิดงาน กรุณาติดต่อผู้ดูแลระบบ Wargakas และส่งข้อความนี้:\n{detail}',
   'Terlalu banyak permintaan. Tunggu sebelum mencoba lagi. Jika email tetap dibatasi, coba lagi nanti; batas pengiriman berlaku untuk seluruh aplikasi.': 'มีคำขอมากเกินไป กรุณารอสักครู่แล้วลองอีกครั้ง หากอีเมลยังถูกจำกัด ให้ลองใหม่ภายหลัง เพราะข้อจำกัดการส่งใช้กับทั้งแอป',
   'Tersimpan di perangkat • tidak ada perubahan menunggu sinkronisasi.':
       'บันทึกไว้ในเครื่องแล้ว • ไม่มีการเปลี่ยนแปลงที่รอซิงค์',
@@ -594,7 +593,7 @@ const Map<String, String> th = {
   'Ulangi kata sandi baru': 'ยืนยันรหัสผ่านใหม่',
   'Unduh laporan PDF atau CSV dulu jika Anda memerlukan salinan.':
       'ดาวน์โหลดรายงาน PDF หรือ CSV ก่อน หากคุณต้องการสำเนา',
-  'Verifikasi keamanan belum berhasil. Coba lagi atau hubungi pengelola Wargakas.': 'การตรวจสอบความปลอดภัยไม่สำเร็จ กรุณาลองอีกครั้งหรือติดต่อผู้ดูแล Wargakas',
+  'Verifikasi keamanan belum berhasil. Coba lagi atau hubungi pengelola Wargakas.': 'การตรวจสอบความปลอดภัยไม่สำเร็จ กรุณาลองอีกครั้งหรือติดต่อผู้ดูแลระบบ Wargakas',
   'Verifikasi ulang diperlukan. Minta link pemulihan baru sebelum mengganti kata sandi.':
       'ต้องยืนยันตัวตนอีกครั้ง กรุณาขอลิงก์กู้คืนใหม่ก่อนเปลี่ยนรหัสผ่าน',
   'Versi aplikasi': 'เวอร์ชันของแอป',
@@ -636,7 +635,7 @@ const Map<String, String> th = {
       'รายจ่าย {count} รายการยังไม่มีใบเสร็จ',
   '{count} pengingat terbuka': 'การเตือนที่ยังเปิดอยู่ {count} รายการ',
   '{count} perubahan di perangkat ini belum terkirim dan akan hilang.':
-      'การเปลี่ยนแปลง {count} รายการบนอุปกรณ์นี้ยังไม่ได้ส่งและจะสูญหาย',
+      'การเปลี่ยนแปลง {count} รายการบนเครื่องนี้ยังไม่ได้ส่งและจะสูญหาย',
   '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.': 'การเปลี่ยนแปลง {count} รายการยังรอส่ง หากออกจากระบบตอนนี้ การเปลี่ยนแปลงจะยังบันทึกไว้ และจะลองส่งอีกครั้งเมื่อบัญชีนี้เข้าสู่ระบบใหม่',
   '{count} perubahan tersimpan dan menunggu sinkronisasi.':
       'บันทึกการเปลี่ยนแปลง {count} รายการไว้แล้วและรอซิงค์',

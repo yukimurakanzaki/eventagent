@@ -93,7 +93,7 @@ const Map<String, String> ar = {
   'Cari mata uang': 'البحث عن عملة',
   'Cari peserta': 'البحث عن مشارك',
   'Catat bayar': 'تسجيل دفعة',
-  'Catat iuran, sponsor, dan pengeluaran di satu tempat. Target per orang dihitung otomatis dari peserta yang aktif.': 'سجّل الاشتراكات والرعاية والمصروفات في مكان واحد. يُحتسب المبلغ المستهدف لكل شخص تلقائيًا من المشاركين النشطين.',
+  'Catat iuran, sponsor, dan pengeluaran di satu tempat. Target per orang dihitung otomatis dari peserta yang aktif.': 'سجّل المساهمات والرعاية والمصروفات في مكان واحد. يُحتسب المبلغ المستهدف لكل شخص تلقائيًا من المشاركين النشطين.',
   'Catat pembayaran': 'تسجيل الدفعة',
   'Catat transaksi': 'تسجيل معاملة',
   'Catatan (opsional)': 'ملاحظة (اختياري)',
@@ -166,7 +166,7 @@ const Map<String, String> ar = {
   'Gunakan empat menu di bawah untuk mengelola peserta, uang, dan laporan. Perubahan disimpan di perangkat dan masuk antrean sinkronisasi saat offline.': 'استخدم القوائم الأربع في الأسفل لإدارة المشاركين والمال والتقارير. تُحفظ التغييرات على الجهاز وتدخل في قائمة المزامنة عند عدم الاتصال.',
   'Gunakan perangkat ini': 'استخدام هذا الجهاز',
   'Halaman {page} dari {pages}': 'الصفحة {page} من {pages}',
-  'Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!': 'مرحبًا {name}، تذكير باشتراك {event}: تم دفع {paid} من {target}، والمتبقي {remaining}. شكرًا لك!',
+  'Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!': 'مرحبًا {name}، تذكير بمساهمة {event}: تم دفع {paid} من {target}، والمتبقي {remaining}. شكرًا لك!',
   'Hanya bendahara yang dapat menambah pengurus.':
       'أمين الصندوق فقط يمكنه إضافة المسؤولين.',
   'Hanya-baca. Diperbarui {date}.': 'للقراءة فقط. حُدِّث في {date}.',
@@ -179,12 +179,12 @@ const Map<String, String> ar = {
   'Ikuti bahasa ponsel': 'اتباع لغة الهاتف',
   'Ikuti bahasa ponsel ({language})': 'اتباع لغة الهاتف ({language})',
   'Isi keterangan transaksi.': 'اكتب وصف المعاملة.',
-  'Iuran per peserta': 'الاشتراك لكل مشارك',
-  'Iuran peserta': 'اشتراكات المشاركين',
-  'Iuran tambahan': 'اشتراك إضافي',
-  'Iuran tambahan: {amount}': 'اشتراك إضافي: {amount}',
+  'Iuran per peserta': 'المساهمة لكل مشارك',
+  'Iuran peserta': 'مساهمات المشاركين',
+  'Iuran tambahan': 'مساهمة إضافية',
+  'Iuran tambahan: {amount}': 'مساهمة إضافية: {amount}',
   'Iuran terkumpul {collected} dari {expected} ({percent}%)':
-      'تم جمع {collected} من {expected} من الاشتراكات ({percent}%)',
+      'تم جمع {collected} من {expected} من المساهمات ({percent}%)',
   'Jatuh tempo sudah lewat. Pilih tanggal dan jam yang belum lewat.':
       'تجاوز موعد الاستحقاق. اختر تاريخًا ووقتًا لم يمرّا بعد.',
   'Jatuh tempo {date}': 'الاستحقاق {date}',
@@ -210,7 +210,7 @@ const Map<String, String> ar = {
       'كلمة المرور 6 أحرف على الأقل. استخدم كلمة مرور يصعب تخمينها.',
   'Kategori': 'الفئة',
   'Kebijakan privasi': 'سياسة الخصوصية',
-  'Keluar': 'خروج',
+  'Keluar': 'تسجيل الخروج',
   'Keterangan': 'البيان',
   'Ketua acara': 'رئيس الفعالية',
   'Ketua acara dapat melihat dan mencatat semua transaksi.':
@@ -353,8 +353,8 @@ const Map<String, String> ar = {
   'Pengeluaran: {amount}': 'المصروفات: {amount}',
   'Pengguna Wargakas': 'مستخدم Wargakas',
   'Penginapan': 'الإقامة',
-  'Pengingat': 'التذكير',
-  'Pengingat acara': 'تذكير الفعالية',
+  'Pengingat': 'التذكيرات',
+  'Pengingat acara': 'تذكيرات الفعالية',
   'Pengingat acara Wargakas.': 'تذكير فعالية Wargakas.',
   'Pengingat belum disimpan': 'لم يُحفظ التذكير',
   'Pengingat pembayaran, pengumpulan, dan persiapan acara.':
@@ -621,7 +621,7 @@ const Map<String, String> ar = {
   'tanpa refund': 'بلا استرداد',
   'tidak': 'لا',
   'tidak dihitung': 'غير محتسب',
-  'transaksi': 'معاملة',
+  'transaksi': 'معاملات',
   'waktu tidak tersedia': 'الوقت غير متوفر',
   'workspace belum siap': 'مساحة العمل غير جاهزة',
   'ya': 'نعم',
@@ -636,7 +636,7 @@ const Map<String, String> ar = {
   '{count} pengingat terbuka': '{count} من التذكيرات المفتوحة',
   '{count} perubahan di perangkat ini belum terkirim dan akan hilang.':
       '{count} من التغييرات على هذا الجهاز لم تُرسل وستُفقد.',
-  '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.': '{count} من التغييرات بانتظار الإرسال. إذا خرجت الآن فستبقى التغييرات محفوظة وستُحاول إرسالها عند عودة هذا الحساب إلى تسجيل الدخول.',
+  '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.': '{count} من التغييرات بانتظار الإرسال. إذا خرجت الآن فستبقى التغييرات محفوظة وستُعاد محاولة إرسالها عند عودة هذا الحساب إلى تسجيل الدخول.',
   '{count} perubahan tersimpan dan menunggu sinkronisasi.':
       '{count} من التغييرات محفوظة وبانتظار المزامنة.',
   '{count} peserta aktif': '{count} من المشاركين النشطين',
