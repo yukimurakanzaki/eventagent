@@ -9,11 +9,11 @@ Fill every [placeholder] before submitting. Character limits: Play short descrip
 | App name (<=30 chars) | Wargakas: Shared Cashbook |
 | Application ID | io.wargakas.mobile |
 | Category | Finance (Play: Finance; App Store primary: Finance, secondary: Productivity) |
-| Contact email | [Support email - replace before submission] |
-| Website | [Website or https://yukimurakanzaki.github.io/eventagent/] |
-| Privacy policy URL | [Hosted URL of privacy-policy.md] |
-| Terms URL | [Hosted URL of terms-of-service.md] |
-| Account-deletion URL | [Public web page explaining deletion, see section 7] |
+| Contact email | the Wargakas support page (https://github.com/yukimurakanzaki/eventagent/issues) |
+| Website | https://yukimurakanzaki.github.io/eventagent/ |
+| Privacy policy URL | https://github.com/yukimurakanzaki/eventagent/blob/main/event-planner-agent/docs/privacy-policy.md |
+| Terms URL | https://github.com/yukimurakanzaki/eventagent/blob/main/event-planner-agent/docs/terms-of-service.md |
+| Account-deletion URL | https://github.com/yukimurakanzaki/eventagent/blob/main/event-planner-agent/docs/account-deletion.md |
 | Pricing | Free, no ads, no in-app purchases |
 
 ## 2. English
@@ -56,7 +56,7 @@ PRIVACY FIRST
 IMPORTANT
 Wargakas is a record-keeping tool. It is not a bank or payment service and does not hold or move money.
 
-Questions or feedback: [Support email]
+Questions or feedback: the Wargakas support page (https://github.com/yukimurakanzaki/eventagent/issues)
 ```
 
 ## 3. Bahasa Indonesia
@@ -99,7 +99,7 @@ PRIVASI DIUTAMAKAN
 PENTING
 Wargakas adalah alat pencatatan. Bukan bank atau layanan pembayaran, dan tidak menyimpan atau memindahkan uang.
 
-Pertanyaan atau saran: [Support email]
+Pertanyaan atau saran: the Wargakas support page (https://github.com/yukimurakanzaki/eventagent/issues)
 ```
 
 ## 4. Short descriptions (other languages, <=80 chars)
@@ -130,7 +130,7 @@ Answer in Play Console -> App content -> Data safety.
 General:
 - Does your app collect or share user data? **Yes (collect), no (share for third-party purposes)**. Supabase acts as a service provider/processor, which Play does not count as "sharing".
 - Is all data encrypted in transit? **Yes** (HTTPS/TLS).
-- Do you provide a way for users to request data deletion? **Yes** (in-app Account -> Hapus akun, plus web URL [Account-deletion URL]).
+- Do you provide a way for users to request data deletion? **Yes** (in-app Account -> Hapus akun, plus web URL https://github.com/yukimurakanzaki/eventagent/blob/main/event-planner-agent/docs/account-deletion.md).
 - Does the app follow the Families Policy? No (not a children's app).
 
 | Data type | Collected | Shared | Optional | Purpose | Notes |
@@ -152,7 +152,7 @@ Security practices: data encrypted in transit; users can request deletion; commi
 
 Play requires (a) an in-app deletion path and (b) a **public web URL** where a user can request deletion without installing the app. In-app path exists (Account -> Hapus akun). Before submission:
 
-1. Publish a simple page at [Account-deletion URL] (for example a section of the GitHub Pages site or your website) that states the app name "Wargakas" and operator, the steps to delete in-app, an email request option ([Support email], send from your registered address, subject "Delete my Wargakas account"), what is deleted and retained (copy from Privacy Policy section 6) and the time to complete (for example within 30 days).
+1. Publish a simple page at https://github.com/yukimurakanzaki/eventagent/blob/main/event-planner-agent/docs/account-deletion.md (for example a section of the GitHub Pages site or your website) that states the app name "Wargakas" and operator, the steps to delete in-app, an email request option (the Wargakas support page (https://github.com/yukimurakanzaki/eventagent/issues), send from your registered address, subject "Delete my Wargakas account"), what is deleted and retained (copy from Privacy Policy section 6) and the time to complete (for example within 30 days).
 2. Enter that URL in Play Console -> App content -> Data safety -> Delete account URL.
 3. Be ready to process emailed requests manually: delete the user in Supabase Authentication (after checking treasurer handover) or run the equivalent of `delete_my_account()` on their behalf.
 
@@ -175,9 +175,9 @@ Data linked to you (all used for **App Functionality** only, none for tracking o
 | Identifiers | User ID | Yes | No |
 
 Data not collected: location, health, browsing history, search history, purchases, diagnostics, usage data, sensitive info, contacts list.
-Privacy policy URL: [Hosted URL]. Also fill: Sign-in required? Yes (demo account for review below). Export compliance: uses standard HTTPS only (qualifies for exemption; answer accordingly).
+Privacy policy URL: https://github.com/yukimurakanzaki/eventagent/blob/main/event-planner-agent/docs/privacy-policy.md. Also fill: Sign-in required? Yes (demo account for review below). Export compliance: uses standard HTTPS only (qualifies for exemption; answer accordingly).
 
-App Review notes: provide a reviewer test account ([Reviewer email] / [Reviewer password]) pre-filled with a sample event, and explain that the app records amounts and does not process payments (avoids 3.1/Finance concerns).
+App Review notes: provide a reviewer test account (a review account you create in Supabase (entered in the console only) / its password (entered in the console only, never in this repo)) pre-filled with a sample event, and explain that the app records amounts and does not process payments (avoids 3.1/Finance concerns).
 
 ## 9. Screenshot shot-list
 

@@ -1,8 +1,8 @@
 # Wargakas Terms of Service
 
-Last updated: [Effective date]
-Operator: [Operator name], [Operator address], [Country] ("we", "us")
-Contact: [Support email - replace before store submission]; interim: https://github.com/yukimurakanzaki/eventagent/issues
+Last updated: 2026-11-05
+Operator: the Wargakas project team, Indonesia, Indonesia ("we", "us")
+Contact: the Wargakas support page (https://github.com/yukimurakanzaki/eventagent/issues); interim: https://github.com/yukimurakanzaki/eventagent/issues
 
 By creating an account or using Wargakas you agree to these terms. If you do not agree, do not use the app.
 
@@ -33,7 +33,7 @@ We work to keep Wargakas available but do not promise uninterrupted service. Off
 
 ## 6. Privacy
 
-Our [Privacy Policy](privacy-policy.md) ([Privacy policy URL]) explains how personal data is handled and forms part of these terms.
+Our [Privacy Policy](privacy-policy.md) (https://github.com/yukimurakanzaki/eventagent/blob/main/event-planner-agent/docs/privacy-policy.md) explains how personal data is handled and forms part of these terms.
 
 ## 7. No warranty
 
@@ -53,14 +53,14 @@ We may update these terms. We will update the date above and notify you of mater
 
 ## 11. Governing law and disputes
 
-These terms are governed by the laws of [Governing law, e.g. the Republic of Indonesia], and disputes go to the courts of [Jurisdiction/city], without affecting mandatory consumer-protection rights where you live. [Optional: try to resolve disputes informally first by emailing the contact above.]
+These terms are governed by the laws of the Republic of Indonesia, and disputes go to the courts of Jakarta, Indonesia, without affecting mandatory consumer-protection rights where you live. [Optional: try to resolve disputes informally first by emailing the contact above.]
 
 ## 12. Contact
 
-[Operator name] - [Support email] - [Postal address]
+the Wargakas project team - the Wargakas support page (https://github.com/yukimurakanzaki/eventagent/issues) - Indonesia
 
 ---
 
 ## Ringkasan singkat (Bahasa Indonesia)
 
-Wargakas adalah alat pencatatan kas bersama, **bukan bank atau layanan pembayaran**, dan **tidak memegang uang**. Anda bertanggung jawab atas keakuratan catatan dan atas hak memasukkan data orang lain. Dilarang menggunakan aplikasi untuk hal melanggar hukum. Layanan diberikan apa adanya tanpa jaminan, dan tanggung jawab kami terbatas sebatas yang diizinkan hukum. Anda dapat menghapus akun kapan saja. Hukum yang berlaku: [Governing law]. Kontak: [Support email].
+Wargakas adalah alat pencatatan kas bersama, **bukan bank atau layanan pembayaran**, dan **tidak memegang uang**. Anda bertanggung jawab atas keakuratan catatan dan atas hak memasukkan data orang lain. Dilarang menggunakan aplikasi untuk hal melanggar hukum. Layanan diberikan apa adanya tanpa jaminan, dan tanggung jawab kami terbatas sebatas yang diizinkan hukum. Anda dapat menghapus akun kapan saja. Hukum yang berlaku: the Republic of Indonesia. Kontak: the Wargakas support page (https://github.com/yukimurakanzaki/eventagent/issues).

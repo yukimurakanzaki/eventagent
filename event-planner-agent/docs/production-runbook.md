@@ -1,22 +1,25 @@
 # Wargakas Production Runbook
 
 Current app version: `2.0.0+5` (`event-planner-agent/mobile/pubspec.yaml`). Release tag for it: `v2.0.0`.
-Repo: https://github.com/yukimurakanzaki/eventagent. Placeholders appear in [square brackets].
+Repo: https://github.com/yukimurakanzaki/eventagent. Defaults chosen for the operator details (project team, Indonesia, GitHub support page) can be changed in privacy-policy.md and terms-of-service.md.
 
-## 0. Known issues to resolve BEFORE go-live
+## 0. Status of issues found while preparing these docs
 
-Found while preparing these docs. Treat items 1 and 2 as launch blockers.
+Resolved in code (verified by `supabase/tests/ci_global_release_flow.sql`, which runs in CI):
 
-1. **Phone numbers can reach the public share link.** `get_shared_cashbook` (migration `202611050001_global_release.sql`) returns `snapshot->'participants'` unchanged, and each participant record contains a `phone` field. The privacy policy promises that the public link never shows phone numbers. Fix with a new migration that strips `phone` from each participant (for example `jsonb_agg(p - 'phone')`), then verify with the curl test in section 1.6. Do not publish the privacy policy until this is verified.
-2. **Receipt files are not deleted with the database rows.** `delete_my_account()` deletes a workspace when the treasurer is the last member, but Storage objects in `receipts/<event_id>/...` stay behind. Add a cleanup job (see section 8.4) or change the policy text; the privacy policy says "routine cleanup within [30] days".
-3. Android reminders use a fixed Indonesian timezone (see `mobile/README.md`). Validate reminders on target phones outside Indonesia or fix before marketing globally.
-4. `release.yml` builds Android only. iOS needs the manual steps in section 4.
-5. Unit tests do not cover live RLS with a real project: run the QA checklist in section 9 against production-like data.
+1. Phone numbers are stripped from the public share link (`get_shared_cashbook` removes `phone`; CI asserts it).
+2. Account deletion removes receipt files of groups that disappear: the app lists them with `my_sole_workspace_event_ids()` and deletes them through the Storage API before `delete_my_account()`, which also clears Storage ownership. Section 8.4 stays as a monthly safety net.
+3. Reminders use the phone's own timezone (`flutter_timezone`), not a fixed Indonesian one.
+
+Still manual:
+
+4. iOS is built on a Mac (section 4); `release.yml` builds Android (APK + AAB) and `web-viewer.yml` deploys the web viewer.
+5. Run the QA checklist in section 9 against the real project before inviting users; unit and CI tests use a local PostgreSQL with stubbed Supabase schemas.
 
 ## 1. Supabase
 
 ### 1.1 Create the project and choose the region
-- Create a project at https://supabase.com/dashboard. Choose the region closest to most users, and write it into the privacy policy ([Supabase region]). Suggested: Singapore (ap-southeast-1) for Indonesia/Southeast Asia. The region cannot be changed later without migrating.
+- Create a project at https://supabase.com/dashboard. Choose the region closest to most users, and write it into the privacy policy (Singapore (ap-southeast-1)). Suggested: Singapore (ap-southeast-1) for Indonesia/Southeast Asia. The region cannot be changed later without migrating.
 - Plan: use **Pro** or higher for production (daily backups, Point-in-Time Recovery add-on, no pausing, higher limits). Free projects pause after inactivity and have no backups you can restore on demand.
 - Store the database password in a password manager.
 
@@ -24,7 +27,7 @@ Found while preparing these docs. Treat items 1 and 2 as launch blockers.
 ```bash
 cd event-planner-agent
 supabase login
-supabase link --project-ref [PROJECT_REF]
+supabase link --project-ref yytzncyxyulwqsanejcg
 supabase db push --dry-run     # review what will run
 supabase db push               # applies, in order:
 #   202608260001_cashbook_shared_state.sql
@@ -62,7 +65,7 @@ where schemaname='storage' and tablename='objects' and policyname like 'receipts
 ```
 `get_shared_cashbook` must be callable anonymously and must reject bad tokens:
 ```bash
-curl -s -X POST "https://[PROJECT_REF].supabase.co/rest/v1/rpc/get_shared_cashbook" \
+curl -s -X POST "https://yytzncyxyulwqsanejcg.supabase.co/rest/v1/rpc/get_shared_cashbook" \
   -H "apikey: [PUBLISHABLE_KEY]" -H "Content-Type: application/json" \
   -d '{"p_token":"bad"}'
 # expect an error "share link not found"
@@ -74,8 +77,8 @@ curl -s -X POST "https://[PROJECT_REF].supabase.co/rest/v1/rpc/get_shared_cashbo
 - URL Configuration:
   - Redirect URLs: add `io.wargakas.mobile://auth-callback/` (exact, with trailing slash).
   - Site URL: your web viewer URL, [Share base URL, e.g. https://yukimurakanzaki.github.io/eventagent/].
-- **Custom SMTP** (Authentication -> Emails -> SMTP): required for production. The built-in sender is rate-limited and only for testing. Use a provider with a verified domain ([Email provider]), set sender `[no-reply@yourdomain]`, and configure SPF, DKIM and DMARC DNS records. Send a real confirmation and a password-reset to Gmail, Outlook and a regional provider.
-- Email templates: translate/brand confirmation and recovery emails ([Brand text]); keep the `{{ .ConfirmationURL }}` link.
+- **Custom SMTP** (Authentication -> Emails -> SMTP): required for production. The built-in sender is rate-limited and only for testing. Use a provider with a verified domain (the transactional email provider configured in Supabase Auth (custom SMTP)), set sender `[no-reply@yourdomain]`, and configure SPF, DKIM and DMARC DNS records. Send a real confirmation and a password-reset to Gmail, Outlook and a regional provider.
+- Email templates: translate/brand confirmation and recovery emails ("Wargakas" name and a short greeting in the user's language); keep the `{{ .ConfirmationURL }}` link.
 - Rate limits (Authentication -> Rate Limits): set sign-ups/sign-ins/emails per hour to values that fit your expected load; keep CAPTCHA (Turnstile/hCaptcha) available to turn on if abuse appears.
 - Disable unused providers and anonymous sign-ins.
 
@@ -95,7 +98,7 @@ Settings -> Secrets and variables -> Actions.
 
 | Name | Type | Value |
 |---|---|---|
-| `SUPABASE_URL` | Secret | `https://[PROJECT_REF].supabase.co` |
+| `SUPABASE_URL` | Secret | `https://yytzncyxyulwqsanejcg.supabase.co` |
 | `SUPABASE_PUBLISHABLE_KEY` | Secret | publishable (anon) key |
 | `KEYSTORE_BASE64` | Secret | `base64 -w0 release.jks` of your upload keystore |
 | `KEYSTORE_PASSWORD` | Secret | keystore password |
@@ -139,7 +142,7 @@ cd event-planner-agent/mobile
 flutter pub get
 cd ios && pod install && cd ..
 flutter build ipa --release \
-  --dart-define=SUPABASE_URL=https://[PROJECT_REF].supabase.co \
+  --dart-define=SUPABASE_URL=https://yytzncyxyulwqsanejcg.supabase.co \
   --dart-define=SUPABASE_PUBLISHABLE_KEY=[PUBLISHABLE_KEY] \
   --dart-define=WARGAKAS_VERSION=2.0.0 \
   --dart-define=WARGAKAS_SHARE_BASE_URL=https://yukimurakanzaki.github.io/eventagent/
@@ -151,7 +154,7 @@ Then: open `ios/Runner.xcworkspace`, set Bundle ID (`io.wargakas.mobile`), Team 
 - Supabase Dashboard -> Reports: database CPU, memory, disk, connections, API requests, auth emails. Enable **spend cap awareness** and usage-limit emails.
 - Logs Explorer: watch Postgres errors (`sync_cashbook_state`, RLS "event access denied"), Auth errors (email send failures), Storage errors.
 - Weekly checks: database size and growth, Storage size, auth email delivery rate (SMTP provider dashboard), Play Console vitals (crash rate, ANR), App Store crash reports.
-- Uptime: add a free external check (UptimeRobot/BetterStack) for `https://yukimurakanzaki.github.io/eventagent/` and `https://[PROJECT_REF].supabase.co/auth/v1/health`.
+- Uptime: add a free external check (UptimeRobot/BetterStack) for `https://yukimurakanzaki.github.io/eventagent/` and `https://yytzncyxyulwqsanejcg.supabase.co/auth/v1/health`.
 - The app has no crash-reporting SDK (a privacy choice). Use store crash reports and user email. If you add one later, update the Privacy Policy and the store data forms first.
 
 ## 6. Scaling notes
