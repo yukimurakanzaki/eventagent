@@ -321,8 +321,8 @@ void main() {
     },
   );
 
-  test('QA-16 the sponsor lock engages on the first participant payment, '
-      'not before', () async {
+  test('QA-16 sponsor money stays editable before and after participant '
+      'payments (late sponsor money)', () async {
     final controller = CashbookController.forTesting(
       initial: _snap(transactions: const []),
     );
@@ -362,8 +362,8 @@ void main() {
     );
     expect(
       controller.validateEventUpdate(changed),
-      'Sponsor dikunci setelah pembayaran peserta dimulai.',
-      reason: 'sponsor stayed editable after the first participant payment',
+      isNull,
+      reason: 'late sponsor money must be recordable after payments start',
     );
   });
 
@@ -381,7 +381,7 @@ void main() {
       tester
           .widget<TextField>(find.widgetWithText(TextField, 'Nama sponsor'))
           .enabled,
-      isTrue,
+      isNot(false),
       reason: 'sponsor name disabled with no participant payment recorded',
     );
     expect(
@@ -390,7 +390,7 @@ void main() {
             find.widgetWithText(TextField, 'Kontribusi sponsor (Rp)'),
           )
           .enabled,
-      isTrue,
+      isNot(false),
       reason: 'sponsor amount disabled with no participant payment recorded',
     );
     expect(
@@ -399,7 +399,7 @@ void main() {
     );
   });
 
-  testWidgets('QA-18 sponsor fields lock once a participant payment exists', (
+  testWidgets('QA-18 sponsor fields stay editable once payments exist', (
     tester,
   ) async {
     // The demo snapshot already carries participant payments.
@@ -412,8 +412,8 @@ void main() {
       tester
           .widget<TextField>(find.widgetWithText(TextField, 'Nama sponsor'))
           .enabled,
-      isFalse,
-      reason: 'sponsor name still editable after payments started',
+      isNot(false),
+      reason: 'sponsor name locked after payments started',
     );
     expect(
       tester
@@ -421,12 +421,12 @@ void main() {
             find.widgetWithText(TextField, 'Kontribusi sponsor (Rp)'),
           )
           .enabled,
-      isFalse,
-      reason: 'sponsor amount still editable after payments started',
+      isNot(false),
+      reason: 'sponsor amount locked after payments started',
     );
     expect(
       find.text('Dikunci karena pembayaran peserta sudah dimulai.'),
-      findsOneWidget,
+      findsNothing,
     );
   });
 

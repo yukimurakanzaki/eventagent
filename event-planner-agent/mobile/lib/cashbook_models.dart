@@ -2,6 +2,21 @@ enum ParticipantState { active, cancelled }
 
 enum RefundPolicy { undecided, none, partial, full }
 
+/// Committee members pay their own share too; showing them in the same list
+/// answers the "did the committee even pay?" suspicion (respondent 2).
+enum ParticipantRole { participant, committee }
+
+/// Expense categories for the per-category summary and report.
+enum ExpenseCategory {
+  transport,
+  lodging,
+  food,
+  tickets,
+  equipment,
+  donation,
+  other,
+}
+
 enum TransactionType {
   participantPayment,
   sponsor,
@@ -24,10 +39,14 @@ class EventRecord {
     required this.sponsorName,
     required this.sponsorContribution,
     required this.openingBalance,
+    this.currency = 'IDR',
   });
 
   final String id;
   final String name;
+
+  /// ISO 4217 code; amounts are stored in this currency's minor unit.
+  final String currency;
   final DateTime startDate;
   final DateTime endDate;
   final int participantCapacity;
@@ -46,8 +65,10 @@ class EventRecord {
     String? sponsorName,
     int? sponsorContribution,
     int? openingBalance,
+    String? currency,
   }) {
     return EventRecord(
+      currency: currency ?? this.currency,
       id: id ?? this.id,
       name: name ?? this.name,
       startDate: startDate ?? this.startDate,
@@ -70,6 +91,7 @@ class EventRecord {
     'sponsorName': sponsorName,
     'sponsorContribution': sponsorContribution,
     'openingBalance': openingBalance,
+    'currency': currency,
   };
 
   factory EventRecord.fromJson(Map<String, dynamic> json) {
@@ -83,6 +105,7 @@ class EventRecord {
       sponsorName: json['sponsorName'] as String,
       sponsorContribution: (json['sponsorContribution'] as num).toInt(),
       openingBalance: (json['openingBalance'] as num).toInt(),
+      currency: json['currency'] as String? ?? 'IDR',
     );
   }
 }
@@ -95,10 +118,17 @@ class ParticipantRecord {
     this.refundPolicy = RefundPolicy.undecided,
     this.replacementForId,
     this.cancelledAt,
+    this.role = ParticipantRole.participant,
+    this.phone = '',
   });
 
   final String id;
   final String name;
+  final ParticipantRole role;
+
+  /// Optional, used only to open a personal WhatsApp reminder. Never shared
+  /// in reports.
+  final String phone;
   final ParticipantState state;
   final RefundPolicy refundPolicy;
   final String? replacementForId;
@@ -110,9 +140,13 @@ class ParticipantRecord {
     RefundPolicy? refundPolicy,
     String? replacementForId,
     DateTime? cancelledAt,
+    ParticipantRole? role,
+    String? phone,
   }) {
     return ParticipantRecord(
       id: id,
+      role: role ?? this.role,
+      phone: phone ?? this.phone,
       name: name ?? this.name,
       state: state ?? this.state,
       refundPolicy: refundPolicy ?? this.refundPolicy,
@@ -128,6 +162,8 @@ class ParticipantRecord {
     'refundPolicy': refundPolicy.name,
     'replacementForId': replacementForId,
     'cancelledAt': cancelledAt?.toIso8601String(),
+    'role': role.name,
+    'phone': phone,
   };
 
   factory ParticipantRecord.fromJson(Map<String, dynamic> json) {
@@ -140,6 +176,11 @@ class ParticipantRecord {
       cancelledAt: json['cancelledAt'] == null
           ? null
           : DateTime.parse(json['cancelledAt'] as String),
+      role: ParticipantRole.values.firstWhere(
+        (role) => role.name == json['role'],
+        orElse: () => ParticipantRole.participant,
+      ),
+      phone: json['phone'] as String? ?? '',
     );
   }
 }
@@ -153,9 +194,23 @@ class TransactionRecord {
     required this.createdAt,
     this.participantId,
     this.relatedTransactionId,
+    this.category,
+    this.receiptPath,
+    this.receiptStoragePath,
   });
 
   final String id;
+  final ExpenseCategory? category;
+
+  /// Photo of the receipt on this device.
+  final String? receiptPath;
+
+  /// Object path in the hosted `receipts` bucket once uploaded.
+  final String? receiptStoragePath;
+
+  bool get hasReceipt =>
+      (receiptPath?.isNotEmpty ?? false) ||
+      (receiptStoragePath?.isNotEmpty ?? false);
   final TransactionType type;
   final int amount;
   final String description;
@@ -171,7 +226,30 @@ class TransactionRecord {
     'createdAt': createdAt.toIso8601String(),
     'participantId': participantId,
     'relatedTransactionId': relatedTransactionId,
+    if (category != null) 'category': category!.name,
+    if (receiptPath != null) 'receiptPath': receiptPath,
+    if (receiptStoragePath != null) 'receiptStoragePath': receiptStoragePath,
   };
+
+  /// [clearStoragePath] drops the hosted copy when a new photo replaces it.
+  TransactionRecord copyWith({
+    String? receiptPath,
+    String? receiptStoragePath,
+    bool clearStoragePath = false,
+  }) => TransactionRecord(
+    id: id,
+    type: type,
+    amount: amount,
+    description: description,
+    createdAt: createdAt,
+    participantId: participantId,
+    relatedTransactionId: relatedTransactionId,
+    category: category,
+    receiptPath: receiptPath ?? this.receiptPath,
+    receiptStoragePath: clearStoragePath
+        ? receiptStoragePath
+        : receiptStoragePath ?? this.receiptStoragePath,
+  );
 
   factory TransactionRecord.fromJson(Map<String, dynamic> json) {
     return TransactionRecord(
@@ -182,6 +260,11 @@ class TransactionRecord {
       createdAt: DateTime.parse(json['createdAt'] as String),
       participantId: json['participantId'] as String?,
       relatedTransactionId: json['relatedTransactionId'] as String?,
+      category: ExpenseCategory.values
+          .where((category) => category.name == json['category'])
+          .firstOrNull,
+      receiptPath: json['receiptPath'] as String?,
+      receiptStoragePath: json['receiptStoragePath'] as String?,
     );
   }
 }

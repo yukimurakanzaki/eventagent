@@ -1,4 +1,5 @@
 import 'cashbook_models.dart';
+import 'l10n/l10n.dart';
 
 class EventSummary {
   const EventSummary({
@@ -7,8 +8,15 @@ class EventSummary {
     required this.startDate,
     required this.endDate,
     required this.archived,
-  });
+    this.workspaceId = '',
+    DateTime? updatedAt,
+  }) : updatedAt = updatedAt ?? startDate;
 
+  /// The group (workspace) the event belongs to.
+  final String workspaceId;
+
+  /// Last change on the server; picks the event to open by default.
+  final DateTime updatedAt;
   final String id;
   final String name;
   final DateTime startDate;
@@ -23,7 +31,11 @@ class NewEventDraft {
     required this.endDate,
     required this.capacity,
     required this.budget,
+    this.currency = 'IDR',
   });
+
+  /// ISO 4217 code chosen when the event is created.
+  final String currency;
 
   final String name;
   final DateTime startDate;
@@ -33,13 +45,15 @@ class NewEventDraft {
 
   /// Mirrors the server checks so errors show before a network round trip.
   String? validate() {
-    if (name.trim().isEmpty) return 'Nama acara wajib diisi.';
-    if (name.trim().length > 120) return 'Nama acara maksimal 120 karakter.';
-    if (endDate.isBefore(startDate)) {
-      return 'Tanggal selesai tidak boleh sebelum tanggal mulai.';
+    if (name.trim().isEmpty) return tr('Nama acara wajib diisi.');
+    if (name.trim().length > 120) {
+      return tr('Nama acara maksimal 120 karakter.');
     }
-    if (capacity <= 0) return 'Kapasitas harus lebih dari 0.';
-    if (budget < 0) return 'Anggaran tidak boleh negatif.';
+    if (endDate.isBefore(startDate)) {
+      return tr('Tanggal selesai tidak boleh sebelum tanggal mulai.');
+    }
+    if (capacity <= 0) return tr('Kapasitas harus lebih dari 0.');
+    if (budget < 0) return tr('Anggaran tidak boleh negatif.');
     return null;
   }
 
@@ -50,6 +64,7 @@ class NewEventDraft {
       endDate: endDate,
       participantCapacity: capacity,
       finalBudget: budget,
+      currency: currency,
     ),
   );
 }

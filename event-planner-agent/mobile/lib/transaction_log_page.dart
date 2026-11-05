@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'cashbook_calculations.dart';
 import 'cashbook_controller.dart';
 import 'cashbook_models.dart';
+import 'l10n/l10n.dart';
+import 'money.dart';
 import 'report_service.dart';
 import 'transaction_log.dart';
 
@@ -36,8 +38,8 @@ class _TransactionLogPageState extends State<TransactionLogPage> {
       initialDateRange: _filter.from == null || _filter.to == null
           ? DateTimeRange(start: event.startDate, end: event.endDate)
           : DateTimeRange(start: _filter.from!, end: _filter.to!),
-      helpText: 'Pilih rentang tanggal',
-      saveText: 'Terapkan',
+      helpText: tr('Pilih rentang tanggal'),
+      saveText: tr('Terapkan'),
     );
     if (picked != null) {
       setState(
@@ -62,12 +64,16 @@ class _TransactionLogPageState extends State<TransactionLogPage> {
       );
       if (saved != null) {
         messenger.showSnackBar(
-          SnackBar(content: Text('Salinan PDF tersimpan di: $saved')),
+          SnackBar(
+            content: Text(
+              tr('Salinan PDF tersimpan di: {path}', {'path': saved}),
+            ),
+          ),
         );
       }
     } catch (_) {
       messenger.showSnackBar(
-        const SnackBar(content: Text('PDF belum dapat dibuat. Coba lagi.')),
+        SnackBar(content: Text(tr('PDF belum dapat dibuat. Coba lagi.'))),
       );
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -85,11 +91,11 @@ class _TransactionLogPageState extends State<TransactionLogPage> {
     );
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Riwayat transaksi')),
+      appBar: AppBar(title: Text(tr('Riwayat transaksi'))),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
-          Text('Kategori', style: theme.textTheme.titleSmall),
+          Text(tr('Kategori'), style: theme.textTheme.titleSmall),
           const SizedBox(height: 4),
           Wrap(
             spacing: 8,
@@ -120,8 +126,11 @@ class _TransactionLogPageState extends State<TransactionLogPage> {
                   icon: const Icon(Icons.date_range_outlined),
                   label: Text(
                     _filter.from == null || _filter.to == null
-                        ? 'Semua tanggal'
-                        : '${formatReportDate(_filter.from!)} - ${formatReportDate(_filter.to!)}',
+                        ? tr('Semua tanggal')
+                        : tr('{from} - {to}', {
+                            'from': formatReportDate(_filter.from!),
+                            'to': formatReportDate(_filter.to!),
+                          }),
                   ),
                 ),
               ),
@@ -129,7 +138,7 @@ class _TransactionLogPageState extends State<TransactionLogPage> {
                 TextButton(
                   onPressed: () =>
                       setState(() => _filter = const TransactionFilter()),
-                  child: const Text('Reset'),
+                  child: Text(tr('Reset')),
                 ),
             ],
           ),
@@ -141,14 +150,24 @@ class _TransactionLogPageState extends State<TransactionLogPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${summary.count} transaksi',
+                    tr('{count} transaksi', {'count': summary.count}),
                     style: theme.textTheme.titleMedium,
                   ),
                   const SizedBox(height: 4),
-                  Text('Pemasukan: ${formatReportRupiah(summary.inflow)}'),
-                  Text('Pengeluaran: ${formatReportRupiah(summary.outflow)}'),
                   Text(
-                    'Selisih: ${formatReportRupiah(summary.net)}',
+                    tr('Pemasukan: {amount}', {
+                      'amount': formatReportRupiah(summary.inflow),
+                    }),
+                  ),
+                  Text(
+                    tr('Pengeluaran: {amount}', {
+                      'amount': formatReportRupiah(summary.outflow),
+                    }),
+                  ),
+                  Text(
+                    tr('Selisih: {amount}', {
+                      'amount': formatReportRupiah(summary.net),
+                    }),
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -159,11 +178,13 @@ class _TransactionLogPageState extends State<TransactionLogPage> {
           FilledButton.icon(
             onPressed: _busy ? null : _export,
             icon: const Icon(Icons.picture_as_pdf_outlined),
-            label: Text(_busy ? 'Menyiapkan...' : 'Ekspor hasil filter (PDF)'),
+            label: Text(
+              _busy ? tr('Menyiapkan...') : tr('Ekspor hasil filter (PDF)'),
+            ),
           ),
           const SizedBox(height: 8),
           if (rows.isEmpty)
-            const ListTile(title: Text('Tidak ada transaksi pada filter ini.')),
+            ListTile(title: Text(tr('Tidak ada transaksi pada filter ini.'))),
           for (final entry in rows)
             _LogTile(
               entry: entry,
@@ -197,30 +218,34 @@ class _TransactionLogPageState extends State<TransactionLogPage> {
         )
         .firstOrNull;
     final status = transaction.type == TransactionType.correction
-        ? 'Koreksi: membatalkan transaksi lain'
+        ? tr('Koreksi: membatalkan transaksi lain')
         : correction != null
-        ? 'Dikoreksi, tidak dihitung'
-        : 'Dihitung dalam saldo';
+        ? tr('Dikoreksi, tidak dihitung')
+        : tr('Dihitung dalam saldo');
     final lines = <(String, String)>[
-      ('Kategori', transactionTypeLabel(transaction.type)),
-      ('Nominal', formatReportRupiah(transaction.amount)),
-      ('Tanggal', formatReportDateTime(transaction.createdAt)),
-      ('Status', status),
-      ('Saldo setelah', formatReportRupiah(entry.balanceAfter)),
+      (tr('Kategori'), transactionTypeLabel(transaction.type)),
+      (tr('Nominal'), formatReportRupiah(transaction.amount)),
+      (tr('Tanggal'), formatReportDateTime(transaction.createdAt)),
+      (tr('Status'), status),
+      (tr('Saldo setelah'), formatReportRupiah(entry.balanceAfter)),
       if (participant != null) ...[
-        ('Peserta', participant.name),
+        (tr('Peserta'), participant.name),
         (
-          'Total bayar peserta',
+          tr('Total bayar peserta'),
           formatReportRupiah(participantPaid(all, participant.id)),
         ),
         (
-          'Total refund peserta',
+          tr('Total refund peserta'),
           formatReportRupiah(refundTotalForParticipant(all, participant.id)),
         ),
         (
-          'Status peserta',
+          tr('Status peserta'),
           participant.state == ParticipantState.cancelled
-              ? 'Dibatalkan - ${refundPolicyLabelForReport(participant.refundPolicy)}'
+              ? tr('Dibatalkan - {policy}', {
+                  'policy': refundPolicyLabelForReport(
+                    participant.refundPolicy,
+                  ),
+                })
               : paymentStatus(
                   participantNetPaid(all, participant.id),
                   controller.contributionTarget,
@@ -229,13 +254,20 @@ class _TransactionLogPageState extends State<TransactionLogPage> {
       ],
       if (related != null)
         (
-          'Membatalkan',
-          '${related.description} (${formatReportRupiah(related.amount)}, ${formatReportDate(related.createdAt)})',
+          tr('Membatalkan'),
+          tr('{name} ({amount}, {date})', {
+            'name': related.description,
+            'amount': formatReportRupiah(related.amount),
+            'date': formatReportDate(related.createdAt),
+          }),
         ),
       if (correction != null)
         (
-          'Dikoreksi pada',
-          '${formatReportDate(correction.createdAt)}. Alasan: ${correction.description}',
+          tr('Dikoreksi pada'),
+          tr('{date}. Alasan: {reason}', {
+            'date': formatReportDate(correction.createdAt),
+            'reason': correction.description,
+          }),
         ),
     ];
     showModalBottomSheet<void>(
@@ -297,7 +329,7 @@ class _LogTile extends StatelessWidget {
       transactionTypeLabel(transaction.type),
       if (participant != null) participant!.name,
       formatReportDate(transaction.createdAt),
-      if (!entry.counted) 'tidak dihitung',
+      if (!entry.counted) tr('tidak dihitung'),
     ].join(' • ');
     return ListTile(
       contentPadding: EdgeInsets.zero,
@@ -315,7 +347,7 @@ class _LogTile extends StatelessWidget {
       trailing: Text(
         transaction.type == TransactionType.correction
             ? '-'
-            : '${outflow ? '−' : '+'}${formatReportRupiah(transaction.amount)}',
+            : formatSignedMoney(transaction.amount, outflow: outflow),
         style: Theme.of(context).textTheme.titleSmall?.merge(struck),
       ),
       onTap: onTap,

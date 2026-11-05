@@ -83,7 +83,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Tambah peserta'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), 'Dewi');
+    await tester.enterText(find.byType(TextField).first, 'Dewi');
     await tester.tap(find.text('Simpan'));
     // Step through the exit animation; disposing the controller early threw here.
     for (var i = 0; i < 20; i++) {

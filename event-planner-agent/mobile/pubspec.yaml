@@ -1,5 +1,5 @@
 name: wargakas_mobile
-description: "A new Flutter project."
+description: "Wargakas: transparent shared cashbook for community events."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.1.1+4
+version: 2.0.0+5
 
 environment:
   sdk: ^3.13.1
@@ -43,6 +43,11 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.3
+  image_picker: ^1.2.4
+  url_launcher: ^6.3.3
 
 dev_dependencies:
   http: ^1.6.0
@@ -75,6 +80,11 @@ flutter:
     - family: SourceSans3
       fonts:
         - asset: assets/fonts/SourceSans3.ttf
+
+  # Noto fonts embedded in PDF reports so names and labels in Latin,
+  # Vietnamese, Cyrillic, Thai, Arabic and Devanagari scripts print correctly.
+  assets:
+    - assets/fonts/pdf/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

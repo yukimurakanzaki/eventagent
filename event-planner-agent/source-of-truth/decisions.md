@@ -257,6 +257,25 @@ Decision: Respondent 3 (a family member of the product owner) uses the Android a
 
 Reasoning: Observing real use answers the adoption question that two interviews could not, and a week is enough for the two fixes without which the ledger could not stay correct.
 
+### 2026-11-05: Build for a global, production release (version 2.0.0)
+
+Decision: The product owner directed a full build-out to a production-ready app for any country, age group and personal preference, choosing the best option at each open question. The discovery gate is therefore bypassed for implementation; the open validation items below remain open as product risks, not blockers.
+
+- Languages: gettext-style `tr()` with the Indonesian copy as source keys; 13 shipped languages (en, id, ms, es, pt, fr, de, vi, th, hi, ar, zh, ja), Arabic right-to-left, singular forms via `<key>|one`. A test fails when a string lacks a translation.
+- Money: each event has an ISO 4217 currency; amounts stay integers in the currency's minor unit (IDR/JPY/VND whole units, USD/EUR cents). Existing rupiah data needs no migration. Locale-aware formatting and input.
+- Personal settings live on the device only: language, theme, text size, accent colour, high contrast, reduced motion, default currency; first-run welcome.
+- Sponsor money may be added or changed after payments start (both respondents); the change is audited and the target is recalculated. Replaces the earlier sponsor lock and its pilot workaround.
+- Committee members appear as payers in the participant list with a "Panitia" badge (respondent 2), and a `committee` workspace role can record money but not manage access.
+- Expenses carry a category and an optional receipt photo in a private bucket; expenses without a receipt are labelled "tanpa nota" so an incomplete ledger shows its gaps (respondent 2).
+- Participant transparency: a revocable, unguessable read-only web link (no account) showing totals, payment status and every transaction; never phone numbers or receipt images. Phone numbers are optional and only used for personal WhatsApp reminders.
+- Reports add per-transaction detail with category and receipt status, a per-category summary, CSV for Excel, and embedded Noto fonts so PDFs print non-Latin names.
+- Account deletion is in-app (store requirement): the treasurer role passes to another member, or a workspace nobody else can see is deleted.
+- Platforms: Android, iOS and web from one codebase; release workflow builds APK + AAB; web viewer deploys to GitHub Pages.
+
+Still deliberately not built (conflicting or single-source evidence): automatic receipt redaction, event lock/reopen, advance-to-sponsor conversion, vice-chair delegation, DOCX, charity/equal surplus distribution, first-vendor-payment refund cutoff, replacement paying the original participant directly.
+
+Reasoning: The owner asked for a complete product rather than further gated discovery. Each choice follows the evidence both respondents share, keeps old data valid, and adds no behaviour the respondents contradicted.
+
 ## Pending
 
 - Repeat the problem interview with 4–6 additional treasurers and 2–3 chairpersons.

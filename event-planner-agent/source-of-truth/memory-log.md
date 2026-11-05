@@ -245,3 +245,12 @@ Next steps, in order:
 - PRs #4 (crash fix + multi-event) and #5 (version 1.1.0+3) merged to `main`. Release APK built with pilot signing (`mobile/build/app/outputs/flutter-apk/app-release.apk`, versionName 1.1.0, versionCode 3) and installs only over builds with the same signing key; a debug build must be uninstalled first.
 - OPEN PROBLEM: the 1.1.0 build showed "Acara bersama belum dapat dibuka... Periksa koneksi internet". Device internet was fine. Querying the hosted project `yytzncyxyulwqsanejcg` returned `column events.archived_at does not exist` and `set_event_archived` returned 404, so the multi-event migration was not live on that project. 1.1.0 reads `archived_at` on startup and cannot open any event until it is. The error screen hides the real cause behind a generic connectivity message.
 - Not yet verified on a device: hosted switch, create, archive, restore.
+
+## 2026-11-05 Session: global production build-out (2.0.0+5)
+
+- Owner directive: finish all pending items and make the app production-ready for any country, age group and personalisation; choose the best option at every open question.
+- Built: 13-language localisation (Indonesian source keys, translations generated from `mobile/tool/l10n/*.json`), per-event currency, settings + onboarding, committee role and badge, optional WhatsApp reminders, expense categories, receipt photos with private storage, "tanpa nota" gap labels, CSV export, revocable participant web link, in-app account deletion, iOS and web targets, AAB release, Pages deploy.
+- Backend: `supabase/migrations/202611050001_global_release.sql`, verified on local PostgreSQL 16 with stubbed auth/storage; `supabase/tests/ci_*` run in CI. A review caught participant phone numbers in the share payload; the RPC now strips them and CI asserts it.
+- Verification: `flutter analyze` clean; 200+ tests including a catalog-completeness test and a smoke test that opens every tab in all 13 languages at large text (fixed two overflows it found); web release build and Android debug APK build succeed; web app screenshots checked in English, German and Arabic.
+- `main.dart` was split into `lib/ui/*.dart` parts.
+- Not verifiable here: real Supabase project, real email delivery, iOS build, physical devices. See the backlog go-live list.

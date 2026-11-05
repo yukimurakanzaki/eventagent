@@ -1,0 +1,109 @@
+name: Deploy database and auth settings
+
+# Applies supabase/migrations to the production project and configures
+# sign-in email (custom SMTP) and the app's auth redirect. Runs on every
+# merge to main that touches supabase/, or by hand from the Actions tab.
+#
+# Required secrets: SUPABASE_ACCESS_TOKEN (Account → Access tokens),
+# SUPABASE_DB_PASSWORD, SUPABASE_PROJECT_REF (e.g. yytzncyxyulwqsanejcg).
+# Optional secrets for email: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS,
+# SMTP_ADMIN_EMAIL (sender address), SMTP_SENDER_NAME.
+on:
+  push:
+    branches: [main]
+    paths: ['event-planner-agent/supabase/**']
+  workflow_dispatch:
+
+concurrency:
+  group: supabase-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+    defaults:
+      run:
+        working-directory: event-planner-agent/supabase
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check credentials
+        id: creds
+        run: |
+          if [ -z "$SUPABASE_ACCESS_TOKEN" ] || [ -z "$SUPABASE_DB_PASSWORD" ] || [ -z "$PROJECT_REF" ]; then
+            echo "::warning::Supabase secrets are not set; skipping deploy. See docs/production-runbook.md."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: supabase/setup-cli@v1
+        if: steps.creds.outputs.ready == 'true'
+        with:
+          version: latest
+      - name: Link project
+        if: steps.creds.outputs.ready == 'true'
+        run: supabase link --project-ref "$PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
+      - name: Show pending migrations
+        if: steps.creds.outputs.ready == 'true'
+        run: supabase migration list --password "$SUPABASE_DB_PASSWORD"
+      - name: Apply migrations
+        if: steps.creds.outputs.ready == 'true'
+        run: supabase db push --password "$SUPABASE_DB_PASSWORD" --include-all
+      - name: Configure auth redirect and custom SMTP
+        if: steps.creds.outputs.ready == 'true'
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          SMTP_ADMIN_EMAIL: ${{ secrets.SMTP_ADMIN_EMAIL }}
+          SMTP_SENDER_NAME: ${{ secrets.SMTP_SENDER_NAME }}
+          SHARE_BASE_URL: ${{ vars.WARGAKAS_SHARE_BASE_URL }}
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          ref = os.environ["PROJECT_REF"]
+          body = {
+              # The app's PKCE callback for email confirmation and recovery.
+              "uri_allow_list": "io.wargakas.mobile://auth-callback/",
+              "site_url": os.environ.get("SHARE_BASE_URL") or f"https://{os.environ.get('GITHUB_REPOSITORY_OWNER','')}.github.io/eventagent/",
+              "mailer_secure_email_change_enabled": True,
+          }
+          if os.environ.get("SMTP_HOST"):
+              body.update({
+                  "smtp_host": os.environ["SMTP_HOST"],
+                  "smtp_port": os.environ.get("SMTP_PORT") or "587",
+                  "smtp_user": os.environ.get("SMTP_USER", ""),
+                  "smtp_pass": os.environ.get("SMTP_PASS", ""),
+                  "smtp_admin_email": os.environ.get("SMTP_ADMIN_EMAIL", ""),
+                  "smtp_sender_name": os.environ.get("SMTP_SENDER_NAME") or "Wargakas",
+                  # Custom SMTP lifts the built-in sender's tiny hourly cap.
+                  "rate_limit_email_sent": 100,
+              })
+          else:
+              print("::warning::SMTP secrets not set; sign-up email still uses Supabase's test sender.")
+          request = urllib.request.Request(
+              f"https://api.supabase.com/v1/projects/{ref}/config/auth",
+              data=json.dumps(body).encode(),
+              method="PATCH",
+              headers={
+                  "Authorization": f"Bearer {os.environ['SUPABASE_ACCESS_TOKEN']}",
+                  "Content-Type": "application/json",
+              },
+          )
+          with urllib.request.urlopen(request) as response:
+              print("auth config updated:", response.status)
+          PY
+      - name: Verify the release objects exist
+        if: steps.creds.outputs.ready == 'true'
+        run: |
+          supabase db dump --password "$SUPABASE_DB_PASSWORD" --schema public -f /tmp/schema.sql
+          grep -q "get_shared_cashbook" /tmp/schema.sql
+          grep -q "delete_my_account" /tmp/schema.sql
+          grep -Eq "currency .*text" /tmp/schema.sql
+          echo "Release schema verified."

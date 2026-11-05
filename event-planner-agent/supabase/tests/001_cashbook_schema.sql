@@ -1,6 +1,6 @@
 begin;
 
-select plan(12);
+select plan(18);
 
 select has_schema('private');
 select has_table('public', 'workspaces');
@@ -22,6 +22,13 @@ select col_is_pk('public', 'cashbook_states', 'event_id');
 select has_column('public', 'events', 'archived_at');
 select has_function('public', 'create_event', array['uuid', 'jsonb']);
 select has_function('public', 'set_event_archived', array['text', 'boolean']);
+
+select has_column('public', 'events', 'currency');
+select has_table('public', 'event_share_links');
+select has_function('public', 'create_share_link', array['text']);
+select has_function('public', 'revoke_share_links', array['text']);
+select has_function('public', 'get_shared_cashbook', array['text']);
+select has_function('public', 'delete_my_account', array[]::text[]);
 
 select * from finish();
 rollback;

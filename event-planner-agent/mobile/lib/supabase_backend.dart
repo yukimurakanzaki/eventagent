@@ -1,9 +1,15 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'cashbook_models.dart';
 import 'cashbook_controller.dart';
 import 'cashbook_sync.dart';
 import 'event_directory.dart';
+import 'l10n/l10n.dart';
 
 class SupabaseBackend {
   SupabaseBackend(this.client);
@@ -31,7 +37,9 @@ class SupabaseBackend {
 
   static String? get configurationError {
     if (isDemoMode || isConfigured) return null;
-    return 'Build ini belum terhubung ke Supabase. Gunakan build hosted dengan SUPABASE_URL dan SUPABASE_PUBLISHABLE_KEY.';
+    return tr(
+      'Build ini belum terhubung ke Supabase. Gunakan build hosted dengan SUPABASE_URL dan SUPABASE_PUBLISHABLE_KEY.',
+    );
   }
 
   static Future<SupabaseBackend?> initializeFromEnvironment() async {
@@ -99,6 +107,7 @@ class SupabaseBackend {
     if (user?.id != userId) throw AuthSessionMissingException();
     final controller = await CashbookController.bootstrap(
       syncAdapter: adapter,
+      receiptUploader: uploadReceipt,
       storageNamespace: '$userId-${adapter.workspaceId}-${adapter.eventId}',
     );
     if (user?.id != userId) {
@@ -119,16 +128,17 @@ class SupabaseBackend {
   }) async {
     final userId = user?.id;
     if (userId == null) throw AuthSessionMissingException();
-    final membership = await client
+    // RLS shows every member of the user's workspaces, so filter to the
+    // signed-in user or another member's role could be picked up.
+    final memberships = await client
         .from('workspace_members')
         .select('workspace_id, role')
-        .order('created_at')
-        .limit(1)
-        .maybeSingle();
+        .eq('user_id', userId)
+        .order('created_at');
 
     if (user?.id != userId) throw AuthSessionMissingException();
 
-    if (membership == null) {
+    if (memberships.isEmpty) {
       final created = await client.rpc(
         'create_workspace_with_event',
         params: {'p_workspace_name': 'Wargakas', 'p_snapshot': seed.toJson()},
@@ -142,45 +152,84 @@ class SupabaseBackend {
       );
     }
 
-    final workspaceId = membership['workspace_id'] as String;
-    final events = await listEvents(workspaceId);
+    final roles = <String, String>{
+      for (final row in memberships)
+        row['workspace_id'] as String: row['role'] as String? ?? 'chairperson',
+    };
+    final events = await listAllEvents(workspaceIds: roles.keys.toList());
     if (events.isEmpty) {
       throw StateError(
-        'Akun belum memiliki acara. Buat acara pertama melalui dashboard Supabase.',
+        tr(
+          'Akun belum memiliki acara. Buat acara pertama melalui dashboard Supabase.',
+        ),
       );
     }
+    // A person can belong to several groups (their own and ones they were
+    // invited to); without a saved choice open the most recently active.
+    final byActivity = [...events]
+      ..sort((x, y) => y.updatedAt.compareTo(x.updatedAt));
     final event = events.firstWhere(
       (item) => item.id == preferredEventId,
-      orElse: () => events.firstWhere(
+      orElse: () => byActivity.firstWhere(
         (item) => !item.archived,
-        orElse: () => events.first,
+        orElse: () => byActivity.first,
       ),
     );
     return SupabaseCashbookSyncAdapter(
       client: client,
-      workspaceId: workspaceId,
+      workspaceId: event.workspaceId,
       eventId: event.id,
-      role: membership['role'] as String? ?? 'chairperson',
+      role: roles[event.workspaceId] ?? 'chairperson',
     );
   }
+
+  /// Every event in every workspace the user belongs to, oldest first.
+  Future<List<EventSummary>> listAllEvents({List<String>? workspaceIds}) async {
+    final userId = user?.id;
+    if (userId == null) throw AuthSessionMissingException();
+    final ids =
+        workspaceIds ??
+        [
+          for (final row
+              in await client
+                  .from('workspace_members')
+                  .select('workspace_id')
+                  .eq('user_id', userId))
+            row['workspace_id'] as String,
+        ];
+    if (ids.isEmpty) return const [];
+    final rows = await client
+        .from('events')
+        .select(
+          'id, workspace_id, name, start_date, end_date, archived_at, updated_at',
+        )
+        .inFilter('workspace_id', ids)
+        .order('created_at');
+    return [for (final row in rows) _eventSummary(row)];
+  }
+
+  EventSummary _eventSummary(Map<String, dynamic> row) => EventSummary(
+    id: row['id'] as String,
+    name: row['name'] as String,
+    startDate: DateTime.parse(row['start_date'] as String),
+    endDate: DateTime.parse(row['end_date'] as String),
+    archived: row['archived_at'] != null,
+    workspaceId: row['workspace_id'] as String? ?? '',
+    updatedAt:
+        DateTime.tryParse(row['updated_at'] as String? ?? '') ??
+        DateTime.fromMillisecondsSinceEpoch(0),
+  );
 
   /// Oldest first, so the fallback event matches the pre-archive behaviour.
   Future<List<EventSummary>> listEvents(String workspaceId) async {
     final rows = await client
         .from('events')
-        .select('id, name, start_date, end_date, archived_at')
+        .select(
+          'id, workspace_id, name, start_date, end_date, archived_at, updated_at',
+        )
         .eq('workspace_id', workspaceId)
         .order('created_at');
-    return [
-      for (final row in rows)
-        EventSummary(
-          id: row['id'] as String,
-          name: row['name'] as String,
-          startDate: DateTime.parse(row['start_date'] as String),
-          endDate: DateTime.parse(row['end_date'] as String),
-          archived: row['archived_at'] != null,
-        ),
-    ];
+    return [for (final row in rows) _eventSummary(row)];
   }
 
   Future<String> createEvent(String workspaceId, NewEventDraft draft) async {
@@ -199,6 +248,124 @@ class SupabaseBackend {
       'set_event_archived',
       params: {'p_event_id': eventId, 'p_archived': archived},
     );
+  }
+
+  Future<void> inviteMember({
+    required String workspaceId,
+    required String email,
+    required String role,
+  }) async {
+    await client.rpc(
+      'invite_workspace_member',
+      params: {
+        'p_workspace_id': workspaceId,
+        'p_email': email.trim(),
+        'p_role': role,
+      },
+    );
+  }
+
+  /// Permanently deletes the signed-in account (store requirement). The
+  /// server hands the treasurer role to another member or removes a
+  /// workspace nobody else can see.
+  Future<void> deleteAccount() async {
+    final userId = user?.id;
+    // Receipt photos of groups that disappear with this account. Storage
+    // files cannot be removed from SQL, so the app removes them first.
+    try {
+      final ids = await client.rpc('my_sole_workspace_event_ids');
+      for (final eventId in (ids as List? ?? const []).cast<String>()) {
+        final files = await client.storage.from('receipts').list(path: eventId);
+        if (files.isEmpty) continue;
+        await client.storage.from('receipts').remove([
+          for (final file in files) '$eventId/${file.name}',
+        ]);
+      }
+    } catch (_) {
+      // Best effort; the runbook's orphan clean-up catches leftovers.
+    }
+    await client.rpc('delete_my_account');
+    await _wipeLocalData(userId);
+    try {
+      await client.auth.signOut(scope: SignOutScope.local);
+    } catch (_) {
+      // The user no longer exists server-side; local sign-out is enough.
+    }
+  }
+
+  /// Removes this account's cached cashbooks, event choice and receipt
+  /// photos from the phone after the account is deleted.
+  Future<void> _wipeLocalData(String? userId) async {
+    if (userId == null) return;
+    try {
+      final preferences = await SharedPreferences.getInstance();
+      for (final key in preferences.getKeys().toList()) {
+        if (key.contains(userId)) await preferences.remove(key);
+      }
+    } catch (_) {}
+    if (kIsWeb) return;
+    try {
+      final receipts = Directory(
+        '${(await getApplicationDocumentsDirectory()).path}/receipts',
+      );
+      if (await receipts.exists()) await receipts.delete(recursive: true);
+    } catch (_) {}
+  }
+
+  /// Uploads a receipt photo to `receipts/<eventId>/<transactionId>.<ext>`.
+  Future<String?> uploadReceipt(
+    String eventId,
+    String transactionId,
+    String localPath,
+  ) async {
+    final file = File(localPath);
+    if (!await file.exists()) return null;
+    final extension = localPath.toLowerCase().endsWith('.png') ? 'png' : 'jpg';
+    final path = '$eventId/$transactionId.$extension';
+    await client.storage
+        .from('receipts')
+        .upload(
+          path,
+          file,
+          fileOptions: FileOptions(
+            upsert: true,
+            contentType: extension == 'png' ? 'image/png' : 'image/jpeg',
+          ),
+        );
+    return path;
+  }
+
+  /// Returns the active participant share token for [eventId].
+  Future<String> createShareLink(String eventId) async {
+    final token = await client.rpc(
+      'create_share_link',
+      params: {'p_event_id': eventId},
+    );
+    return token as String;
+  }
+
+  Future<void> revokeShareLinks(String eventId) async {
+    await client.rpc('revoke_share_links', params: {'p_event_id': eventId});
+  }
+
+  /// Public read-only snapshot for a participant share link.
+  Future<Map<String, dynamic>> fetchSharedCashbook(String token) async {
+    final result = await client.rpc(
+      'get_shared_cashbook',
+      params: {'p_token': token},
+    );
+    return Map<String, dynamic>.from(result as Map);
+  }
+
+  /// Short-lived signed URL so members on other phones can see a receipt.
+  Future<String?> receiptUrl(String storagePath) async {
+    try {
+      return await client.storage
+          .from('receipts')
+          .createSignedUrl(storagePath, 60 * 60);
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<void> inviteChairperson({
