@@ -103,6 +103,7 @@ const Map<String, String> hi = {
   'Contoh: Saldo kas sekarang': 'उदाहरण: वर्तमान नकद शेष',
   'Contoh: Uang muka bus': 'उदाहरण: बस का अग्रिम',
   'Contoh: salah ketik nominal': 'उदाहरण: राशि गलत लिख दी',
+  'Contoh: {example}': 'उदाहरण: {example}',
   'Daftar acara belum dapat dimuat.':
       'कार्यक्रमों की सूची अभी लोड नहीं हो सकी।',
   'Daftar transaksi': 'लेन-देन की सूची',
@@ -168,8 +169,6 @@ const Map<String, String> hi = {
   'Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!': 'नमस्ते {name} जी, {event} के अंशदान का रिमाइंडर: {target} में से {paid} का भुगतान हो चुका है, शेष {remaining}। धन्यवाद!',
   'Hanya bendahara yang dapat menambah pengurus.':
       'केवल कोषाध्यक्ष ही प्रबंधक जोड़ सकते हैं।',
-  'Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.':
-      'केवल निजी रिमाइंडर के लिए है, रिपोर्ट में कभी नहीं दिखेगा।',
   'Hanya-baca. Diperbarui {date}.':
       'केवल पढ़ने के लिए। {date} को अपडेट किया गया।',
   'Hanya-baca: data langsung dari buku kas bendahara.':
@@ -481,6 +480,7 @@ const Map<String, String> hi = {
   'Semua tanggal': 'सभी तारीख़ें',
   'Semua tautan yang sudah dibagikan tidak akan bisa dibuka lagi. Anda bisa membuat tautan baru kapan saja.': 'साझा किए जा चुके सभी लिंक फिर नहीं खुलेंगे। आप कभी भी नया लिंक बना सकते हैं।',
   'Semua transaksi ({count})': 'सभी लेन-देन ({count})',
+  'Sertakan kode negara, misalnya +62 untuk Indonesia. Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.': 'देश कोड शामिल करें, जैसे भारत के लिए +91। केवल निजी रिमाइंडर के लिए उपयोग होता है, रिपोर्ट में कभी नहीं दिखता।',
   'Sesi sudah berakhir. Masuk kembali atau minta link pemulihan baru.':
       'सत्र समाप्त हो गया है। फिर से लॉगिन करें या नया रिकवरी लिंक माँगें।',
   'Sesi sudah berakhir. Masuk kembali untuk melanjutkan.':
@@ -580,6 +580,7 @@ const Map<String, String> hi = {
   'Transaksi berhasil disimpan.': 'लेन-देन सफलतापूर्वक सहेजा गया।',
   'Transaksi ini sudah dikoreksi.': 'इस लेन-देन में पहले ही सुधार हो चुका है।',
   'Transaksi ini tidak dihapus. Ia tetap terlihat dicoret di riwayat dan laporan, dan tidak dihitung lagi. Setelah itu catat ulang transaksi yang benar.': 'यह लेन-देन हटाया नहीं गया है। यह इतिहास और रिपोर्ट में कटे हुए रूप में दिखता रहेगा और अब गिना नहीं जाएगा। इसके बाद सही लेन-देन फिर से दर्ज करें।',
+  'Transaksi tidak dapat disimpan.': 'लेन-देन सहेजा नहीं जा सका।',
   'Transaksi tidak ditemukan.': 'लेन-देन नहीं मिला।',
   'Transportasi': 'परिवहन',
   'Tulis hal yang perlu diingat terlebih dahulu.':
@@ -638,6 +639,8 @@ const Map<String, String> hi = {
       '{changes}\n\nबदलाव ऑडिट इतिहास में दर्ज किए जाएँगे।',
   '{count} pengeluaran belum memiliki nota.': '{count} खर्चों की रसीद नहीं है।',
   '{count} pengingat terbuka': '{count} रिमाइंडर खुले हैं',
+  '{count} perubahan di perangkat ini belum terkirim dan akan hilang.':
+      'इस डिवाइस पर {count} बदलाव भेजे नहीं गए हैं और खो जाएँगे।',
   '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.': '{count} बदलाव अभी भेजे जाने बाकी हैं। अभी लॉग आउट करने पर बदलाव सुरक्षित रहेंगे और इस खाते में दोबारा लॉगिन होने पर भेजने का प्रयास होगा।',
   '{count} perubahan tersimpan dan menunggu sinkronisasi.':
       '{count} बदलाव सहेजे गए हैं और सिंक की प्रतीक्षा में हैं।',

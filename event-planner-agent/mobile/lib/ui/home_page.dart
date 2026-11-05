@@ -146,7 +146,11 @@ class _EventHomePageState extends State<EventHomePage> {
                                     context,
                                     widget.eventDirectory!,
                                   ),
-                            onEdit: widget.controller.isReadOnly
+                            // Committee members record money only; the
+                            // server rejects their event-setting changes.
+                            onEdit:
+                                widget.controller.isReadOnly ||
+                                    widget.accountRole == 'committee'
                                 ? null
                                 : () => showEventDialog(
                                     context,

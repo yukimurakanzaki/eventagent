@@ -162,14 +162,22 @@ Future<bool> showTransactionDialog(
                 TextField(
                   key: const Key('transaction-amount'),
                   controller: amountController,
-                  keyboardType: TextInputType.number,
+                  keyboardType: TextInputType.numberWithOptions(
+                    decimal: Money.spec.decimals > 0,
+                  ),
                   inputFormatters: [MoneyTextInputFormatter()],
                   onChanged: (_) => setState(() => showValidation = true),
                   decoration: InputDecoration(
                     labelText: tr('Jumlah ({currency})', {
                       'currency': Money.currency,
                     }),
-                    helperText: tr('Contoh: 125.000'),
+                    helperText: Money.currency == 'IDR'
+                        ? tr('Contoh: 125.000')
+                        : tr('Contoh: {example}', {
+                            'example': formatMoneyInput(
+                              Money.spec.decimals > 0 ? 1250 : 125000,
+                            ),
+                          }),
                     errorText: showValidation && amount <= 0
                         ? tr('Masukkan jumlah lebih dari {zero}.', {
                             'zero': formatMoney(0),
@@ -352,7 +360,7 @@ Future<bool> showTransactionDialog(
 
   // As with cancellation, commit after the dialog route has been removed so
   // a refund's participant dropdown is never rebuilt while it is deactivating.
-  await controller.recordTransaction(
+  final saved = await controller.recordTransaction(
     type: draft.type,
     amount: draft.amount,
     description: draft.description,
@@ -360,7 +368,12 @@ Future<bool> showTransactionDialog(
     category: draft.category,
     receiptPath: draft.receiptPath,
   );
-  return true;
+  if (!saved && context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(tr('Transaksi tidak dapat disimpan.'))),
+    );
+  }
+  return saved;
 }
 
 class _TransactionDraft {

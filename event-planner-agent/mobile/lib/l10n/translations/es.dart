@@ -102,6 +102,7 @@ const Map<String, String> es = {
   'Contoh: Saldo kas sekarang': 'Ejemplo: Saldo de caja actual',
   'Contoh: Uang muka bus': 'Ejemplo: Anticipo del autobús',
   'Contoh: salah ketik nominal': 'Ejemplo: error al escribir el monto',
+  'Contoh: {example}': 'Ejemplo: {example}',
   'Daftar acara belum dapat dimuat.': 'No se pudo cargar la lista de eventos.',
   'Daftar transaksi': 'Lista de transacciones',
   'Data acara tetap tersimpan di Supabase dan di perangkat ini untuk digunakan saat sinyal lemah.': 'Los datos del evento se guardan en Supabase y en este dispositivo para usarlos cuando la señal sea débil.',
@@ -164,7 +165,6 @@ const Map<String, String> es = {
   'Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!': 'Hola {name}, recordatorio de la contribución de {event}: ha pagado {paid} de {target}, falta {remaining}. ¡Gracias!',
   'Hanya bendahara yang dapat menambah pengurus.':
       'Solo el tesorero puede agregar administradores.',
-  'Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.': 'Solo se usa para recordatorios personales; nunca aparece en los informes.',
   'Hanya-baca. Diperbarui {date}.': 'Solo lectura. Actualizado el {date}.',
   'Hanya-baca: data langsung dari buku kas bendahara.':
       'Solo lectura: datos en vivo del libro de caja del tesorero.',
@@ -482,6 +482,7 @@ const Map<String, String> es = {
   'Semua tanggal': 'Todas las fechas',
   'Semua tautan yang sudah dibagikan tidak akan bisa dibuka lagi. Anda bisa membuat tautan baru kapan saja.': 'Todos los enlaces compartidos dejarán de abrirse. Puede crear un enlace nuevo en cualquier momento.',
   'Semua transaksi ({count})': 'Todas las transacciones ({count})',
+  'Sertakan kode negara, misalnya +62 untuk Indonesia. Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.': 'Incluya el código de país, por ejemplo +52 para México. Solo se usa para recordatorios personales y nunca aparece en los informes.',
   'Sesi sudah berakhir. Masuk kembali atau minta link pemulihan baru.': 'La sesión ha caducado. Inicie sesión de nuevo o solicite un nuevo enlace de recuperación.',
   'Sesi sudah berakhir. Masuk kembali untuk melanjutkan.':
       'La sesión ha caducado. Inicie sesión de nuevo para continuar.',
@@ -578,6 +579,7 @@ const Map<String, String> es = {
   'Transaksi berhasil disimpan.': 'La transacción se guardó correctamente.',
   'Transaksi ini sudah dikoreksi.': 'Esta transacción ya fue corregida.',
   'Transaksi ini tidak dihapus. Ia tetap terlihat dicoret di riwayat dan laporan, dan tidak dihitung lagi. Setelah itu catat ulang transaksi yang benar.': 'Esta transacción no se elimina. Sigue visible tachada en el historial y en los informes, y ya no se cuenta. Después, registre de nuevo la transacción correcta.',
+  'Transaksi tidak dapat disimpan.': 'No se pudo guardar la transacción.',
   'Transaksi tidak ditemukan.': 'No se encontró la transacción.',
   'Transportasi': 'Transporte',
   'Tulis hal yang perlu diingat terlebih dahulu.':
@@ -640,6 +642,10 @@ const Map<String, String> es = {
       '{count} gasto no tiene recibo.',
   '{count} pengingat terbuka': '{count} recordatorios abiertos',
   '{count} pengingat terbuka|one': '{count} recordatorio abierto',
+  '{count} perubahan di perangkat ini belum terkirim dan akan hilang.':
+      '{count} cambios en este dispositivo no se han enviado y se perderán.',
+  '{count} perubahan di perangkat ini belum terkirim dan akan hilang.|one':
+      '{count} cambio en este dispositivo no se ha enviado y se perderá.',
   '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.': '{count} cambios aún esperan ser enviados. Si sale ahora, los cambios se conservan y se intentará enviarlos cuando esta cuenta vuelva a iniciar sesión.',
   '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.|one': '{count} cambio aún espera ser enviado. Si sale ahora, el cambio se conserva y se intentará enviarlo cuando esta cuenta vuelva a iniciar sesión.',
   '{count} perubahan tersimpan dan menunggu sinkronisasi.':

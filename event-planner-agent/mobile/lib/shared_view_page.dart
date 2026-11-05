@@ -7,7 +7,7 @@ import 'formatting.dart';
 import 'l10n/l10n.dart';
 import 'labels.dart';
 import 'money.dart';
-import 'report_service.dart' show transactionTypeLabel;
+import 'report_service.dart' show sanitizeReportText, transactionTypeLabel;
 import 'settings_page.dart' show openSettings;
 import 'status_chip.dart';
 import 'transaction_log.dart' show isOutflow;
@@ -399,7 +399,7 @@ class _ParticipantRow extends StatelessWidget {
     return ListTile(
       title: Row(
         children: [
-          Flexible(child: Text(participant.name)),
+          Flexible(child: Text(sanitizeReportText(participant.name))),
           if (participant.role == ParticipantRole.committee) ...[
             const SizedBox(width: 8),
             StatusPill(
@@ -459,7 +459,7 @@ class _TransactionRow extends StatelessWidget {
             : Icons.south_west,
       ),
       title: Text(
-        transaction.description,
+        sanitizeReportText(transaction.description),
         style: voided
             ? const TextStyle(decoration: TextDecoration.lineThrough)
             : null,

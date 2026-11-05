@@ -109,6 +109,7 @@ const Map<String, String> zh = {
   'Contoh: Saldo kas sekarang': '例如：当前现金余额',
   'Contoh: Uang muka bus': '例如：巴士定金',
   'Contoh: salah ketik nominal': '例如：金额输错了',
+  'Contoh: {example}': '示例：{example}',
   'Daftar acara belum dapat dimuat.': '暂时无法加载活动列表。',
   'Daftar transaksi': '交易列表',
   'Data acara tetap tersimpan di Supabase dan di perangkat ini untuk digunakan saat sinyal lemah.':
@@ -177,8 +178,6 @@ const Map<String, String> zh = {
   'Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!':
       '{name}，您好，这是 {event} 的会费提醒：已缴 {paid}，目标 {target}，尚欠 {remaining}。谢谢！',
   'Hanya bendahara yang dapat menambah pengurus.': '只有司库可以添加管理人员。',
-  'Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.':
-      '仅用于个人提醒，绝不会出现在报告中。',
   'Hanya-baca. Diperbarui {date}.': '只读。更新于 {date}。',
   'Hanya-baca: data langsung dari buku kas bendahara.': '只读：直接来自司库账本的数据。',
   'Hapus akun': '删除账号',
@@ -476,6 +475,8 @@ const Map<String, String> zh = {
   'Semua tautan yang sudah dibagikan tidak akan bisa dibuka lagi. Anda bisa membuat tautan baru kapan saja.':
       '所有已分享的链接将无法再打开。您可以随时创建新链接。',
   'Semua transaksi ({count})': '全部交易（{count}）',
+  'Sertakan kode negara, misalnya +62 untuk Indonesia. Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.':
+      '请包含国家代码，例如中国为 +86。仅用于个人提醒，绝不会出现在报告中。',
   'Sesi sudah berakhir. Masuk kembali atau minta link pemulihan baru.':
       '登录已过期。请重新登录，或申请新的恢复链接。',
   'Sesi sudah berakhir. Masuk kembali untuk melanjutkan.': '登录已过期。请重新登录以继续。',
@@ -571,6 +572,7 @@ const Map<String, String> zh = {
   'Transaksi ini sudah dikoreksi.': '此交易已被更正。',
   'Transaksi ini tidak dihapus. Ia tetap terlihat dicoret di riwayat dan laporan, dan tidak dihitung lagi. Setelah itu catat ulang transaksi yang benar.':
       '此交易没有被删除。它在历史和报告中仍以删除线显示，且不再计入。之后请重新记录正确的交易。',
+  'Transaksi tidak dapat disimpan.': '无法保存该交易。',
   'Transaksi tidak ditemukan.': '找不到该交易。',
   'Transportasi': '交通',
   'Tulis hal yang perlu diingat terlebih dahulu.': '请先写下需要记住的事项。',
@@ -625,6 +627,8 @@ const Map<String, String> zh = {
       '{changes}\n\n更改将记录在审计历史中。',
   '{count} pengeluaran belum memiliki nota.': '{count} 笔支出还没有收据。',
   '{count} pengingat terbuka': '{count} 条未完成的提醒',
+  '{count} perubahan di perangkat ini belum terkirim dan akan hilang.':
+      '此设备上有 {count} 项更改尚未发送，将会丢失。',
   '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.':
       '有 {count} 项更改仍在等待发送。如果现在退出，更改仍会保存，并在此账号再次登录时重试。',
   '{count} perubahan tersimpan dan menunggu sinkronisasi.':

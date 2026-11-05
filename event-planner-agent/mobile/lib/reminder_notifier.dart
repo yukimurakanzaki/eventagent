@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -49,6 +50,15 @@ class LocalReminderNotifier implements ReminderNotifier {
 
   @override
   Future<void> initialize() async {
+    if (kIsWeb) return;
+    try {
+      await _initialize();
+    } catch (_) {
+      // Reminders are best effort and must never break loading.
+    }
+  }
+
+  Future<void> _initialize() async {
     tz.initializeTimeZones();
     final deviceTimezone = await FlutterTimezone.getLocalTimezone();
     tz.setLocalLocation(tz.getLocation(deviceTimezone));
@@ -69,6 +79,20 @@ class LocalReminderNotifier implements ReminderNotifier {
     required String title,
     required DateTime dueAt,
     String note = '',
+  }) async {
+    if (kIsWeb) return;
+    try {
+      await _schedule(id: id, title: title, dueAt: dueAt, note: note);
+    } catch (_) {
+      // Reminders are best effort and must never break saving.
+    }
+  }
+
+  Future<void> _schedule({
+    required String id,
+    required String title,
+    required DateTime dueAt,
+    required String note,
   }) async {
     final scheduled = scheduleAfterQuietHours(
       tz.TZDateTime.from(dueAt, tz.local),
@@ -94,7 +118,14 @@ class LocalReminderNotifier implements ReminderNotifier {
   }
 
   @override
-  Future<void> cancel(String id) => _plugin.cancel(id: _notificationId(id));
+  Future<void> cancel(String id) async {
+    if (kIsWeb) return;
+    try {
+      await _plugin.cancel(id: _notificationId(id));
+    } catch (_) {
+      // Best effort.
+    }
+  }
 
   int _notificationId(String id) =>
       id.codeUnits.fold(0, (value, unit) => (value * 31 + unit) & 0x7fffffff);

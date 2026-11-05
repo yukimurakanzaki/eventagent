@@ -108,6 +108,7 @@ const Map<String, String> fr = {
   'Contoh: Saldo kas sekarang': 'Exemple : Solde actuel de la caisse',
   'Contoh: Uang muka bus': 'Exemple : Acompte pour le bus',
   'Contoh: salah ketik nominal': 'Exemple : erreur de saisie du montant',
+  'Contoh: {example}': 'Exemple : {example}',
   'Daftar acara belum dapat dimuat.':
       'La liste des événements n\'a pas pu être chargée.',
   'Daftar transaksi': 'Liste des transactions',
@@ -169,7 +170,6 @@ const Map<String, String> fr = {
   'Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!': 'Bonjour {name}, rappel de contribution pour {event} : {paid} déjà payé sur {target}, il reste {remaining}. Merci !',
   'Hanya bendahara yang dapat menambah pengurus.':
       'Seul le trésorier peut ajouter des responsables.',
-  'Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.': 'Utilisé uniquement pour les rappels personnels, jamais affiché dans les rapports.',
   'Hanya-baca. Diperbarui {date}.': 'Lecture seule. Mis à jour le {date}.',
   'Hanya-baca: data langsung dari buku kas bendahara.':
       'Lecture seule : données en direct du livre de caisse du trésorier.',
@@ -490,6 +490,7 @@ const Map<String, String> fr = {
   'Semua tanggal': 'Toutes les dates',
   'Semua tautan yang sudah dibagikan tidak akan bisa dibuka lagi. Anda bisa membuat tautan baru kapan saja.': 'Tous les liens déjà partagés ne pourront plus être ouverts. Vous pouvez créer un nouveau lien à tout moment.',
   'Semua transaksi ({count})': 'Toutes les transactions ({count})',
+  'Sertakan kode negara, misalnya +62 untuk Indonesia. Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.': 'Indiquez l\'indicatif du pays, par exemple +33 pour la France. Utilisé uniquement pour les rappels personnels, jamais affiché dans les rapports.',
   'Sesi sudah berakhir. Masuk kembali atau minta link pemulihan baru.': 'La session a expiré. Reconnectez-vous ou demandez un nouveau lien de récupération.',
   'Sesi sudah berakhir. Masuk kembali untuk melanjutkan.':
       'La session a expiré. Reconnectez-vous pour continuer.',
@@ -582,6 +583,8 @@ const Map<String, String> fr = {
   'Transaksi berhasil disimpan.': 'Transaction enregistrée.',
   'Transaksi ini sudah dikoreksi.': 'Cette transaction a déjà été corrigée.',
   'Transaksi ini tidak dihapus. Ia tetap terlihat dicoret di riwayat dan laporan, dan tidak dihitung lagi. Setelah itu catat ulang transaksi yang benar.': 'Cette transaction n\'est pas supprimée. Elle reste visible, barrée, dans l\'historique et les rapports, et n\'est plus comptabilisée. Enregistrez ensuite à nouveau la bonne transaction.',
+  'Transaksi tidak dapat disimpan.':
+      'La transaction n\'a pas pu être enregistrée.',
   'Transaksi tidak ditemukan.': 'Transaction introuvable.',
   'Transportasi': 'Transport',
   'Tulis hal yang perlu diingat terlebih dahulu.':
@@ -643,6 +646,8 @@ const Map<String, String> fr = {
       '{count} dépense n\'a pas de reçu.',
   '{count} pengingat terbuka': '{count} rappels ouverts',
   '{count} pengingat terbuka|one': '{count} rappel ouvert',
+  '{count} perubahan di perangkat ini belum terkirim dan akan hilang.': '{count} modifications sur cet appareil n\'ont pas été envoyées et seront perdues.',
+  '{count} perubahan di perangkat ini belum terkirim dan akan hilang.|one': '{count} modification sur cet appareil n\'a pas été envoyée et sera perdue.',
   '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.': '{count} modifications attendent encore d\'être envoyées. Si vous vous déconnectez maintenant, elles resteront enregistrées et seront retentées à la prochaine connexion de ce compte.',
   '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.|one': '{count} modification attend encore d\'être envoyée. Si vous vous déconnectez maintenant, elle restera enregistrée et sera retentée à la prochaine connexion de ce compte.',
   '{count} perubahan tersimpan dan menunggu sinkronisasi.':

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
@@ -415,14 +416,28 @@ class PlatformReportShareGateway implements ReportShareGateway {
   @override
   Future<String?> sharePdf(CashbookReport report) async {
     final bytes = await report.buildPdf();
-    final directory = await getTemporaryDirectory();
     final slug = report.snapshot.event.name
         .toLowerCase()
         .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
         .replaceAll(RegExp(r'^-|-$'), '');
-    final file = File(
-      '${directory.path}/wargakas-${report.kind.name}-${slug.isEmpty ? 'laporan' : slug}.pdf',
-    );
+    final name =
+        'wargakas-${report.kind.name}-${slug.isEmpty ? 'laporan' : slug}.pdf';
+    final subject = tr('Laporan Wargakas - {name}', {
+      'name': report.snapshot.event.name,
+    });
+    if (kIsWeb) {
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [
+            XFile.fromData(bytes, name: name, mimeType: 'application/pdf'),
+          ],
+          subject: subject,
+        ),
+      );
+      return null;
+    }
+    final directory = await getTemporaryDirectory();
+    final file = File('${directory.path}/$name');
     await file.writeAsBytes(bytes, flush: true);
     // Android cannot tell us when the share sheet has no target apps, so
     // always keep a copy the user can reach without sharing.
@@ -438,9 +453,7 @@ class PlatformReportShareGateway implements ReportShareGateway {
     await SharePlus.instance.share(
       ShareParams(
         files: [XFile(file.path, mimeType: 'application/pdf')],
-        subject: tr('Laporan Wargakas - {name}', {
-          'name': report.snapshot.event.name,
-        }),
+        subject: subject,
       ),
     );
     return savedPath;
@@ -483,6 +496,7 @@ pw.Widget _reportSectionTitle(String title) => pw.Padding(
 String reportRoleLabel(String role) => switch (role) {
   'treasurer' => tr('Bendahara'),
   'chairperson' => tr('Ketua acara'),
+  'committee' => tr('Panitia'),
   _ => tr('Pengguna Wargakas'),
 };
 
@@ -512,9 +526,13 @@ String sanitizeReportText(String value) {
   // ponytail: a rupiah amount is strictly 1-3 digits then .ddd groups; anything
   // else that long (accounts, phones, card numbers) gets redacted.
   final rupiahAmount = RegExp(r'^\d{1,3}(\.\d{3})+$');
+  // ISO dates (2026-12-01) are not account numbers; the first alternative
+  // consumes them so the long-digit-run alternative never sees them.
   sanitized = sanitized.replaceAllMapped(
-    RegExp(r'(?<!\d)\+?\d[\d\s.-]{7,}\d(?!\d)'),
-    (match) => rupiahAmount.hasMatch(match[0]!)
+    RegExp(r'(?<!\d)\d{4}-\d{2}-\d{2}(?!\d)|(?<!\d)\+?\d[\d\s.-]{7,}\d(?!\d)'),
+    (match) =>
+        rupiahAmount.hasMatch(match[0]!) ||
+            RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(match[0]!)
         ? match[0]!
         : tr('[nomor disembunyikan]'),
   );

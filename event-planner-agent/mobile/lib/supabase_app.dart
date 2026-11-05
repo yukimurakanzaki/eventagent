@@ -154,8 +154,14 @@ class _SupabaseAppState extends State<SupabaseApp> implements EventDirectory {
     _workspaceId = null;
     _role = null;
     _eventId = null;
+    // Stop the old account's retry timer so its queue never syncs under a
+    // different signed-in user. Its edits stay saved on the device.
+    final previous = _controller;
     _controller = null;
     _controllerFuture = null;
+    if (previous != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => previous.dispose());
+    }
   }
 
   @override
@@ -166,18 +172,22 @@ class _SupabaseAppState extends State<SupabaseApp> implements EventDirectory {
 
   @override
   Future<List<EventSummary>> list() {
-    final workspaceId = _workspaceId;
-    if (workspaceId == null) throw StateError(tr('workspace belum siap'));
-    return widget.backend.listEvents(workspaceId);
+    if (_workspaceId == null) throw StateError(tr('workspace belum siap'));
+    // Events from every group the user belongs to, so an invited member can
+    // switch between their own events and the shared ones.
+    return widget.backend.listAllEvents();
   }
 
   @override
   Future<void> select(String eventId) async {
     if (eventId == _eventId) return;
-    // Unsynced edits stay in the local store and resume when the event reopens.
+    // Queued edits get one push attempt before the old event is released;
+    // anything still unsent stays on the device for the next open.
     final previous = _controller;
     setState(() => _controllerFuture = _loadController(eventId: eventId));
-    WidgetsBinding.instance.addPostFrameCallback((_) => previous?.dispose());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => previous?.flushThenDispose(),
+    );
   }
 
   @override

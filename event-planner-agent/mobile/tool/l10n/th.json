@@ -150,7 +150,6 @@
  "Halaman {page} dari {pages}": "หน้า {page} จาก {pages}",
  "Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!": "สวัสดีคุณ {name} ขอเตือนเรื่องเงินสมทบงาน {event}: จ่ายแล้ว {paid} จาก {target} คงเหลือ {remaining} ขอบคุณค่ะ",
  "Hanya bendahara yang dapat menambah pengurus.": "เฉพาะเหรัญญิกเท่านั้นที่เพิ่มผู้ดูแลได้",
- "Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.": "ใช้เพื่อการเตือนส่วนตัวเท่านั้น จะไม่ปรากฏในรายงาน",
  "Hanya-baca. Diperbarui {date}.": "อ่านอย่างเดียว อัปเดตเมื่อ {date}",
  "Hanya-baca: data langsung dari buku kas bendahara.": "อ่านอย่างเดียว: ข้อมูลสดจากสมุดเงินสดของเหรัญญิก",
  "Hapus akun": "ลบบัญชี",
@@ -558,5 +557,9 @@
  "{name} • tersedia {amount}": "{name} • คงเหลือ {amount}",
  "{net}\nBayar {paid} • Refund {refund}": "{net}\nจ่าย {paid} • คืนเงิน {refund}",
  "{range} • {active}/{capacity} peserta": "{range} • ผู้เข้าร่วม {active}/{capacity} คน",
- "{title} ({count})": "{title} ({count})"
+ "{title} ({count})": "{title} ({count})",
+ "{count} perubahan di perangkat ini belum terkirim dan akan hilang.": "การเปลี่ยนแปลง {count} รายการบนอุปกรณ์นี้ยังไม่ได้ส่งและจะสูญหาย",
+ "Sertakan kode negara, misalnya +62 untuk Indonesia. Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.": "กรุณาใส่รหัสประเทศ เช่น +66 สำหรับประเทศไทย ใช้สำหรับการเตือนส่วนตัวเท่านั้น ไม่แสดงในรายงาน",
+ "Transaksi tidak dapat disimpan.": "ไม่สามารถบันทึกรายการได้",
+ "Contoh: {example}": "ตัวอย่าง: {example}"
 }

@@ -150,7 +150,6 @@
  "Halaman {page} dari {pages}": "Seite {page} von {pages}",
  "Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!": "Guten Tag {name}, Erinnerung an den Beitrag für {event}: {paid} von {target} bezahlt, noch offen {remaining}. Vielen Dank!",
  "Hanya bendahara yang dapat menambah pengurus.": "Nur der Kassenwart kann Verwalter hinzufügen.",
- "Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.": "Nur für persönliche Erinnerungen, erscheint nie in Berichten.",
  "Hanya-baca. Diperbarui {date}.": "Nur Lesen. Aktualisiert am {date}.",
  "Hanya-baca: data langsung dari buku kas bendahara.": "Nur Lesen: Live-Daten direkt aus dem Kassenbuch des Kassenwarts.",
  "Hapus akun": "Konto löschen",
@@ -570,5 +569,10 @@
  "{count} peserta aktif|one": "{count} aktiver Teilnehmer",
  "{count} peserta belum bayar|one": "{count} Teilnehmer noch nicht bezahlt",
  "{count} transaksi|one": "{count} Buchung",
- "{label}: {count} peserta|one": "{label}: {count} Teilnehmer"
+ "{label}: {count} peserta|one": "{label}: {count} Teilnehmer",
+ "{count} perubahan di perangkat ini belum terkirim dan akan hilang.": "{count} Änderungen auf diesem Gerät wurden nicht gesendet und gehen verloren.",
+ "Sertakan kode negara, misalnya +62 untuk Indonesia. Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.": "Geben Sie die Ländervorwahl an, z. B. +49 für Deutschland. Wird nur für persönliche Erinnerungen verwendet und erscheint nie in Berichten.",
+ "Transaksi tidak dapat disimpan.": "Die Buchung konnte nicht gespeichert werden.",
+ "Contoh: {example}": "Beispiel: {example}",
+ "{count} perubahan di perangkat ini belum terkirim dan akan hilang.|one": "{count} Änderung auf diesem Gerät wurde nicht gesendet und geht verloren."
 }

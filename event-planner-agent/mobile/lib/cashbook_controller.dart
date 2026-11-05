@@ -35,6 +35,7 @@ class CashbookController extends ChangeNotifier {
   CashbookSnapshot _snapshot;
   String? _syncError;
   Timer? _retryTimer;
+  bool _disposed = false;
 
   CashbookSnapshot get snapshot => _snapshot;
   EventRecord get event => _snapshot.event;
@@ -510,7 +511,7 @@ class CashbookController extends ChangeNotifier {
   /// Uploads receipts that exist only on this device. Safe to call often.
   Future<void> _uploadPendingReceipts() async {
     final uploader = _receiptUploader;
-    if (uploader == null || isReadOnly) return;
+    if (uploader == null || isReadOnly || _disposed) return;
     for (final transaction in [...transactions]) {
       final local = transaction.receiptPath;
       if (local == null || local.isEmpty) continue;
@@ -639,12 +640,34 @@ class CashbookController extends ChangeNotifier {
   }
 
   @override
+  @override
+  void notifyListeners() {
+    // Async sync work can finish after the screen let go of this controller.
+    if (!_disposed) super.notifyListeners();
+  }
+
+  /// Tries once to send queued changes, then releases the controller. Used
+  /// when switching events so offline edits are not left waiting until the
+  /// event is reopened.
+  Future<void> flushThenDispose() async {
+    try {
+      await _flushPending().timeout(const Duration(seconds: 10));
+    } catch (_) {
+      // Still queued on the device; retried when the event opens again.
+    }
+    dispose();
+  }
+
+  @override
   void dispose() {
+    if (_disposed) return;
+    _disposed = true;
     _retryTimer?.cancel();
     super.dispose();
   }
 
   Future<void> _flushPending() async {
+    if (_disposed) return;
     final syncAdapter = _syncAdapter;
     if (syncAdapter == null || pendingOperations.isEmpty) return;
     _syncError = null;

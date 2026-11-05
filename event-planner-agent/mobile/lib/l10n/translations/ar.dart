@@ -104,6 +104,7 @@ const Map<String, String> ar = {
   'Contoh: Saldo kas sekarang': 'مثال: رصيد الصندوق الحالي',
   'Contoh: Uang muka bus': 'مثال: عربون الحافلة',
   'Contoh: salah ketik nominal': 'مثال: خطأ في كتابة المبلغ',
+  'Contoh: {example}': 'مثال: {example}',
   'Daftar acara belum dapat dimuat.': 'تعذّر تحميل قائمة الفعاليات.',
   'Daftar transaksi': 'قائمة المعاملات',
   'Data acara tetap tersimpan di Supabase dan di perangkat ini untuk digunakan saat sinyal lemah.': 'بيانات الفعالية محفوظة في Supabase وعلى هذا الجهاز لاستخدامها عند ضعف الإشارة.',
@@ -168,8 +169,6 @@ const Map<String, String> ar = {
   'Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!': 'مرحبًا {name}، تذكير باشتراك {event}: تم دفع {paid} من {target}، والمتبقي {remaining}. شكرًا لك!',
   'Hanya bendahara yang dapat menambah pengurus.':
       'أمين الصندوق فقط يمكنه إضافة المسؤولين.',
-  'Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.':
-      'تُستخدم للتذكير الشخصي فقط، ولا تظهر أبدًا في التقارير.',
   'Hanya-baca. Diperbarui {date}.': 'للقراءة فقط. حُدِّث في {date}.',
   'Hanya-baca: data langsung dari buku kas bendahara.':
       'للقراءة فقط: بيانات مباشرة من دفتر صندوق أمين الصندوق.',
@@ -477,6 +476,7 @@ const Map<String, String> ar = {
   'Semua tanggal': 'جميع التواريخ',
   'Semua tautan yang sudah dibagikan tidak akan bisa dibuka lagi. Anda bisa membuat tautan baru kapan saja.': 'ستتوقف جميع الروابط التي سبقت مشاركتها عن العمل. يمكنك إنشاء رابط جديد في أي وقت.',
   'Semua transaksi ({count})': 'جميع المعاملات ({count})',
+  'Sertakan kode negara, misalnya +62 untuk Indonesia. Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.': 'أضف رمز الدولة، مثل +966 للسعودية. يُستخدم للتذكيرات الشخصية فقط ولا يظهر في التقارير أبدًا.',
   'Sesi sudah berakhir. Masuk kembali atau minta link pemulihan baru.':
       'انتهت الجلسة. سجّل الدخول مرة أخرى أو اطلب رابط استعادة جديدًا.',
   'Sesi sudah berakhir. Masuk kembali untuk melanjutkan.':
@@ -576,6 +576,7 @@ const Map<String, String> ar = {
   'Transaksi berhasil disimpan.': 'تم حفظ المعاملة بنجاح.',
   'Transaksi ini sudah dikoreksi.': 'تم تصحيح هذه المعاملة بالفعل.',
   'Transaksi ini tidak dihapus. Ia tetap terlihat dicoret di riwayat dan laporan, dan tidak dihitung lagi. Setelah itu catat ulang transaksi yang benar.': 'لم تُحذف هذه المعاملة. تبقى ظاهرة مشطوبة في السجل والتقارير ولا تُحتسب بعد ذلك. بعدها سجّل المعاملة الصحيحة من جديد.',
+  'Transaksi tidak dapat disimpan.': 'تعذّر حفظ المعاملة.',
   'Transaksi tidak ditemukan.': 'لم يتم العثور على المعاملة.',
   'Transportasi': 'المواصلات',
   'Tulis hal yang perlu diingat terlebih dahulu.': 'اكتب أولًا ما تريد تذكّره.',
@@ -633,6 +634,8 @@ const Map<String, String> ar = {
       '{changes}\n\nستُسجَّل التغييرات في سجل المراجعة.',
   '{count} pengeluaran belum memiliki nota.': '{count} من المصروفات بلا إيصال.',
   '{count} pengingat terbuka': '{count} من التذكيرات المفتوحة',
+  '{count} perubahan di perangkat ini belum terkirim dan akan hilang.':
+      '{count} من التغييرات على هذا الجهاز لم تُرسل وستُفقد.',
   '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.': '{count} من التغييرات بانتظار الإرسال. إذا خرجت الآن فستبقى التغييرات محفوظة وستُحاول إرسالها عند عودة هذا الحساب إلى تسجيل الدخول.',
   '{count} perubahan tersimpan dan menunggu sinkronisasi.':
       '{count} من التغييرات محفوظة وبانتظار المزامنة.',

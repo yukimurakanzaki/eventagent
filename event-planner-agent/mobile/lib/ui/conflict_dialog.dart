@@ -215,8 +215,8 @@ List<String> _eventChangeSummary(EventRecord before, EventRecord after) {
   if (before.finalBudget != after.finalBudget) {
     changes.add(
       tr('Anggaran: {before} -> {after}', {
-        'before': formatMoney(before.finalBudget),
-        'after': formatMoney(after.finalBudget),
+        'before': formatMoney(before.finalBudget, currency: before.currency),
+        'after': formatMoney(after.finalBudget, currency: after.currency),
       }),
     );
   }
@@ -225,17 +225,17 @@ List<String> _eventChangeSummary(EventRecord before, EventRecord after) {
     changes.add(
       tr('Sponsor: {before} -> {after}', {
         'before':
-            '${before.sponsorName} ${formatMoney(before.sponsorContribution)}',
+            '${before.sponsorName} ${formatMoney(before.sponsorContribution, currency: before.currency)}',
         'after':
-            '${after.sponsorName} ${formatMoney(after.sponsorContribution)}',
+            '${after.sponsorName} ${formatMoney(after.sponsorContribution, currency: after.currency)}',
       }),
     );
   }
   if (before.openingBalance != after.openingBalance) {
     changes.add(
       tr('Saldo awal: {before} -> {after}', {
-        'before': formatMoney(before.openingBalance),
-        'after': formatMoney(after.openingBalance),
+        'before': formatMoney(before.openingBalance, currency: before.currency),
+        'after': formatMoney(after.openingBalance, currency: after.currency),
       }),
     );
   }

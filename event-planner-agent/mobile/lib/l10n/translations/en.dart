@@ -105,6 +105,7 @@ const Map<String, String> en = {
   'Contoh: Saldo kas sekarang': 'Example: Current cash balance',
   'Contoh: Uang muka bus': 'Example: Bus deposit',
   'Contoh: salah ketik nominal': 'Example: typo in the amount',
+  'Contoh: {example}': 'Example: {example}',
   'Daftar acara belum dapat dimuat.': 'The event list could not be loaded yet.',
   'Daftar transaksi': 'Transaction list',
   'Data acara tetap tersimpan di Supabase dan di perangkat ini untuk digunakan saat sinyal lemah.': 'Event data is still saved in Supabase and on this device for use when the signal is weak.',
@@ -165,8 +166,6 @@ const Map<String, String> en = {
   'Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!': 'Hello {name}, a reminder about the {event} contribution: {paid} paid of {target}, {remaining} remaining. Thank you!',
   'Hanya bendahara yang dapat menambah pengurus.':
       'Only the treasurer can add organizers.',
-  'Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.':
-      'Used only for personal reminders; it never appears in reports.',
   'Hanya-baca. Diperbarui {date}.': 'Read-only. Updated {date}.',
   'Hanya-baca: data langsung dari buku kas bendahara.':
       'Read-only: live data from the treasurer\'s cashbook.',
@@ -478,6 +477,7 @@ const Map<String, String> en = {
   'Semua tanggal': 'All dates',
   'Semua tautan yang sudah dibagikan tidak akan bisa dibuka lagi. Anda bisa membuat tautan baru kapan saja.': 'All links that have been shared will no longer open. You can create a new link at any time.',
   'Semua transaksi ({count})': 'All transactions ({count})',
+  'Sertakan kode negara, misalnya +62 untuk Indonesia. Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.': 'Include the country code, e.g. +62 for Indonesia. Used only for personal reminders, never shown in reports.',
   'Sesi sudah berakhir. Masuk kembali atau minta link pemulihan baru.':
       'The session has ended. Sign in again or request a new recovery link.',
   'Sesi sudah berakhir. Masuk kembali untuk melanjutkan.':
@@ -578,6 +578,7 @@ const Map<String, String> en = {
   'Transaksi ini sudah dikoreksi.':
       'This transaction has already been corrected.',
   'Transaksi ini tidak dihapus. Ia tetap terlihat dicoret di riwayat dan laporan, dan tidak dihitung lagi. Setelah itu catat ulang transaksi yang benar.': 'This transaction is not deleted. It stays visible with a strikethrough in the history and reports, and is no longer counted. After that, record the correct transaction again.',
+  'Transaksi tidak dapat disimpan.': 'The transaction could not be saved.',
   'Transaksi tidak ditemukan.': 'Transaction not found.',
   'Transportasi': 'Transportation',
   'Tulis hal yang perlu diingat terlebih dahulu.':
@@ -641,6 +642,10 @@ const Map<String, String> en = {
       '{count} expense has no receipt yet.',
   '{count} pengingat terbuka': '{count} open reminders',
   '{count} pengingat terbuka|one': '{count} open reminder',
+  '{count} perubahan di perangkat ini belum terkirim dan akan hilang.':
+      '{count} changes on this device have not been sent and will be lost.',
+  '{count} perubahan di perangkat ini belum terkirim dan akan hilang.|one':
+      '{count} change on this device has not been sent and will be lost.',
   '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.': '{count} changes are still waiting to be sent. If you sign out now, the changes stay saved and will be tried again when this account signs in again.',
   '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.|one': '{count} change is still waiting to be sent. If you sign out now, it stays saved and will be retried when this account signs in again.',
   '{count} perubahan tersimpan dan menunggu sinkronisasi.':

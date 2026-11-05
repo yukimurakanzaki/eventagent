@@ -35,14 +35,69 @@ Widget _roleAndPhoneFields({
         keyboardType: TextInputType.phone,
         decoration: InputDecoration(
           labelText: tr('Nomor WhatsApp (opsional)'),
-          helperMaxLines: 3,
+          helperMaxLines: 4,
           helperText: tr(
-            'Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.',
+            'Sertakan kode negara, misalnya +62 untuk Indonesia. Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.',
           ),
         ),
       ),
     ],
   );
+}
+
+const _callingCodes = <String, String>{
+  'ID': '62',
+  'MY': '60',
+  'SG': '65',
+  'TH': '66',
+  'VN': '84',
+  'PH': '63',
+  'IN': '91',
+  'PK': '92',
+  'BD': '880',
+  'CN': '86',
+  'JP': '81',
+  'KR': '82',
+  'AU': '61',
+  'NZ': '64',
+  'GB': '44',
+  'DE': '49',
+  'FR': '33',
+  'ES': '34',
+  'IT': '39',
+  'NL': '31',
+  'PT': '351',
+  'BR': '55',
+  'MX': '52',
+  'AR': '54',
+  'CO': '57',
+  'CL': '56',
+  'PE': '51',
+  'SA': '966',
+  'AE': '971',
+  'EG': '20',
+  'NG': '234',
+  'KE': '254',
+  'ZA': '27',
+  'TR': '90',
+  'US': '1',
+  'CA': '1',
+};
+
+/// The wa.me number (E.164 digits, no '+') for a stored [phone]. A leading
+/// '+' keeps its digits, '00' is dropped, a single leading '0' is replaced by
+/// the calling code of [countryCode] (default Indonesia, 62).
+String whatsAppNumber(String phone, {String? countryCode}) {
+  final trimmed = phone.trim();
+  final digits = trimmed.replaceAll(RegExp(r'\D'), '');
+  if (digits.isEmpty) return '';
+  if (trimmed.startsWith('+')) return digits;
+  if (digits.startsWith('00')) return digits.substring(2);
+  if (digits.startsWith('0')) {
+    final code = _callingCodes[countryCode?.toUpperCase()] ?? '62';
+    return '$code${digits.substring(1)}';
+  }
+  return digits;
 }
 
 /// Opens [uri] outside the app. Replaceable in tests.
@@ -70,7 +125,10 @@ Future<void> sendPaymentReminder(
       'remaining': formatMoney(target - paid),
     },
   );
-  final digits = participant.phone.replaceAll(RegExp(r'\D'), '');
+  final digits = whatsAppNumber(
+    participant.phone,
+    countryCode: WidgetsBinding.instance.platformDispatcher.locale.countryCode,
+  );
   if (digits.isNotEmpty) {
     try {
       final uri = Uri.parse(
@@ -372,12 +430,19 @@ Future<void> showCancelParticipantDialog(
                   TextField(
                     key: const Key('cancellation-refund-amount'),
                     controller: partialRefundController,
-                    keyboardType: TextInputType.number,
+                    keyboardType: TextInputType.numberWithOptions(
+                      decimal: Money.spec.decimals > 0,
+                    ),
                     inputFormatters: [MoneyTextInputFormatter()],
                     onChanged: (_) => setState(() {}),
                     decoration: InputDecoration(
                       labelText: tr('Nominal refund sebagian ({currency})', {
                         'currency': Money.currency,
+                      }),
+                      helperText: tr('Contoh: {example}', {
+                        'example': formatMoneyInput(
+                          Money.spec.decimals > 0 ? 1250 : 125000,
+                        ),
                       }),
                       errorText: partialRefundController.text.isEmpty
                           ? null

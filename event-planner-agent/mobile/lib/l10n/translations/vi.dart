@@ -102,6 +102,7 @@ const Map<String, String> vi = {
   'Contoh: Saldo kas sekarang': 'Ví dụ: Số dư quỹ hiện tại',
   'Contoh: Uang muka bus': 'Ví dụ: Tiền đặt cọc xe buýt',
   'Contoh: salah ketik nominal': 'Ví dụ: nhập sai số tiền',
+  'Contoh: {example}': 'Ví dụ: {example}',
   'Daftar acara belum dapat dimuat.': 'Chưa thể tải danh sách sự kiện.',
   'Daftar transaksi': 'Danh sách giao dịch',
   'Data acara tetap tersimpan di Supabase dan di perangkat ini untuk digunakan saat sinyal lemah.': 'Dữ liệu sự kiện vẫn được lưu trên Supabase và trên thiết bị này để dùng khi sóng yếu.',
@@ -164,8 +165,6 @@ const Map<String, String> vi = {
   'Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!': 'Chào {name}, nhắc đóng khoản {event}: đã đóng {paid} trên {target}, còn lại {remaining}. Xin cảm ơn!',
   'Hanya bendahara yang dapat menambah pengurus.':
       'Chỉ thủ quỹ mới có thể thêm người quản lý.',
-  'Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.':
-      'Chỉ dùng cho lời nhắc riêng, không bao giờ xuất hiện trong báo cáo.',
   'Hanya-baca. Diperbarui {date}.': 'Chỉ xem. Cập nhật {date}.',
   'Hanya-baca: data langsung dari buku kas bendahara.':
       'Chỉ xem: dữ liệu trực tiếp từ sổ quỹ của thủ quỹ.',
@@ -475,6 +474,7 @@ const Map<String, String> vi = {
   'Semua tanggal': 'Tất cả ngày',
   'Semua tautan yang sudah dibagikan tidak akan bisa dibuka lagi. Anda bisa membuat tautan baru kapan saja.': 'Tất cả liên kết đã chia sẻ sẽ không thể mở được nữa. Bạn có thể tạo liên kết mới bất cứ lúc nào.',
   'Semua transaksi ({count})': 'Tất cả giao dịch ({count})',
+  'Sertakan kode negara, misalnya +62 untuk Indonesia. Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.': 'Hãy thêm mã quốc gia, ví dụ +84 cho Việt Nam. Chỉ dùng để nhắc nhở cá nhân, không bao giờ hiển thị trong báo cáo.',
   'Sesi sudah berakhir. Masuk kembali atau minta link pemulihan baru.': 'Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại hoặc yêu cầu liên kết khôi phục mới.',
   'Sesi sudah berakhir. Masuk kembali untuk melanjutkan.':
       'Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại để tiếp tục.',
@@ -575,6 +575,7 @@ const Map<String, String> vi = {
   'Transaksi berhasil disimpan.': 'Đã lưu giao dịch.',
   'Transaksi ini sudah dikoreksi.': 'Giao dịch này đã được sửa.',
   'Transaksi ini tidak dihapus. Ia tetap terlihat dicoret di riwayat dan laporan, dan tidak dihitung lagi. Setelah itu catat ulang transaksi yang benar.': 'Giao dịch này không bị xóa. Nó vẫn hiển thị với nét gạch ngang trong lịch sử và báo cáo, và không còn được tính nữa. Sau đó hãy ghi lại giao dịch đúng.',
+  'Transaksi tidak dapat disimpan.': 'Không thể lưu giao dịch.',
   'Transaksi tidak ditemukan.': 'Không tìm thấy giao dịch.',
   'Transportasi': 'Đi lại',
   'Tulis hal yang perlu diingat terlebih dahulu.':
@@ -633,6 +634,8 @@ const Map<String, String> vi = {
   '{count} pengeluaran belum memiliki nota.':
       '{count} khoản chi chưa có biên nhận.',
   '{count} pengingat terbuka': '{count} lời nhắc đang mở',
+  '{count} perubahan di perangkat ini belum terkirim dan akan hilang.':
+      '{count} thay đổi trên thiết bị này chưa được gửi và sẽ bị mất.',
   '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.': '{count} thay đổi vẫn đang chờ gửi. Nếu đăng xuất bây giờ, thay đổi vẫn được lưu và sẽ được thử lại khi tài khoản này đăng nhập lại.',
   '{count} perubahan tersimpan dan menunggu sinkronisasi.':
       '{count} thay đổi đã lưu và đang chờ đồng bộ.',

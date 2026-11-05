@@ -105,6 +105,7 @@ const Map<String, String> pt = {
   'Contoh: Saldo kas sekarang': 'Exemplo: Saldo atual do caixa',
   'Contoh: Uang muka bus': 'Exemplo: Sinal do ônibus',
   'Contoh: salah ketik nominal': 'Exemplo: erro de digitação no valor',
+  'Contoh: {example}': 'Exemplo: {example}',
   'Daftar acara belum dapat dimuat.':
       'Não foi possível carregar a lista de eventos.',
   'Daftar transaksi': 'Lista de transações',
@@ -167,8 +168,6 @@ const Map<String, String> pt = {
   'Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!': 'Olá, {name}, lembrete da contribuição do evento {event}: já foi pago {paid} de {target}, faltam {remaining}. Obrigado!',
   'Hanya bendahara yang dapat menambah pengurus.':
       'Somente o tesoureiro pode adicionar responsáveis.',
-  'Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.':
-      'Usado apenas para lembretes pessoais; nunca aparece nos relatórios.',
   'Hanya-baca. Diperbarui {date}.': 'Somente leitura. Atualizado em {date}.',
   'Hanya-baca: data langsung dari buku kas bendahara.':
       'Somente leitura: dados ao vivo do caixa do tesoureiro.',
@@ -484,6 +483,7 @@ const Map<String, String> pt = {
   'Semua tanggal': 'Todas as datas',
   'Semua tautan yang sudah dibagikan tidak akan bisa dibuka lagi. Anda bisa membuat tautan baru kapan saja.': 'Todos os links já compartilhados deixarão de abrir. Você pode criar um novo link quando quiser.',
   'Semua transaksi ({count})': 'Todas as transações ({count})',
+  'Sertakan kode negara, misalnya +62 untuk Indonesia. Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.': 'Inclua o código do país, por exemplo +55 para o Brasil. Usado apenas para lembretes pessoais, nunca aparece nos relatórios.',
   'Sesi sudah berakhir. Masuk kembali atau minta link pemulihan baru.': 'A sessão expirou. Entre novamente ou solicite um novo link de recuperação.',
   'Sesi sudah berakhir. Masuk kembali untuk melanjutkan.':
       'A sessão expirou. Entre novamente para continuar.',
@@ -579,6 +579,7 @@ const Map<String, String> pt = {
   'Transaksi berhasil disimpan.': 'Transação salva com sucesso.',
   'Transaksi ini sudah dikoreksi.': 'Esta transação já foi corrigida.',
   'Transaksi ini tidak dihapus. Ia tetap terlihat dicoret di riwayat dan laporan, dan tidak dihitung lagi. Setelah itu catat ulang transaksi yang benar.': 'Esta transação não foi excluída. Ela continua visível, riscada, no histórico e nos relatórios, e não é mais contabilizada. Depois, registre novamente a transação correta.',
+  'Transaksi tidak dapat disimpan.': 'Não foi possível salvar a transação.',
   'Transaksi tidak ditemukan.': 'Transação não encontrada.',
   'Transportasi': 'Transporte',
   'Tulis hal yang perlu diingat terlebih dahulu.':
@@ -642,6 +643,9 @@ const Map<String, String> pt = {
       '{count} despesa ainda não tem comprovante.',
   '{count} pengingat terbuka': '{count} lembretes em aberto',
   '{count} pengingat terbuka|one': '{count} lembrete em aberto',
+  '{count} perubahan di perangkat ini belum terkirim dan akan hilang.': '{count} alterações neste dispositivo não foram enviadas e serão perdidas.',
+  '{count} perubahan di perangkat ini belum terkirim dan akan hilang.|one':
+      '{count} alteração neste dispositivo não foi enviada e será perdida.',
   '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.': '{count} alterações ainda aguardam envio. Se sair agora, as alterações continuam salvas e serão enviadas quando esta conta entrar novamente.',
   '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.|one': '{count} alteração ainda aguarda envio. Se sair agora, a alteração continua salva e será enviada quando esta conta entrar novamente.',
   '{count} perubahan tersimpan dan menunggu sinkronisasi.':

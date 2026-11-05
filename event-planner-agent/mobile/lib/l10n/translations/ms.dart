@@ -103,6 +103,7 @@ const Map<String, String> ms = {
   'Contoh: Saldo kas sekarang': 'Contoh: Baki tunai sekarang',
   'Contoh: Uang muka bus': 'Contoh: Wang pendahuluan bas',
   'Contoh: salah ketik nominal': 'Contoh: salah taip jumlah',
+  'Contoh: {example}': 'Contoh: {example}',
   'Daftar acara belum dapat dimuat.': 'Senarai acara belum dapat dimuatkan.',
   'Daftar transaksi': 'Senarai transaksi',
   'Data acara tetap tersimpan di Supabase dan di perangkat ini untuk digunakan saat sinyal lemah.': 'Data acara tetap disimpan di Supabase dan dalam peranti ini untuk digunakan apabila isyarat lemah.',
@@ -166,7 +167,6 @@ const Map<String, String> ms = {
   'Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!': 'Hai {name}, peringatan yuran {event}: sudah dibayar {paid} daripada {target}, baki {remaining}. Terima kasih!',
   'Hanya bendahara yang dapat menambah pengurus.':
       'Hanya bendahari boleh menambah pengurus.',
-  'Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.': 'Hanya digunakan untuk peringatan peribadi, tidak pernah muncul dalam laporan.',
   'Hanya-baca. Diperbarui {date}.': 'Baca sahaja. Dikemas kini {date}.',
   'Hanya-baca: data langsung dari buku kas bendahara.':
       'Baca sahaja: data terus daripada buku tunai bendahari.',
@@ -476,6 +476,7 @@ const Map<String, String> ms = {
   'Semua tanggal': 'Semua tarikh',
   'Semua tautan yang sudah dibagikan tidak akan bisa dibuka lagi. Anda bisa membuat tautan baru kapan saja.': 'Semua pautan yang telah dikongsi tidak akan dapat dibuka lagi. Anda boleh membuat pautan baharu pada bila-bila masa.',
   'Semua transaksi ({count})': 'Semua transaksi ({count})',
+  'Sertakan kode negara, misalnya +62 untuk Indonesia. Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.': 'Sertakan kod negara, contohnya +60 untuk Malaysia. Hanya digunakan untuk peringatan peribadi, tidak pernah dipaparkan dalam laporan.',
   'Sesi sudah berakhir. Masuk kembali atau minta link pemulihan baru.':
       'Sesi sudah tamat. Log masuk semula atau minta pautan pemulihan baharu.',
   'Sesi sudah berakhir. Masuk kembali untuk melanjutkan.':
@@ -575,6 +576,7 @@ const Map<String, String> ms = {
   'Transaksi berhasil disimpan.': 'Transaksi berjaya disimpan.',
   'Transaksi ini sudah dikoreksi.': 'Transaksi ini sudah dibetulkan.',
   'Transaksi ini tidak dihapus. Ia tetap terlihat dicoret di riwayat dan laporan, dan tidak dihitung lagi. Setelah itu catat ulang transaksi yang benar.': 'Transaksi ini tidak dipadam. Ia tetap kelihatan dicoret dalam sejarah dan laporan, dan tidak dikira lagi. Selepas itu catat semula transaksi yang betul.',
+  'Transaksi tidak dapat disimpan.': 'Transaksi tidak dapat disimpan.',
   'Transaksi tidak ditemukan.': 'Transaksi tidak ditemui.',
   'Transportasi': 'Pengangkutan',
   'Tulis hal yang perlu diingat terlebih dahulu.':
@@ -633,6 +635,8 @@ const Map<String, String> ms = {
   '{count} pengeluaran belum memiliki nota.':
       '{count} perbelanjaan belum mempunyai resit.',
   '{count} pengingat terbuka': '{count} peringatan terbuka',
+  '{count} perubahan di perangkat ini belum terkirim dan akan hilang.':
+      '{count} perubahan pada peranti ini belum dihantar dan akan hilang.',
   '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.': '{count} perubahan masih menunggu untuk dihantar. Jika log keluar sekarang, perubahan tetap disimpan dan akan dicuba semula apabila akaun ini log masuk kembali.',
   '{count} perubahan tersimpan dan menunggu sinkronisasi.':
       '{count} perubahan disimpan dan menunggu penyegerakan.',

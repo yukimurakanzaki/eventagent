@@ -150,7 +150,6 @@
  "Halaman {page} dari {pages}": "पृष्ठ {page} / {pages}",
  "Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!": "नमस्ते {name} जी, {event} के अंशदान का रिमाइंडर: {target} में से {paid} का भुगतान हो चुका है, शेष {remaining}। धन्यवाद!",
  "Hanya bendahara yang dapat menambah pengurus.": "केवल कोषाध्यक्ष ही प्रबंधक जोड़ सकते हैं।",
- "Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.": "केवल निजी रिमाइंडर के लिए है, रिपोर्ट में कभी नहीं दिखेगा।",
  "Hanya-baca. Diperbarui {date}.": "केवल पढ़ने के लिए। {date} को अपडेट किया गया।",
  "Hanya-baca: data langsung dari buku kas bendahara.": "केवल पढ़ने के लिए: कोषाध्यक्ष की नकद-बही से सीधा डेटा।",
  "Hapus akun": "खाता हटाएँ",
@@ -558,5 +557,9 @@
  "{name} • tersedia {amount}": "{name} • {amount} उपलब्ध",
  "{net}\nBayar {paid} • Refund {refund}": "{net}\nभुगतान {paid} • रिफंड {refund}",
  "{range} • {active}/{capacity} peserta": "{range} • {active}/{capacity} प्रतिभागी",
- "{title} ({count})": "{title} ({count})"
+ "{title} ({count})": "{title} ({count})",
+ "{count} perubahan di perangkat ini belum terkirim dan akan hilang.": "इस डिवाइस पर {count} बदलाव भेजे नहीं गए हैं और खो जाएँगे।",
+ "Sertakan kode negara, misalnya +62 untuk Indonesia. Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.": "देश कोड शामिल करें, जैसे भारत के लिए +91। केवल निजी रिमाइंडर के लिए उपयोग होता है, रिपोर्ट में कभी नहीं दिखता।",
+ "Transaksi tidak dapat disimpan.": "लेन-देन सहेजा नहीं जा सका।",
+ "Contoh: {example}": "उदाहरण: {example}"
 }

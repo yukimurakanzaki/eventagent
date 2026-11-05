@@ -119,7 +119,7 @@ class _ReportPageState extends State<ReportPage> {
         ],
       ),
     );
-    if (confirmed != true) return;
+    if (confirmed != true || !mounted) return;
     setState(() => _linkBusy = true);
     try {
       await service.revokeLinks();

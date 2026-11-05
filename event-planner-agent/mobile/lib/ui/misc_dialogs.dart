@@ -307,7 +307,12 @@ Future<void> showAccountDialog(
     ),
   );
   if (action == 'delete' && onDeleteAccount != null && context.mounted) {
-    await _confirmDeleteAccount(context, role, onDeleteAccount);
+    await _confirmDeleteAccount(
+      context,
+      role,
+      onDeleteAccount,
+      pendingCount: controller.pendingOperations.length,
+    );
     return;
   }
   if (action != 'signOut' || !context.mounted) return;
@@ -373,8 +378,9 @@ Future<void> showInfo(BuildContext context, String title, String message) {
 Future<void> _confirmDeleteAccount(
   BuildContext context,
   String? role,
-  Future<void> Function() onDeleteAccount,
-) async {
+  Future<void> Function() onDeleteAccount, {
+  int pendingCount = 0,
+}) async {
   var understood = false;
   var busy = false;
   await showDialog<void>(
@@ -403,6 +409,19 @@ Future<void> _confirmDeleteAccount(
                 'Unduh laporan PDF atau CSV dulu jika Anda memerlukan salinan.',
               ),
             ),
+            if (pendingCount > 0) ...[
+              const SizedBox(height: 8),
+              Text(
+                tr(
+                  '{count} perubahan di perangkat ini belum terkirim dan akan hilang.',
+                  {'count': pendingCount},
+                ),
+                style: TextStyle(
+                  color: Theme.of(dialogContext).colorScheme.error,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
             const SizedBox(height: 8),
             CheckboxListTile(
               contentPadding: EdgeInsets.zero,

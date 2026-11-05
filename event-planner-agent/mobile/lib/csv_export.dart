@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -73,7 +75,7 @@ String buildLedgerCsv(CashbookSnapshot snapshot) {
               ? expenseCategoryLabel(t.category ?? ExpenseCategory.other)
               : '',
         ),
-        csvCell(t.description),
+        csvCell(sanitizeReportText(t.description)),
         csvCell(names[t.participantId] ?? ''),
         csvCell(csvAmount(t.amount, spec), numeric: true),
         csvCell(spec.code),
@@ -93,18 +95,27 @@ String formatCsvDate(DateTime value) =>
 
 /// Writes the ledger CSV to the temp folder and opens the share sheet.
 Future<void> shareLedgerCsv(CashbookSnapshot snapshot) async {
-  final directory = await getTemporaryDirectory();
   final slug = snapshot.event.name
       .toLowerCase()
       .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
       .replaceAll(RegExp(r'^-|-$'), '');
-  final file = File(
-    '${directory.path}/wargakas-${slug.isEmpty ? 'laporan' : slug}.csv',
-  );
-  await file.writeAsString(buildLedgerCsv(snapshot), flush: true);
+  final name = 'wargakas-${slug.isEmpty ? 'laporan' : slug}.csv';
+  final XFile shared;
+  if (kIsWeb) {
+    shared = XFile.fromData(
+      Uint8List.fromList(utf8.encode(buildLedgerCsv(snapshot))),
+      name: name,
+      mimeType: 'text/csv',
+    );
+  } else {
+    final directory = await getTemporaryDirectory();
+    final file = File('${directory.path}/$name');
+    await file.writeAsString(buildLedgerCsv(snapshot), flush: true);
+    shared = XFile(file.path, mimeType: 'text/csv');
+  }
   await SharePlus.instance.share(
     ShareParams(
-      files: [XFile(file.path, mimeType: 'text/csv')],
+      files: [shared],
       subject: tr('Laporan Wargakas - {name}', {'name': snapshot.event.name}),
     ),
   );

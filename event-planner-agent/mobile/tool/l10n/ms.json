@@ -150,7 +150,6 @@
  "Halaman {page} dari {pages}": "Halaman {page} daripada {pages}",
  "Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!": "Hai {name}, peringatan yuran {event}: sudah dibayar {paid} daripada {target}, baki {remaining}. Terima kasih!",
  "Hanya bendahara yang dapat menambah pengurus.": "Hanya bendahari boleh menambah pengurus.",
- "Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.": "Hanya digunakan untuk peringatan peribadi, tidak pernah muncul dalam laporan.",
  "Hanya-baca. Diperbarui {date}.": "Baca sahaja. Dikemas kini {date}.",
  "Hanya-baca: data langsung dari buku kas bendahara.": "Baca sahaja: data terus daripada buku tunai bendahari.",
  "Hapus akun": "Padam akaun",
@@ -558,5 +557,9 @@
  "{name} • tersedia {amount}": "{name} • tersedia {amount}",
  "{net}\nBayar {paid} • Refund {refund}": "{net}\nBayar {paid} • Bayaran balik {refund}",
  "{range} • {active}/{capacity} peserta": "{range} • {active}/{capacity} peserta",
- "{title} ({count})": "{title} ({count})"
+ "{title} ({count})": "{title} ({count})",
+ "{count} perubahan di perangkat ini belum terkirim dan akan hilang.": "{count} perubahan pada peranti ini belum dihantar dan akan hilang.",
+ "Sertakan kode negara, misalnya +62 untuk Indonesia. Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.": "Sertakan kod negara, contohnya +60 untuk Malaysia. Hanya digunakan untuk peringatan peribadi, tidak pernah dipaparkan dalam laporan.",
+ "Transaksi tidak dapat disimpan.": "Transaksi tidak dapat disimpan.",
+ "Contoh: {example}": "Contoh: {example}"
 }

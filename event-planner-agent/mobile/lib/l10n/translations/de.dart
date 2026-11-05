@@ -108,6 +108,7 @@ const Map<String, String> de = {
   'Contoh: Saldo kas sekarang': 'Beispiel: aktueller Kassenstand',
   'Contoh: Uang muka bus': 'Beispiel: Anzahlung für den Bus',
   'Contoh: salah ketik nominal': 'Beispiel: Betrag falsch eingegeben',
+  'Contoh: {example}': 'Beispiel: {example}',
   'Daftar acara belum dapat dimuat.':
       'Die Liste der Veranstaltungen konnte noch nicht geladen werden.',
   'Daftar transaksi': 'Buchungsliste',
@@ -168,8 +169,6 @@ const Map<String, String> de = {
   'Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!': 'Guten Tag {name}, Erinnerung an den Beitrag für {event}: {paid} von {target} bezahlt, noch offen {remaining}. Vielen Dank!',
   'Hanya bendahara yang dapat menambah pengurus.':
       'Nur der Kassenwart kann Verwalter hinzufügen.',
-  'Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.':
-      'Nur für persönliche Erinnerungen, erscheint nie in Berichten.',
   'Hanya-baca. Diperbarui {date}.': 'Nur Lesen. Aktualisiert am {date}.',
   'Hanya-baca: data langsung dari buku kas bendahara.':
       'Nur Lesen: Live-Daten direkt aus dem Kassenbuch des Kassenwarts.',
@@ -485,6 +484,7 @@ const Map<String, String> de = {
   'Semua tanggal': 'Alle Daten',
   'Semua tautan yang sudah dibagikan tidak akan bisa dibuka lagi. Anda bisa membuat tautan baru kapan saja.': 'Alle bereits geteilten Links lassen sich nicht mehr öffnen. Sie können jederzeit einen neuen Link erstellen.',
   'Semua transaksi ({count})': 'Alle Buchungen ({count})',
+  'Sertakan kode negara, misalnya +62 untuk Indonesia. Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.': 'Geben Sie die Ländervorwahl an, z. B. +49 für Deutschland. Wird nur für persönliche Erinnerungen verwendet und erscheint nie in Berichten.',
   'Sesi sudah berakhir. Masuk kembali atau minta link pemulihan baru.': 'Die Sitzung ist abgelaufen. Melden Sie sich erneut an oder fordern Sie einen neuen Wiederherstellungslink an.',
   'Sesi sudah berakhir. Masuk kembali untuk melanjutkan.':
       'Die Sitzung ist abgelaufen. Melden Sie sich erneut an, um fortzufahren.',
@@ -575,6 +575,8 @@ const Map<String, String> de = {
   'Transaksi berhasil disimpan.': 'Die Buchung wurde gespeichert.',
   'Transaksi ini sudah dikoreksi.': 'Diese Buchung wurde bereits korrigiert.',
   'Transaksi ini tidak dihapus. Ia tetap terlihat dicoret di riwayat dan laporan, dan tidak dihitung lagi. Setelah itu catat ulang transaksi yang benar.': 'Diese Buchung wird nicht gelöscht. Sie bleibt im Verlauf und im Bericht durchgestrichen sichtbar und wird nicht mehr mitgerechnet. Erfassen Sie danach die richtige Buchung neu.',
+  'Transaksi tidak dapat disimpan.':
+      'Die Buchung konnte nicht gespeichert werden.',
   'Transaksi tidak ditemukan.': 'Buchung nicht gefunden.',
   'Transportasi': 'Transport',
   'Tulis hal yang perlu diingat terlebih dahulu.':
@@ -638,6 +640,8 @@ const Map<String, String> de = {
       '{count} Ausgabe hat noch keinen Beleg.',
   '{count} pengingat terbuka': '{count} offene Erinnerungen',
   '{count} pengingat terbuka|one': '{count} offene Erinnerung',
+  '{count} perubahan di perangkat ini belum terkirim dan akan hilang.': '{count} Änderungen auf diesem Gerät wurden nicht gesendet und gehen verloren.',
+  '{count} perubahan di perangkat ini belum terkirim dan akan hilang.|one': '{count} Änderung auf diesem Gerät wurde nicht gesendet und geht verloren.',
   '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.': '{count} Änderungen warten noch auf die Übertragung. Wenn Sie sich jetzt abmelden, bleiben die Änderungen gespeichert und werden beim nächsten Anmelden dieses Kontos erneut versucht.',
   '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.|one': '{count} Änderung wartet noch auf die Übertragung. Wenn Sie sich jetzt abmelden, bleibt die Änderung gespeichert und wird beim nächsten Anmelden dieses Kontos erneut versucht.',
   '{count} perubahan tersimpan dan menunggu sinkronisasi.': '{count} Änderungen sind gespeichert und warten auf die Synchronisierung.',

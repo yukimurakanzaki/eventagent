@@ -150,7 +150,6 @@
  "Halaman {page} dari {pages}": "الصفحة {page} من {pages}",
  "Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!": "مرحبًا {name}، تذكير باشتراك {event}: تم دفع {paid} من {target}، والمتبقي {remaining}. شكرًا لك!",
  "Hanya bendahara yang dapat menambah pengurus.": "أمين الصندوق فقط يمكنه إضافة المسؤولين.",
- "Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.": "تُستخدم للتذكير الشخصي فقط، ولا تظهر أبدًا في التقارير.",
  "Hanya-baca. Diperbarui {date}.": "للقراءة فقط. حُدِّث في {date}.",
  "Hanya-baca: data langsung dari buku kas bendahara.": "للقراءة فقط: بيانات مباشرة من دفتر صندوق أمين الصندوق.",
  "Hapus akun": "حذف الحساب",
@@ -558,5 +557,9 @@
  "{name} • tersedia {amount}": "{name} • المتاح {amount}",
  "{net}\nBayar {paid} • Refund {refund}": "{net}\nدفع {paid} • استرداد {refund}",
  "{range} • {active}/{capacity} peserta": "{range} • {active}/{capacity} من المشاركين",
- "{title} ({count})": "{title} ({count})"
+ "{title} ({count})": "{title} ({count})",
+ "{count} perubahan di perangkat ini belum terkirim dan akan hilang.": "{count} من التغييرات على هذا الجهاز لم تُرسل وستُفقد.",
+ "Sertakan kode negara, misalnya +62 untuk Indonesia. Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.": "أضف رمز الدولة، مثل +966 للسعودية. يُستخدم للتذكيرات الشخصية فقط ولا يظهر في التقارير أبدًا.",
+ "Transaksi tidak dapat disimpan.": "تعذّر حفظ المعاملة.",
+ "Contoh: {example}": "مثال: {example}"
 }

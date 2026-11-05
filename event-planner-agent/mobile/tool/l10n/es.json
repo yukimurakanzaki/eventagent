@@ -150,7 +150,6 @@
  "Halaman {page} dari {pages}": "Página {page} de {pages}",
  "Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!": "Hola {name}, recordatorio de la contribución de {event}: ha pagado {paid} de {target}, falta {remaining}. ¡Gracias!",
  "Hanya bendahara yang dapat menambah pengurus.": "Solo el tesorero puede agregar administradores.",
- "Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.": "Solo se usa para recordatorios personales; nunca aparece en los informes.",
  "Hanya-baca. Diperbarui {date}.": "Solo lectura. Actualizado el {date}.",
  "Hanya-baca: data langsung dari buku kas bendahara.": "Solo lectura: datos en vivo del libro de caja del tesorero.",
  "Hapus akun": "Eliminar cuenta",
@@ -570,5 +569,10 @@
  "{count} peserta aktif|one": "{count} participante activo",
  "{count} peserta belum bayar|one": "{count} participante sin pagar",
  "{count} transaksi|one": "{count} transacción",
- "{label}: {count} peserta|one": "{label}: {count} participante"
+ "{label}: {count} peserta|one": "{label}: {count} participante",
+ "{count} perubahan di perangkat ini belum terkirim dan akan hilang.": "{count} cambios en este dispositivo no se han enviado y se perderán.",
+ "Sertakan kode negara, misalnya +62 untuk Indonesia. Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.": "Incluya el código de país, por ejemplo +52 para México. Solo se usa para recordatorios personales y nunca aparece en los informes.",
+ "Transaksi tidak dapat disimpan.": "No se pudo guardar la transacción.",
+ "Contoh: {example}": "Ejemplo: {example}",
+ "{count} perubahan di perangkat ini belum terkirim dan akan hilang.|one": "{count} cambio en este dispositivo no se ha enviado y se perderá."
 }

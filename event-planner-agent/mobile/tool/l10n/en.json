@@ -150,7 +150,6 @@
  "Halaman {page} dari {pages}": "Page {page} of {pages}",
  "Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!": "Hello {name}, a reminder about the {event} contribution: {paid} paid of {target}, {remaining} remaining. Thank you!",
  "Hanya bendahara yang dapat menambah pengurus.": "Only the treasurer can add organizers.",
- "Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.": "Used only for personal reminders; it never appears in reports.",
  "Hanya-baca. Diperbarui {date}.": "Read-only. Updated {date}.",
  "Hanya-baca: data langsung dari buku kas bendahara.": "Read-only: live data from the treasurer's cashbook.",
  "Hapus akun": "Delete account",
@@ -570,5 +569,10 @@
  "{count} peserta aktif|one": "{count} active participant",
  "{count} peserta belum bayar|one": "{count} participant has not paid yet",
  "{count} transaksi|one": "{count} transaction",
- "{label}: {count} peserta|one": "{label}: {count} participant"
+ "{label}: {count} peserta|one": "{label}: {count} participant",
+ "{count} perubahan di perangkat ini belum terkirim dan akan hilang.": "{count} changes on this device have not been sent and will be lost.",
+ "Sertakan kode negara, misalnya +62 untuk Indonesia. Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.": "Include the country code, e.g. +62 for Indonesia. Used only for personal reminders, never shown in reports.",
+ "Transaksi tidak dapat disimpan.": "The transaction could not be saved.",
+ "Contoh: {example}": "Example: {example}",
+ "{count} perubahan di perangkat ini belum terkirim dan akan hilang.|one": "{count} change on this device has not been sent and will be lost."
 }

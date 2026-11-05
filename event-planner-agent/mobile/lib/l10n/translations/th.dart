@@ -105,6 +105,7 @@ const Map<String, String> th = {
   'Contoh: Saldo kas sekarang': 'ตัวอย่าง: ยอดเงินสดปัจจุบัน',
   'Contoh: Uang muka bus': 'ตัวอย่าง: เงินมัดจำรถบัส',
   'Contoh: salah ketik nominal': 'ตัวอย่าง: พิมพ์จำนวนเงินผิด',
+  'Contoh: {example}': 'ตัวอย่าง: {example}',
   'Daftar acara belum dapat dimuat.': 'ยังโหลดรายการงานไม่ได้',
   'Daftar transaksi': 'รายการทั้งหมด',
   'Data acara tetap tersimpan di Supabase dan di perangkat ini untuk digunakan saat sinyal lemah.': 'ข้อมูลของงานยังเก็บไว้ใน Supabase และในเครื่องนี้ เพื่อใช้เมื่อสัญญาณอ่อน',
@@ -169,8 +170,6 @@ const Map<String, String> th = {
   'Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!': 'สวัสดีคุณ {name} ขอเตือนเรื่องเงินสมทบงาน {event}: จ่ายแล้ว {paid} จาก {target} คงเหลือ {remaining} ขอบคุณค่ะ',
   'Hanya bendahara yang dapat menambah pengurus.':
       'เฉพาะเหรัญญิกเท่านั้นที่เพิ่มผู้ดูแลได้',
-  'Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.':
-      'ใช้เพื่อการเตือนส่วนตัวเท่านั้น จะไม่ปรากฏในรายงาน',
   'Hanya-baca. Diperbarui {date}.': 'อ่านอย่างเดียว อัปเดตเมื่อ {date}',
   'Hanya-baca: data langsung dari buku kas bendahara.':
       'อ่านอย่างเดียว: ข้อมูลสดจากสมุดเงินสดของเหรัญญิก',
@@ -475,6 +474,7 @@ const Map<String, String> th = {
   'Semua tautan yang sudah dibagikan tidak akan bisa dibuka lagi. Anda bisa membuat tautan baru kapan saja.':
       'ลิงก์ที่แชร์ไปแล้วทั้งหมดจะเปิดไม่ได้อีก คุณสร้างลิงก์ใหม่ได้ทุกเมื่อ',
   'Semua transaksi ({count})': 'รายการทั้งหมด ({count})',
+  'Sertakan kode negara, misalnya +62 untuk Indonesia. Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.': 'กรุณาใส่รหัสประเทศ เช่น +66 สำหรับประเทศไทย ใช้สำหรับการเตือนส่วนตัวเท่านั้น ไม่แสดงในรายงาน',
   'Sesi sudah berakhir. Masuk kembali atau minta link pemulihan baru.':
       'เซสชันหมดอายุแล้ว กรุณาเข้าสู่ระบบอีกครั้ง หรือขอลิงก์กู้คืนใหม่',
   'Sesi sudah berakhir. Masuk kembali untuk melanjutkan.':
@@ -575,6 +575,7 @@ const Map<String, String> th = {
   'Transaksi berhasil disimpan.': 'บันทึกรายการเรียบร้อยแล้ว',
   'Transaksi ini sudah dikoreksi.': 'รายการนี้ถูกแก้ไขแล้ว',
   'Transaksi ini tidak dihapus. Ia tetap terlihat dicoret di riwayat dan laporan, dan tidak dihitung lagi. Setelah itu catat ulang transaksi yang benar.': 'รายการนี้ไม่ได้ถูกลบ ยังมองเห็นเป็นรายการขีดฆ่าในประวัติและรายงาน และไม่นับรวมอีกต่อไป หลังจากนั้นให้บันทึกรายการที่ถูกต้องใหม่',
+  'Transaksi tidak dapat disimpan.': 'ไม่สามารถบันทึกรายการได้',
   'Transaksi tidak ditemukan.': 'ไม่พบรายการ',
   'Transportasi': 'การเดินทาง',
   'Tulis hal yang perlu diingat terlebih dahulu.':
@@ -634,6 +635,8 @@ const Map<String, String> th = {
   '{count} pengeluaran belum memiliki nota.':
       'รายจ่าย {count} รายการยังไม่มีใบเสร็จ',
   '{count} pengingat terbuka': 'การเตือนที่ยังเปิดอยู่ {count} รายการ',
+  '{count} perubahan di perangkat ini belum terkirim dan akan hilang.':
+      'การเปลี่ยนแปลง {count} รายการบนอุปกรณ์นี้ยังไม่ได้ส่งและจะสูญหาย',
   '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.': 'การเปลี่ยนแปลง {count} รายการยังรอส่ง หากออกจากระบบตอนนี้ การเปลี่ยนแปลงจะยังบันทึกไว้ และจะลองส่งอีกครั้งเมื่อบัญชีนี้เข้าสู่ระบบใหม่',
   '{count} perubahan tersimpan dan menunggu sinkronisasi.':
       'บันทึกการเปลี่ยนแปลง {count} รายการไว้แล้วและรอซิงค์',

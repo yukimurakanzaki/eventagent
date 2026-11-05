@@ -150,7 +150,6 @@
  "Halaman {page} dari {pages}": "第 {page} 页，共 {pages} 页",
  "Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!": "{name}，您好，这是 {event} 的会费提醒：已缴 {paid}，目标 {target}，尚欠 {remaining}。谢谢！",
  "Hanya bendahara yang dapat menambah pengurus.": "只有司库可以添加管理人员。",
- "Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.": "仅用于个人提醒，绝不会出现在报告中。",
  "Hanya-baca. Diperbarui {date}.": "只读。更新于 {date}。",
  "Hanya-baca: data langsung dari buku kas bendahara.": "只读：直接来自司库账本的数据。",
  "Hapus akun": "删除账号",
@@ -558,5 +557,9 @@
  "{name} • tersedia {amount}": "{name} • 可用 {amount}",
  "{net}\nBayar {paid} • Refund {refund}": "{net}\n已缴 {paid} • 退款 {refund}",
  "{range} • {active}/{capacity} peserta": "{range} • {active}/{capacity} 位参与者",
- "{title} ({count})": "{title}（{count}）"
+ "{title} ({count})": "{title}（{count}）",
+ "{count} perubahan di perangkat ini belum terkirim dan akan hilang.": "此设备上有 {count} 项更改尚未发送，将会丢失。",
+ "Sertakan kode negara, misalnya +62 untuk Indonesia. Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.": "请包含国家代码，例如中国为 +86。仅用于个人提醒，绝不会出现在报告中。",
+ "Transaksi tidak dapat disimpan.": "无法保存该交易。",
+ "Contoh: {example}": "示例：{example}"
 }

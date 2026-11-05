@@ -150,7 +150,6 @@
  "Halaman {page} dari {pages}": "{pages} ページ中 {page} ページ",
  "Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!": "{name} さん、{event} の会費のリマインダーです。{target} のうち {paid} をお支払い済みで、残りは {remaining} です。よろしくお願いいたします。",
  "Hanya bendahara yang dapat menambah pengurus.": "運営メンバーを追加できるのは会計係だけです。",
- "Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.": "個人用のリマインダーにのみ使われ、レポートには表示されません。",
  "Hanya-baca. Diperbarui {date}.": "閲覧専用です。{date} 更新。",
  "Hanya-baca: data langsung dari buku kas bendahara.": "閲覧専用: 会計係の出納帳の最新データです。",
  "Hapus akun": "アカウントを削除",
@@ -558,5 +557,9 @@
  "{name} • tersedia {amount}": "{name} • 利用可能 {amount}",
  "{net}\nBayar {paid} • Refund {refund}": "{net}\n支払 {paid} • 返金 {refund}",
  "{range} • {active}/{capacity} peserta": "{range} • 参加者 {active}/{capacity} 名",
- "{title} ({count})": "{title} ({count})"
+ "{title} ({count})": "{title} ({count})",
+ "{count} perubahan di perangkat ini belum terkirim dan akan hilang.": "この端末の {count} 件の変更はまだ送信されておらず、失われます。",
+ "Sertakan kode negara, misalnya +62 untuk Indonesia. Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.": "国番号を含めてください（例：日本は +81）。個人的なリマインダーにのみ使用され、レポートには表示されません。",
+ "Transaksi tidak dapat disimpan.": "取引を保存できませんでした。",
+ "Contoh: {example}": "例：{example}"
 }

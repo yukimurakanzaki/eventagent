@@ -191,25 +191,78 @@ String formatMoneyInput(
   return text;
 }
 
-/// Parses what a person typed into minor units. Accepts the locale's decimal
-/// separator; for whole-unit currencies every non-digit is ignored.
+/// Converts Arabic-Indic, Extended Arabic-Indic, Devanagari, Thai and
+/// fullwidth digits to ASCII so every keyboard can type amounts.
+String normalizeDigits(String value) {
+  const starts = [0x0660, 0x06F0, 0x0966, 0x0E50, 0xFF10];
+  final out = StringBuffer();
+  for (final unit in value.runes) {
+    var mapped = unit;
+    for (final start in starts) {
+      if (unit >= start && unit <= start + 9) {
+        mapped = 0x30 + unit - start;
+        break;
+      }
+    }
+    out.writeCharCode(mapped);
+  }
+  return out.toString();
+}
+
+/// Splits typed text into whole digits and fraction digits. For currencies
+/// with decimals, the last '.' or ',' is the decimal separator when 1..decimals
+/// digits follow it at the end of the text (any locale); otherwise it groups
+/// thousands. While [typing], a trailing separator also counts as decimal, and
+/// the locale's own [decimalSeparator] always does.
+({String whole, String fraction, bool hasDecimal}) _splitAmount(
+  String text,
+  int decimals, {
+  String? decimalSeparator,
+  bool typing = false,
+}) {
+  final ascii = normalizeDigits(text).replaceAll(RegExp(r'[^0-9.,]'), '');
+  var index = -1;
+  if (decimals > 0) {
+    if (decimalSeparator != null &&
+        decimalSeparator.length == 1 &&
+        '.,'.contains(decimalSeparator)) {
+      index = ascii.lastIndexOf(decimalSeparator);
+    }
+    if (index < 0) {
+      final last = ascii.lastIndexOf(RegExp(r'[.,]'));
+      if (last >= 0) {
+        final tail = ascii.substring(last + 1);
+        final count = tail.length;
+        if (!tail.contains(RegExp(r'[.,]')) &&
+            count <= decimals &&
+            (count >= 1 || typing)) {
+          index = last;
+        }
+      }
+    }
+  }
+  String digitsOf(String v) => v.replaceAll(RegExp(r'[^0-9]'), '');
+  if (index < 0) {
+    return (whole: digitsOf(ascii), fraction: '', hasDecimal: false);
+  }
+  var fraction = digitsOf(ascii.substring(index + 1));
+  if (fraction.length > decimals) fraction = fraction.substring(0, decimals);
+  return (
+    whole: digitsOf(ascii.substring(0, index)),
+    fraction: fraction,
+    hasDecimal: true,
+  );
+}
+
+/// Parses what a person typed into minor units. For whole-unit currencies
+/// every non-digit is ignored; otherwise see [_splitAmount].
 int parseMoneyInput(String value, {String? currency, String? languageCode}) {
   final spec = currencySpec(currency ?? Money.currency);
-  if (spec.decimals == 0) {
-    return int.tryParse(value.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
-  }
-  final decimal = _decimalSeparator(languageCode ?? L10n.code);
-  final cleaned = value.replaceAll(
-    RegExp('[^0-9${RegExp.escape(decimal)}]'),
-    '',
-  );
-  final parts = cleaned.split(decimal);
-  final whole = int.tryParse(parts.first.isEmpty ? '0' : parts.first) ?? 0;
-  var fractionText = parts.length > 1 ? parts[1] : '';
-  if (fractionText.length > spec.decimals) {
-    fractionText = fractionText.substring(0, spec.decimals);
-  }
-  final fraction = int.tryParse(fractionText.padRight(spec.decimals, '0')) ?? 0;
+  final parts = _splitAmount(value, spec.decimals);
+  final whole = int.tryParse(parts.whole.isEmpty ? '0' : parts.whole) ?? 0;
+  if (spec.decimals == 0) return whole;
+  final fraction =
+      int.tryParse(parts.fraction.padRight(spec.decimals, '0')) ?? 0;
   return whole * spec.minorFactor + fraction;
 }
 
@@ -229,29 +282,18 @@ class MoneyTextInputFormatter extends TextInputFormatter {
     final language = languageCode ?? L10n.code;
     final group = _groupSeparator(language);
     final decimal = _decimalSeparator(language);
-    var raw = newValue.text;
-    String fraction = '';
-    var hasDecimal = false;
-    if (spec.decimals > 0) {
-      // Accept "." typed on a keyboard whose locale uses ",".
-      if (decimal != '.' && group != '.' && raw.contains('.')) {
-        raw = raw.replaceAll('.', decimal);
-      }
-      final index = raw.indexOf(decimal);
-      if (index >= 0) {
-        hasDecimal = true;
-        fraction = raw.substring(index + 1).replaceAll(RegExp(r'[^0-9]'), '');
-        if (fraction.length > spec.decimals) {
-          fraction = fraction.substring(0, spec.decimals);
-        }
-        raw = raw.substring(0, index);
-      }
+    final parts = _splitAmount(
+      newValue.text,
+      spec.decimals,
+      decimalSeparator: decimal,
+      typing: true,
+    );
+    if (parts.whole.isEmpty && !parts.hasDecimal) {
+      return const TextEditingValue();
     }
-    final digits = raw.replaceAll(RegExp(r'[^0-9]'), '');
-    if (digits.isEmpty && !hasDecimal) return const TextEditingValue();
-    final trimmed = digits.replaceFirst(RegExp(r'^0+'), '');
+    final trimmed = parts.whole.replaceFirst(RegExp(r'^0+'), '');
     var text = _groupDigits(trimmed.isEmpty ? '0' : trimmed, group);
-    if (hasDecimal) text += '$decimal$fraction';
+    if (parts.hasDecimal) text += '$decimal${parts.fraction}';
     return TextEditingValue(
       text: text,
       selection: TextSelection.collapsed(offset: text.length),

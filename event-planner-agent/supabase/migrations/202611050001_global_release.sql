@@ -111,6 +111,7 @@ declare
   v_event jsonb;
   v_active_count integer;
   v_currency text;
+  v_role text;
 begin
   if v_user_id is null or not private.is_event_member(p_event_id) then
     raise exception 'event access denied';
@@ -174,6 +175,20 @@ begin
       coalesce((v_event->>'openingBalance')::bigint, 0) < 0 then
     raise exception 'event capacity and financial values are invalid';
   end if;
+  -- Committee members record money; event settings stay with the treasurer
+  -- and chairperson. Enforced here, not only hidden in the app.
+  select wm.role into v_role
+  from public.events e
+  join public.workspace_members wm on wm.workspace_id = e.workspace_id
+  where e.id = p_event_id and wm.user_id = v_user_id;
+  if v_role = 'committee' and
+      (v_current.snapshot->'event') ||
+        jsonb_build_object('currency', coalesce(v_current.snapshot#>>'{event,currency}', 'IDR'))
+      is distinct from
+      v_event || jsonb_build_object('currency', coalesce(v_event->>'currency', 'IDR')) then
+    raise exception 'committee members cannot change event settings';
+  end if;
+
   v_currency := coalesce(v_event->>'currency', 'IDR');
   if v_currency !~ '^[A-Z]{3}$' then
     raise exception 'event currency must be an ISO 4217 code';
@@ -397,6 +412,22 @@ with check (
   and (select private.is_event_member((storage.foldername(name))[1]))
 );
 
+-- The treasurer may remove receipt files (account deletion clean-up).
+drop policy if exists receipts_treasurer_delete on storage.objects;
+create policy receipts_treasurer_delete on storage.objects
+for delete to authenticated
+using (
+  bucket_id = 'receipts'
+  and exists (
+    select 1
+    from public.events e
+    join public.workspace_members wm on wm.workspace_id = e.workspace_id
+    where e.id = (storage.foldername(name))[1]
+      and wm.user_id = (select auth.uid())
+      and wm.role = 'treasurer'
+  )
+);
+
 -- Replacing a receipt photo overwrites the same object (upsert).
 drop policy if exists receipts_member_update on storage.objects;
 create policy receipts_member_update on storage.objects
@@ -473,9 +504,48 @@ begin
   end loop;
 
   delete from public.workspace_members where user_id = v_user_id;
+
+  -- Storage keeps an owner reference on uploaded files; clear it so the
+  -- user row can be removed (column names differ across storage versions).
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'storage' and table_name = 'objects' and column_name = 'owner'
+  ) then
+    execute 'update storage.objects set owner = null where owner = $1' using v_user_id;
+  end if;
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'storage' and table_name = 'objects' and column_name = 'owner_id'
+  ) then
+    execute 'update storage.objects set owner_id = null where owner_id = $1' using v_user_id::text;
+  end if;
+
   delete from auth.users where id = v_user_id;
 end;
 $$;
+
+-- Events whose workspace will disappear with this account (no other
+-- members). The app deletes their receipt files before deleting the account.
+create or replace function public.my_sole_workspace_event_ids()
+returns text[]
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select coalesce(array_agg(e.id), array[]::text[])
+  from public.events e
+  join public.workspace_members wm on wm.workspace_id = e.workspace_id
+  where wm.user_id = (select auth.uid())
+    and wm.role = 'treasurer'
+    and not exists (
+      select 1 from public.workspace_members other
+      where other.workspace_id = e.workspace_id and other.user_id <> wm.user_id
+    );
+$$;
+
+revoke all on function public.my_sole_workspace_event_ids() from public, anon, authenticated;
+grant execute on function public.my_sole_workspace_event_ids() to authenticated;
 
 revoke all on function public.delete_my_account() from public, anon, authenticated;
 grant execute on function public.delete_my_account() to authenticated;

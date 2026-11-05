@@ -8,8 +8,15 @@ class EventSummary {
     required this.startDate,
     required this.endDate,
     required this.archived,
-  });
+    this.workspaceId = '',
+    DateTime? updatedAt,
+  }) : updatedAt = updatedAt ?? startDate;
 
+  /// The group (workspace) the event belongs to.
+  final String workspaceId;
+
+  /// Last change on the server; picks the event to open by default.
+  final DateTime updatedAt;
   final String id;
   final String name;
   final DateTime startDate;

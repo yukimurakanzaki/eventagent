@@ -36,7 +36,26 @@ reset role;
 set test.uid = '33333333-3333-3333-3333-333333333333';
 do $$ begin perform public.create_share_link((select id from public.events limit 1)); raise exception 'SHOULD FAIL'; exception when others then if sqlerrm = 'SHOULD FAIL' then raise; end if; raise notice 'outsider blocked: %', sqlerrm; end $$;
 -- treasurer deletes account -> committee member becomes treasurer
+-- committee member may record money but not change event settings
+set test.uid = '22222222-2222-2222-2222-222222222222';
+do $$ begin
+  perform public.sync_cashbook_state(
+    (select id from public.events limit 1),
+    jsonb_set((select snapshot from public.cashbook_states limit 1), '{event,finalBudget}', '999'),
+    (select version from public.cashbook_states limit 1), 'op-c1', 'event', 'x', 'update');
+  raise exception 'SHOULD FAIL';
+exception when others then
+  if sqlerrm = 'SHOULD FAIL' then raise; end if;
+  raise notice 'committee event edit blocked: %', sqlerrm;
+end $$;
+select public.sync_cashbook_state(:'ev',
+  jsonb_set((select snapshot from cashbook_states where event_id=:'ev'), '{transactions}',
+    (select snapshot->'transactions' from cashbook_states where event_id=:'ev') || '[{"id":"t9","type":"expense","amount":5,"description":"bus","createdAt":"2026-11-02T00:00:00"}]'::jsonb),
+  (select version from cashbook_states where event_id=:'ev'), 'op-c2', 'transaction', 't9', 'create')->>'status' as committee_record;
+-- receipt uploaded by the treasurer, then account deleted: owner cleared
+insert into storage.objects (bucket_id, name, owner) values ('receipts', :'ev' || '/t0.jpg', '11111111-1111-1111-1111-111111111111');
 set test.uid = '11111111-1111-1111-1111-111111111111';
+select array_length(public.my_sole_workspace_event_ids(), 1) is null as shared_workspace_not_listed;
 select public.revoke_share_links(:'ev');
 select public.delete_my_account();
 select user_id, role from workspace_members;

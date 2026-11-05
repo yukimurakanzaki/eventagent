@@ -109,6 +109,7 @@ const Map<String, String> ja = {
   'Contoh: Saldo kas sekarang': '例: 現在の現金残高',
   'Contoh: Uang muka bus': '例: バスの手付金',
   'Contoh: salah ketik nominal': '例: 金額の入力ミス',
+  'Contoh: {example}': '例：{example}',
   'Daftar acara belum dapat dimuat.': 'イベント一覧を読み込めませんでした。',
   'Daftar transaksi': '取引一覧',
   'Data acara tetap tersimpan di Supabase dan di perangkat ini untuk digunakan saat sinyal lemah.':
@@ -176,8 +177,6 @@ const Map<String, String> ja = {
   'Halaman {page} dari {pages}': '{pages} ページ中 {page} ページ',
   'Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!': '{name} さん、{event} の会費のリマインダーです。{target} のうち {paid} をお支払い済みで、残りは {remaining} です。よろしくお願いいたします。',
   'Hanya bendahara yang dapat menambah pengurus.': '運営メンバーを追加できるのは会計係だけです。',
-  'Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.':
-      '個人用のリマインダーにのみ使われ、レポートには表示されません。',
   'Hanya-baca. Diperbarui {date}.': '閲覧専用です。{date} 更新。',
   'Hanya-baca: data langsung dari buku kas bendahara.':
       '閲覧専用: 会計係の出納帳の最新データです。',
@@ -484,6 +483,8 @@ const Map<String, String> ja = {
   'Semua tautan yang sudah dibagikan tidak akan bisa dibuka lagi. Anda bisa membuat tautan baru kapan saja.':
       '共有済みのリンクはすべて開けなくなります。新しいリンクはいつでも作成できます。',
   'Semua transaksi ({count})': 'すべての取引 ({count})',
+  'Sertakan kode negara, misalnya +62 untuk Indonesia. Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.':
+      '国番号を含めてください（例：日本は +81）。個人的なリマインダーにのみ使用され、レポートには表示されません。',
   'Sesi sudah berakhir. Masuk kembali atau minta link pemulihan baru.':
       'セッションの有効期限が切れました。もう一度ログインするか、新しい復旧用リンクを請求してください。',
   'Sesi sudah berakhir. Masuk kembali untuk melanjutkan.':
@@ -583,6 +584,7 @@ const Map<String, String> ja = {
   'Transaksi ini sudah dikoreksi.': 'この取引はすでに訂正されています。',
   'Transaksi ini tidak dihapus. Ia tetap terlihat dicoret di riwayat dan laporan, dan tidak dihitung lagi. Setelah itu catat ulang transaksi yang benar.':
       'この取引は削除されません。履歴とレポートでは取り消し線付きで表示され、集計には含まれなくなります。そのあと、正しい取引を記録し直してください。',
+  'Transaksi tidak dapat disimpan.': '取引を保存できませんでした。',
   'Transaksi tidak ditemukan.': '取引が見つかりません。',
   'Transportasi': '交通費',
   'Tulis hal yang perlu diingat terlebih dahulu.': '先に、覚えておきたい内容を入力してください。',
@@ -638,6 +640,8 @@ const Map<String, String> ja = {
       '{changes}\n\n変更は監査履歴に記録されます。',
   '{count} pengeluaran belum memiliki nota.': '領収書のない支出が {count} 件あります。',
   '{count} pengingat terbuka': '未完了のリマインダー {count} 件',
+  '{count} perubahan di perangkat ini belum terkirim dan akan hilang.':
+      'この端末の {count} 件の変更はまだ送信されておらず、失われます。',
   '{count} perubahan masih menunggu dikirim. Jika keluar sekarang, perubahan tetap disimpan dan akan dicoba saat akun ini masuk kembali.':
       '{count} 件の変更が送信待ちです。今ログアウトしても変更は保存され、このアカウントで再度ログインしたときに送信を試みます。',
   '{count} perubahan tersimpan dan menunggu sinkronisasi.':

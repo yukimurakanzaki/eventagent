@@ -150,7 +150,6 @@
  "Halaman {page} dari {pages}": "Trang {page} trên {pages}",
  "Halo {name}, pengingat iuran {event}: sudah dibayar {paid} dari {target}, sisa {remaining}. Terima kasih!": "Chào {name}, nhắc đóng khoản {event}: đã đóng {paid} trên {target}, còn lại {remaining}. Xin cảm ơn!",
  "Hanya bendahara yang dapat menambah pengurus.": "Chỉ thủ quỹ mới có thể thêm người quản lý.",
- "Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.": "Chỉ dùng cho lời nhắc riêng, không bao giờ xuất hiện trong báo cáo.",
  "Hanya-baca. Diperbarui {date}.": "Chỉ xem. Cập nhật {date}.",
  "Hanya-baca: data langsung dari buku kas bendahara.": "Chỉ xem: dữ liệu trực tiếp từ sổ quỹ của thủ quỹ.",
  "Hapus akun": "Xóa tài khoản",
@@ -558,5 +557,9 @@
  "{name} • tersedia {amount}": "{name} • còn {amount}",
  "{net}\nBayar {paid} • Refund {refund}": "{net}\nĐã đóng {paid} • Hoàn tiền {refund}",
  "{range} • {active}/{capacity} peserta": "{range} • {active}/{capacity} người tham gia",
- "{title} ({count})": "{title} ({count})"
+ "{title} ({count})": "{title} ({count})",
+ "{count} perubahan di perangkat ini belum terkirim dan akan hilang.": "{count} thay đổi trên thiết bị này chưa được gửi và sẽ bị mất.",
+ "Sertakan kode negara, misalnya +62 untuk Indonesia. Hanya dipakai untuk pengingat pribadi, tidak pernah muncul di laporan.": "Hãy thêm mã quốc gia, ví dụ +84 cho Việt Nam. Chỉ dùng để nhắc nhở cá nhân, không bao giờ hiển thị trong báo cáo.",
+ "Transaksi tidak dapat disimpan.": "Không thể lưu giao dịch.",
+ "Contoh: {example}": "Ví dụ: {example}"
 }
