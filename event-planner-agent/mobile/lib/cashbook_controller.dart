@@ -557,6 +557,26 @@ class CashbookController extends ChangeNotifier {
     return null;
   }
 
+  bool get canRestoreBackup => _syncAdapter == null;
+
+  /// Replaces all local data with a backup. Offline/demo mode only.
+  Future<String?> restoreFromBackup(CashbookSnapshot backup) async {
+    if (!canRestoreBackup) {
+      return tr(
+        'Pemulihan cadangan hanya tersedia di mode offline. Data online dipulihkan oleh bendahara melalui cadangan server.',
+      );
+    }
+    final restored = backup.copyWith(
+      pendingOperations: const [],
+      clearSyncConflict: true,
+    );
+    _snapshot = restored;
+    _syncError = null;
+    await _store.save(restored);
+    notifyListeners();
+    return null;
+  }
+
   Future<void> resolveConflictWithRemote() async {
     final conflict = syncConflict;
     if (conflict == null) return;

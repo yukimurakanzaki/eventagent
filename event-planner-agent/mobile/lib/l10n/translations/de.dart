@@ -81,6 +81,9 @@ const Map<String, String> de = {
       'Noch nicht verbunden. Änderungen bleiben auf dem Gerät gespeichert.',
   'Bendahara': 'Kassenwart',
   'Berikan akses': 'Zugriff erteilen',
+  'Berkas cadangan belum dapat dibuka. Coba lagi.': 'Die Sicherungsdatei konnte nicht geöffnet werden. Bitte versuchen Sie es erneut.',
+  'Berkas ini bukan cadangan Wargakas yang valid.':
+      'Diese Datei ist keine gültige Wargakas-Sicherung.',
   'Bersih': 'Netto',
   'Boleh diubah kapan saja; perubahan tercatat di riwayat dan target per peserta dihitung ulang.': 'Kann jederzeit geändert werden; die Änderung wird im Verlauf protokolliert und das Ziel pro Teilnehmer neu berechnet.',
   'Buat / salin tautan': 'Link erstellen / kopieren',
@@ -92,9 +95,18 @@ const Map<String, String> de = {
   'Buat kata sandi baru': 'Neues Passwort erstellen',
   'Buat ulang kata sandi': 'Passwort zurücksetzen',
   'Build ini belum terhubung ke Supabase. Gunakan build hosted dengan SUPABASE_URL dan SUPABASE_PUBLISHABLE_KEY.': 'Dieser Build ist noch nicht mit Supabase verbunden. Verwenden Sie den gehosteten Build mit SUPABASE_URL und SUPABASE_PUBLISHABLE_KEY.',
+  'Buka Wargakas': 'Wargakas entsperren',
+  'Buka kunci': 'Entsperren',
+  'Buka kunci untuk melihat catatan kas.':
+      'Entsperren Sie, um das Kassenbuch zu sehen.',
   'Buku kas bersama untuk acara komunitas: jujur, rapi, dan mudah dibagikan.': 'Das gemeinsame Kassenbuch für Gemeinschaftsveranstaltungen: ehrlich, übersichtlich und leicht zu teilen.',
   'Buku kas lengkap': 'Vollständiges Kassenbuch',
   'Bulan': 'Monat',
+  'Cadangan Wargakas - {name}': 'Wargakas-Sicherung - {name}',
+  'Cadangan acara "{name}" berisi {count} transaksi. Data yang ada di perangkat ini akan diganti dan tidak bisa dikembalikan.': 'Die Sicherung von „{name}“ enthält {count} Buchungen. Die Daten auf diesem Gerät werden ersetzt und können nicht wiederhergestellt werden.',
+  'Cadangan acara "{name}" berisi {count} transaksi. Data yang ada di perangkat ini akan diganti dan tidak bisa dikembalikan.|one': 'Die Sicherung von „{name}“ enthält {count} Buchung. Die Daten auf diesem Gerät werden ersetzt und können nicht wiederhergestellt werden.',
+  'Cadangan belum dapat dibuat atau dibagikan. Coba lagi.': 'Die Sicherung konnte nicht erstellt oder geteilt werden. Bitte versuchen Sie es erneut.',
+  'Cadangan belum dapat dipulihkan. Coba lagi.': 'Die Sicherung konnte nicht wiederhergestellt werden. Bitte versuchen Sie es erneut.',
   'Cari mata uang': 'Währung suchen',
   'Cari peserta': 'Teilnehmer suchen',
   'Catat bayar': 'Zahlung erfassen',
@@ -113,6 +125,8 @@ const Map<String, String> de = {
       'Die Liste der Veranstaltungen konnte noch nicht geladen werden.',
   'Daftar transaksi': 'Buchungsliste',
   'Data acara tetap tersimpan di Supabase dan di perangkat ini untuk digunakan saat sinyal lemah.': 'Die Veranstaltungsdaten bleiben in Supabase und auf diesem Gerät gespeichert, damit sie auch bei schwachem Empfang verfügbar sind.',
+  'Data berhasil dipulihkan dari cadangan.':
+      'Daten aus der Sicherung wiederhergestellt.',
   'Data online': 'Online-Version',
   'Diarsipkan ({count})': 'Archiviert ({count})',
   'Dibatalkan': 'Storniert',
@@ -154,6 +168,7 @@ const Map<String, String> de = {
   'Foto nota belum tersedia di perangkat ini. Sambungkan internet untuk mengunduhnya.': 'Das Belegfoto ist auf diesem Gerät noch nicht verfügbar. Verbinden Sie sich mit dem Internet, um es herunterzuladen.',
   'Foto nota terlampir': 'Belegfoto angehängt',
   'Ganti acara': 'Veranstaltung wechseln',
+  'Ganti data': 'Daten ersetzen',
   'Ganti foto nota': 'Belegfoto ersetzen',
   'Ganti nota': 'Beleg ersetzen',
   'Garis dan teks lebih tegas agar mudah dibaca.':
@@ -179,6 +194,8 @@ const Map<String, String> de = {
   'Ikuti bahasa ponsel': 'Sprache des Telefons verwenden',
   'Ikuti bahasa ponsel ({language})':
       'Sprache des Telefons verwenden ({language})',
+  'Isi cadangan rusak atau tidak lengkap.':
+      'Die Sicherung ist beschädigt oder unvollständig.',
   'Isi keterangan transaksi.':
       'Bitte geben Sie die Beschreibung der Buchung ein.',
   'Iuran per peserta': 'Beitrag pro Teilnehmer',
@@ -214,6 +231,7 @@ const Map<String, String> de = {
   'Kata sandi berhasil diperbarui. Gunakan kata sandi baru saat masuk berikutnya.': 'Das Passwort wurde aktualisiert. Verwenden Sie bei der nächsten Anmeldung das neue Passwort.',
   'Kata sandi minimal 6 karakter. Gunakan kata sandi yang sulit ditebak.': 'Das Passwort muss mindestens 6 Zeichen haben. Wählen Sie ein schwer zu erratendes Passwort.',
   'Kategori': 'Kategorie',
+  'Keamanan': 'Sicherheit',
   'Kebijakan privasi': 'Datenschutzerklärung',
   'Keluar': 'Abmelden',
   'Keterangan': 'Beschreibung',
@@ -225,6 +243,7 @@ const Map<String, String> de = {
   'Kirim link pemulihan': 'Wiederherstellungslink senden',
   'Kirim pengingat': 'Erinnerung senden',
   'Kirim ulang email konfirmasi': 'Bestätigungs-E-Mail erneut senden',
+  'Kode QR tautan peserta': 'QR-Code des Teilnehmerlinks',
   'Komponen': 'Komponente',
   'Koneksi terlalu lama. Hasil permintaan belum dapat dipastikan. Periksa email atau coba Masuk sebelum mengulangi permintaan.': 'Die Verbindung hat zu lange gedauert. Das Ergebnis der Anfrage ist noch unklar. Prüfen Sie Ihre E-Mails oder versuchen Sie, sich anzumelden, bevor Sie die Anfrage wiederholen.',
   'Konfirmasi pilihan': 'Auswahl bestätigen',
@@ -241,6 +260,7 @@ const Map<String, String> de = {
   'Koreksi: membatalkan transaksi lain':
       'Korrektur: hebt eine andere Buchung auf',
   'Koreksi: {name}': 'Korrektur: {name}',
+  'Kunci aplikasi': 'App-Sperre',
   'Kurang {amount}': '{amount} fehlen',
   'Kurangi animasi': 'Animationen reduzieren',
   'Lainnya': 'Sonstiges',
@@ -308,6 +328,7 @@ const Map<String, String> de = {
   'Menyimpan…': 'Wird gespeichert…',
   'Minimal 6 karakter; gunakan kata sandi yang kuat.':
       'Mindestens 6 Zeichen; wählen Sie ein starkes Passwort.',
+  'Minta sidik jari, wajah, atau PIN ponsel saat membuka Wargakas.': 'Beim Öffnen von Wargakas nach Fingerabdruck, Gesicht oder Geräte-PIN fragen.',
   'Muat ulang': 'Neu laden',
   'Mulai': 'Starten',
   'Mulai {date}': 'Beginn {date}',
@@ -349,6 +370,7 @@ const Map<String, String> de = {
       'Das Laden der Veranstaltung dauert zu lange.',
   'Pemuatan akun sebelumnya dibatalkan.':
       'Das vorherige Laden des Kontos wurde abgebrochen.',
+  'Pemulihan cadangan hanya tersedia di mode offline. Data online dipulihkan oleh bendahara melalui cadangan server.': 'Das Wiederherstellen einer Sicherung ist nur im Offlinemodus möglich. Online-Daten stellt der Kassenwart aus den Server-Sicherungen wieder her.',
   'Pendaftaran atau masuk dengan email sedang dinonaktifkan. Hubungi pengelola Wargakas.': 'Die Registrierung oder Anmeldung per E-Mail ist derzeit deaktiviert. Wenden Sie sich an den Wargakas-Administrator.',
   'Pengaturan': 'Einstellungen',
   'Pengeditan dihentikan agar perubahan dari dua perangkat tidak saling menimpa.': 'Die Bearbeitung wurde gestoppt, damit sich Änderungen von zwei Geräten nicht gegenseitig überschreiben.',
@@ -394,6 +416,8 @@ const Map<String, String> de = {
   'Peserta belum diperbarui': 'Teilnehmer noch nicht aktualisiert',
   'Peserta belum ditambahkan': 'Teilnehmer noch nicht hinzugefügt',
   'Peserta bisa membuka tautan ini di browser tanpa akun. Selalu menampilkan data terbaru. Nomor telepon dan foto nota tidak ditampilkan.': 'Teilnehmer können diesen Link im Browser ohne Konto öffnen. Zeigt immer die neuesten Daten. Telefonnummern und Belegfotos werden nicht angezeigt.',
+  'Peserta dapat memindai kode ini dengan kamera ponsel.':
+      'Teilnehmer können diesen Code mit der Handykamera scannen.',
   'Peserta pengganti harus menggantikan peserta yang dibatalkan.':
       'Ein Ersatzteilnehmer muss einen stornierten Teilnehmer ersetzen.',
   'Peserta {state}': 'Teilnehmer {state}',
@@ -410,6 +434,7 @@ const Map<String, String> de = {
   'Pilih tanggal {label}, {date}': 'Datum {label} wählen, {date}',
   'Pilih versi data sebelum melanjutkan':
       'Wählen Sie eine Datenversion, bevor Sie fortfahren',
+  'Ponsel ini belum mengatur kunci layar atau sidik jari.': 'Auf diesem Handy ist noch keine Displaysperre und kein Fingerabdruck eingerichtet.',
   'Portofolio acara': 'Veranstaltungsportfolio',
   'Portofolio acara lengkap (PDF)':
       'Vollständiges Veranstaltungsportfolio (PDF)',
@@ -418,6 +443,8 @@ const Map<String, String> de = {
   'Privasi: laporan ini tidak memuat nomor rekening, kredensial, nomor telepon, token, atau dokumen identitas. Periksa penerima sebelum membagikan laporan.': 'Datenschutz: Dieser Bericht enthält keine Kontonummern, Zugangsdaten, Telefonnummern, Token oder Ausweisdokumente. Prüfen Sie den Empfänger, bevor Sie den Bericht teilen.',
   'Privasi: laporan ini tidak memuat nomor rekening, kredensial, nomor telepon, token, atau dokumen identitas. Saldo pada daftar dihitung dari seluruh riwayat, bukan hanya baris yang difilter. Periksa penerima sebelum membagikan.': 'Datenschutz: Dieser Bericht enthält keine Kontonummern, Zugangsdaten, Telefonnummern, Token oder Ausweisdokumente. Der Saldo in der Liste wird aus dem gesamten Verlauf berechnet, nicht nur aus den gefilterten Zeilen. Prüfen Sie den Empfänger vor dem Teilen.',
   'Pulihkan': 'Wiederherstellen',
+  'Pulihkan dari cadangan': 'Aus Sicherung wiederherstellen',
+  'Pulihkan dari cadangan?': 'Aus Sicherung wiederherstellen?',
   'Refund': 'Erstattung',
   'Refund dan pengeluaran': 'Erstattungen und Ausgaben',
   'Refund dan pengeluaran {amount}': 'Erstattungen und Ausgaben {amount}',
@@ -488,6 +515,7 @@ const Map<String, String> de = {
       'Die Sitzung ist abgelaufen. Melden Sie sich erneut an, um fortzufahren.',
   'Setiap rupiah bisa ditelusuri': 'Jede Münze lässt sich nachvollziehen',
   'Simpan': 'Speichern',
+  'Simpan cadangan (JSON)': 'Sicherung speichern (JSON)',
   'Simpan kata sandi': 'Passwort speichern',
   'Simpan koreksi': 'Korrektur speichern',
   'Simpan pembatalan': 'Stornierung speichern',
@@ -598,8 +626,10 @@ const Map<String, String> de = {
   'Verifikasi keamanan belum berhasil. Coba lagi atau hubungi pengelola Wargakas.': 'Die Sicherheitsprüfung war nicht erfolgreich. Versuchen Sie es erneut oder wenden Sie sich an den Wargakas-Administrator.',
   'Verifikasi ulang diperlukan. Minta link pemulihan baru sebelum mengganti kata sandi.': 'Erneute Bestätigung erforderlich. Fordern Sie einen neuen Wiederherstellungslink an, bevor Sie das Passwort ändern.',
   'Versi aplikasi': 'App-Version',
+  'Versi cadangan tidak didukung. Perbarui aplikasi lalu coba lagi.': 'Diese Sicherungsversion wird nicht unterstützt. Aktualisieren Sie die App und versuchen Sie es erneut.',
   'Versi {version} oleh {actor} - {time}':
       'Version {version} von {actor} - {time}',
+  'Wargakas terkunci': 'Wargakas ist gesperrt',
   'Wargakas: {title}': 'Wargakas: {title}',
   'Warna utama': 'Hauptfarbe',
   'Warna {number}': 'Farbe {number}',

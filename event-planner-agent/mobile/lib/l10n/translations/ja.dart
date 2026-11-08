@@ -78,6 +78,10 @@ const Map<String, String> ja = {
       '接続されていません。変更はこの端末に保存されます。',
   'Bendahara': '会計係',
   'Berikan akses': 'アクセスを付与',
+  'Berkas cadangan belum dapat dibuka. Coba lagi.':
+      'バックアップファイルを開けませんでした。もう一度お試しください。',
+  'Berkas ini bukan cadangan Wargakas yang valid.':
+      'このファイルは有効な Wargakas のバックアップではありません。',
   'Bersih': '差引',
   'Boleh diubah kapan saja; perubahan tercatat di riwayat dan target per peserta dihitung ulang.':
       'いつでも変更できます。変更は履歴に記録され、参加者ごとの目標額は再計算されます。',
@@ -90,10 +94,20 @@ const Map<String, String> ja = {
   'Buat kata sandi baru': '新しいパスワードを作成',
   'Buat ulang kata sandi': 'パスワードを再作成',
   'Build ini belum terhubung ke Supabase. Gunakan build hosted dengan SUPABASE_URL dan SUPABASE_PUBLISHABLE_KEY.': 'このビルドは Supabase に接続されていません。SUPABASE_URL と SUPABASE_PUBLISHABLE_KEY を設定したホスト版のビルドをお使いください。',
+  'Buka Wargakas': 'Wargakas のロックを解除',
+  'Buka kunci': 'ロック解除',
+  'Buka kunci untuk melihat catatan kas.': 'ロックを解除して出納帳を表示します。',
   'Buku kas bersama untuk acara komunitas: jujur, rapi, dan mudah dibagikan.':
       '地域イベントのための共有出納帳。誠実で、きちんと整理され、かんたんに共有できます。',
   'Buku kas lengkap': '完全な出納帳',
   'Bulan': '月',
+  'Cadangan Wargakas - {name}': 'Wargakas バックアップ - {name}',
+  'Cadangan acara "{name}" berisi {count} transaksi. Data yang ada di perangkat ini akan diganti dan tidak bisa dikembalikan.':
+      '「{name}」のバックアップには {count} 件の取引があります。この端末のデータは置き換えられ、元に戻せません。',
+  'Cadangan belum dapat dibuat atau dibagikan. Coba lagi.':
+      'バックアップを作成または共有できませんでした。もう一度お試しください。',
+  'Cadangan belum dapat dipulihkan. Coba lagi.':
+      'バックアップを復元できませんでした。もう一度お試しください。',
   'Cari mata uang': '通貨を検索',
   'Cari peserta': '参加者を検索',
   'Catat bayar': '支払を記録',
@@ -114,6 +128,7 @@ const Map<String, String> ja = {
   'Daftar transaksi': '取引一覧',
   'Data acara tetap tersimpan di Supabase dan di perangkat ini untuk digunakan saat sinyal lemah.':
       'イベントのデータは Supabase とこの端末に保存されるため、電波が弱いときも利用できます。',
+  'Data berhasil dipulihkan dari cadangan.': 'バックアップからデータを復元しました。',
   'Data online': 'オンライン版',
   'Diarsipkan ({count})': 'アーカイブ済み（{count}）',
   'Dibatalkan': '取り消し済み',
@@ -163,6 +178,7 @@ const Map<String, String> ja = {
       '領収書の写真はこの端末にありません。ダウンロードするにはインターネットに接続してください。',
   'Foto nota terlampir': '領収書の写真が添付されています',
   'Ganti acara': 'イベントを切り替え',
+  'Ganti data': 'データを置き換える',
   'Ganti foto nota': '領収書の写真を差し替え',
   'Ganti nota': '領収書を差し替え',
   'Garis dan teks lebih tegas agar mudah dibaca.': '線と文字をはっきりさせ、読みやすくします。',
@@ -185,6 +201,7 @@ const Map<String, String> ja = {
   'Ikhtisar keuangan': 'お金の概要',
   'Ikuti bahasa ponsel': 'スマートフォンの言語に合わせる',
   'Ikuti bahasa ponsel ({language})': 'スマートフォンの言語に合わせる（{language}）',
+  'Isi cadangan rusak atau tidak lengkap.': 'バックアップが壊れているか不完全です。',
   'Isi keterangan transaksi.': '取引の内容を入力してください。',
   'Iuran per peserta': '参加者ごとの会費',
   'Iuran peserta': '参加者の会費',
@@ -217,6 +234,7 @@ const Map<String, String> ja = {
   'Kata sandi minimal 6 karakter. Gunakan kata sandi yang sulit ditebak.':
       'パスワードは6文字以上にしてください。推測されにくいものにしましょう。',
   'Kategori': 'カテゴリー',
+  'Keamanan': 'セキュリティ',
   'Kebijakan privasi': 'プライバシーポリシー',
   'Keluar': 'ログアウト',
   'Keterangan': '内容',
@@ -229,6 +247,7 @@ const Map<String, String> ja = {
   'Kirim link pemulihan': '復旧用リンクを送信',
   'Kirim pengingat': 'リマインダーを送る',
   'Kirim ulang email konfirmasi': '確認メールを再送',
+  'Kode QR tautan peserta': '参加者リンクの QR コード',
   'Komponen': '項目',
   'Koneksi terlalu lama. Hasil permintaan belum dapat dipastikan. Periksa email atau coba Masuk sebelum mengulangi permintaan.':
       '接続に時間がかかりすぎました。リクエストの結果を確認できません。リクエストを繰り返す前に、メールを確認するか、ログインをお試しください。',
@@ -245,6 +264,7 @@ const Map<String, String> ja = {
   'Koreksi transaksi': '取引を訂正',
   'Koreksi: membatalkan transaksi lain': '訂正：ほかの取引を取り消します',
   'Koreksi: {name}': '訂正：{name}',
+  'Kunci aplikasi': 'アプリのロック',
   'Kurang {amount}': '不足 {amount}',
   'Kurangi animasi': 'アニメーションを減らす',
   'Lainnya': 'その他',
@@ -308,6 +328,8 @@ const Map<String, String> ja = {
   'Menyiapkan...': '準備しています...',
   'Menyimpan…': '保存しています…',
   'Minimal 6 karakter; gunakan kata sandi yang kuat.': '6文字以上で、強いパスワードにしてください。',
+  'Minta sidik jari, wajah, atau PIN ponsel saat membuka Wargakas.':
+      'Wargakas を開くときに指紋、顔、または端末の PIN を求めます。',
   'Muat ulang': '再読み込み',
   'Mulai': '開始',
   'Mulai {date}': '{date} 開始',
@@ -349,6 +371,8 @@ const Map<String, String> ja = {
   'Pembayaran {name} disimpan.': '{name} さんの支払を保存しました。',
   'Pemuatan acara terlalu lama.': 'イベントの読み込みに時間がかかりすぎました。',
   'Pemuatan akun sebelumnya dibatalkan.': '前回のアカウントの読み込みはキャンセルされました。',
+  'Pemulihan cadangan hanya tersedia di mode offline. Data online dipulihkan oleh bendahara melalui cadangan server.':
+      'バックアップの復元はオフラインモードでのみ利用できます。オンラインのデータは会計係がサーバーのバックアップから復元します。',
   'Pendaftaran atau masuk dengan email sedang dinonaktifkan. Hubungi pengelola Wargakas.':
       'メールでの登録またはログインは現在停止されています。Wargakas の管理者にお問い合わせください。',
   'Pengaturan': '設定',
@@ -399,6 +423,8 @@ const Map<String, String> ja = {
   'Peserta belum ditambahkan': '参加者を追加できませんでした',
   'Peserta bisa membuka tautan ini di browser tanpa akun. Selalu menampilkan data terbaru. Nomor telepon dan foto nota tidak ditampilkan.':
       '参加者は、アカウントなしでこのリンクをブラウザで開けます。常に最新のデータが表示されます。電話番号と領収書の写真は表示されません。',
+  'Peserta dapat memindai kode ini dengan kamera ponsel.':
+      '参加者はスマートフォンのカメラでこのコードを読み取れます。',
   'Peserta pengganti harus menggantikan peserta yang dibatalkan.':
       '交代する参加者は、取り消された参加者の代わりに指定してください。',
   'Peserta {state}': '参加者 {state}',
@@ -411,6 +437,8 @@ const Map<String, String> ja = {
   'Pilih rentang tanggal': '日付の範囲を選択',
   'Pilih tanggal {label}, {date}': '{label}の日付を選択、{date}',
   'Pilih versi data sebelum melanjutkan': '続ける前にデータの版を選んでください',
+  'Ponsel ini belum mengatur kunci layar atau sidik jari.':
+      'この端末には画面ロックや指紋がまだ設定されていません。',
   'Portofolio acara': 'イベントの全体像',
   'Portofolio acara lengkap (PDF)': 'イベントの全体像（PDF）',
   'Preview laporan': 'レポートのプレビュー',
@@ -420,6 +448,8 @@ const Map<String, String> ja = {
       'プライバシー：このレポートには、口座番号、認証情報、電話番号、トークン、本人確認書類は含まれていません。共有する前に宛先をご確認ください。',
   'Privasi: laporan ini tidak memuat nomor rekening, kredensial, nomor telepon, token, atau dokumen identitas. Saldo pada daftar dihitung dari seluruh riwayat, bukan hanya baris yang difilter. Periksa penerima sebelum membagikan.': 'プライバシー：このレポートには、口座番号、認証情報、電話番号、トークン、本人確認書類は含まれていません。一覧の残高は、絞り込んだ行だけでなく、すべての履歴から計算されています。共有する前に宛先をご確認ください。',
   'Pulihkan': '元に戻す',
+  'Pulihkan dari cadangan': 'バックアップから復元',
+  'Pulihkan dari cadangan?': 'バックアップから復元しますか？',
   'Refund': '返金',
   'Refund dan pengeluaran': '返金と支出',
   'Refund dan pengeluaran {amount}': '返金と支出 {amount}',
@@ -489,6 +519,7 @@ const Map<String, String> ja = {
       'セッションの有効期限が切れました。続けるにはもう一度ログインしてください。',
   'Setiap rupiah bisa ditelusuri': 'すべてのお金の行方をたどれます',
   'Simpan': '保存',
+  'Simpan cadangan (JSON)': 'バックアップを保存（JSON）',
   'Simpan kata sandi': 'パスワードを保存',
   'Simpan koreksi': '訂正を保存',
   'Simpan pembatalan': '取り消しを保存',
@@ -604,7 +635,10 @@ const Map<String, String> ja = {
   'Verifikasi ulang diperlukan. Minta link pemulihan baru sebelum mengganti kata sandi.':
       '再認証が必要です。パスワードを変更する前に、新しい復旧用リンクをリクエストしてください。',
   'Versi aplikasi': 'アプリのバージョン',
+  'Versi cadangan tidak didukung. Perbarui aplikasi lalu coba lagi.':
+      'このバックアップのバージョンには対応していません。アプリを更新してもう一度お試しください。',
   'Versi {version} oleh {actor} - {time}': 'バージョン {version} / {actor} - {time}',
+  'Wargakas terkunci': 'Wargakas はロックされています',
   'Wargakas: {title}': 'Wargakas: {title}',
   'Warna utama': 'テーマカラー',
   'Warna {number}': '色 {number}',

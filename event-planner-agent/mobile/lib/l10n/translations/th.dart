@@ -76,6 +76,10 @@ const Map<String, String> th = {
       'ยังไม่ได้เชื่อมต่อ การเปลี่ยนแปลงยังบันทึกไว้ในเครื่อง',
   'Bendahara': 'เหรัญญิก',
   'Berikan akses': 'ให้สิทธิ์เข้าถึง',
+  'Berkas cadangan belum dapat dibuka. Coba lagi.':
+      'ไม่สามารถเปิดไฟล์สำรองข้อมูลได้ กรุณาลองอีกครั้ง',
+  'Berkas ini bukan cadangan Wargakas yang valid.':
+      'ไฟล์นี้ไม่ใช่ข้อมูลสำรอง Wargakas ที่ถูกต้อง',
   'Bersih': 'สุทธิ',
   'Boleh diubah kapan saja; perubahan tercatat di riwayat dan target per peserta dihitung ulang.': 'แก้ไขได้ทุกเมื่อ การเปลี่ยนแปลงจะบันทึกไว้ในประวัติ และเป้าหมายต่อผู้เข้าร่วมจะคำนวณใหม่',
   'Buat / salin tautan': 'สร้าง / คัดลอกลิงก์',
@@ -87,10 +91,19 @@ const Map<String, String> th = {
   'Buat kata sandi baru': 'สร้างรหัสผ่านใหม่',
   'Buat ulang kata sandi': 'ตั้งรหัสผ่านใหม่',
   'Build ini belum terhubung ke Supabase. Gunakan build hosted dengan SUPABASE_URL dan SUPABASE_PUBLISHABLE_KEY.': 'แอปเวอร์ชันนี้ยังไม่ได้เชื่อมต่อกับ Supabase กรุณาใช้เวอร์ชันที่โฮสต์ไว้พร้อม SUPABASE_URL และ SUPABASE_PUBLISHABLE_KEY',
+  'Buka Wargakas': 'ปลดล็อก Wargakas',
+  'Buka kunci': 'ปลดล็อก',
+  'Buka kunci untuk melihat catatan kas.': 'ปลดล็อกเพื่อดูสมุดบัญชี',
   'Buku kas bersama untuk acara komunitas: jujur, rapi, dan mudah dibagikan.':
       'สมุดเงินสดส่วนกลางสำหรับงานของชุมชน ซื่อตรง เป็นระเบียบ และแชร์ง่าย',
   'Buku kas lengkap': 'สมุดเงินสดฉบับเต็ม',
   'Bulan': 'เดือน',
+  'Cadangan Wargakas - {name}': 'ข้อมูลสำรอง Wargakas - {name}',
+  'Cadangan acara "{name}" berisi {count} transaksi. Data yang ada di perangkat ini akan diganti dan tidak bisa dikembalikan.': 'ข้อมูลสำรองของ "{name}" มี {count} รายการ ข้อมูลบนเครื่องนี้จะถูกแทนที่และกู้คืนไม่ได้',
+  'Cadangan belum dapat dibuat atau dibagikan. Coba lagi.':
+      'ไม่สามารถสร้างหรือแชร์ข้อมูลสำรองได้ กรุณาลองอีกครั้ง',
+  'Cadangan belum dapat dipulihkan. Coba lagi.':
+      'ไม่สามารถกู้คืนข้อมูลสำรองได้ กรุณาลองอีกครั้ง',
   'Cari mata uang': 'ค้นหาสกุลเงิน',
   'Cari peserta': 'ค้นหาผู้เข้าร่วม',
   'Catat bayar': 'บันทึกการจ่าย',
@@ -109,6 +122,7 @@ const Map<String, String> th = {
   'Daftar acara belum dapat dimuat.': 'ยังโหลดรายการงานไม่ได้',
   'Daftar transaksi': 'รายการทั้งหมด',
   'Data acara tetap tersimpan di Supabase dan di perangkat ini untuk digunakan saat sinyal lemah.': 'ข้อมูลของงานยังเก็บไว้ใน Supabase และในเครื่องนี้ เพื่อใช้เมื่อสัญญาณอ่อน',
+  'Data berhasil dipulihkan dari cadangan.': 'กู้คืนข้อมูลจากข้อมูลสำรองแล้ว',
   'Data online': 'ข้อมูลออนไลน์',
   'Diarsipkan ({count})': 'เก็บถาวรแล้ว ({count})',
   'Dibatalkan': 'ยกเลิกแล้ว',
@@ -155,6 +169,7 @@ const Map<String, String> th = {
       'รูปใบเสร็จยังไม่มีในเครื่องนี้ เชื่อมต่ออินเทอร์เน็ตเพื่อดาวน์โหลด',
   'Foto nota terlampir': 'แนบรูปใบเสร็จแล้ว',
   'Ganti acara': 'เปลี่ยนงาน',
+  'Ganti data': 'แทนที่ข้อมูล',
   'Ganti foto nota': 'เปลี่ยนรูปใบเสร็จ',
   'Ganti nota': 'เปลี่ยนใบเสร็จ',
   'Garis dan teks lebih tegas agar mudah dibaca.':
@@ -179,6 +194,7 @@ const Map<String, String> th = {
   'Ikhtisar keuangan': 'ภาพรวมการเงิน',
   'Ikuti bahasa ponsel': 'ใช้ภาษาตามโทรศัพท์',
   'Ikuti bahasa ponsel ({language})': 'ใช้ภาษาตามโทรศัพท์ ({language})',
+  'Isi cadangan rusak atau tidak lengkap.': 'ข้อมูลสำรองเสียหายหรือไม่ครบถ้วน',
   'Isi keterangan transaksi.': 'กรุณากรอกรายละเอียดของรายการ',
   'Iuran per peserta': 'เงินสมทบต่อผู้เข้าร่วม',
   'Iuran peserta': 'เงินสมทบของผู้เข้าร่วม',
@@ -211,6 +227,7 @@ const Map<String, String> th = {
   'Kata sandi minimal 6 karakter. Gunakan kata sandi yang sulit ditebak.':
       'รหัสผ่านอย่างน้อย 6 ตัวอักษร ใช้รหัสผ่านที่เดาได้ยาก',
   'Kategori': 'หมวดหมู่',
+  'Keamanan': 'ความปลอดภัย',
   'Kebijakan privasi': 'นโยบายความเป็นส่วนตัว',
   'Keluar': 'ออกจากระบบ',
   'Keterangan': 'รายละเอียด',
@@ -223,6 +240,7 @@ const Map<String, String> th = {
   'Kirim link pemulihan': 'ส่งลิงก์กู้คืน',
   'Kirim pengingat': 'ส่งการเตือน',
   'Kirim ulang email konfirmasi': 'ส่งอีเมลยืนยันอีกครั้ง',
+  'Kode QR tautan peserta': 'คิวอาร์โค้ดลิงก์สำหรับผู้เข้าร่วม',
   'Komponen': 'ส่วนประกอบ',
   'Koneksi terlalu lama. Hasil permintaan belum dapat dipastikan. Periksa email atau coba Masuk sebelum mengulangi permintaan.': 'การเชื่อมต่อใช้เวลานานเกินไป ยังไม่ทราบผลของคำขอ กรุณาตรวจสอบอีเมลหรือลองเข้าสู่ระบบก่อนทำคำขอซ้ำ',
   'Konfirmasi pilihan': 'ยืนยันตัวเลือก',
@@ -238,6 +256,7 @@ const Map<String, String> th = {
   'Koreksi transaksi': 'แก้ไขรายการ',
   'Koreksi: membatalkan transaksi lain': 'แก้ไข: ยกเลิกรายการอื่น',
   'Koreksi: {name}': 'แก้ไข: {name}',
+  'Kunci aplikasi': 'ล็อกแอป',
   'Kurang {amount}': 'ขาดอีก {amount}',
   'Kurangi animasi': 'ลดภาพเคลื่อนไหว',
   'Lainnya': 'อื่น ๆ',
@@ -302,6 +321,8 @@ const Map<String, String> th = {
   'Menyimpan…': 'กำลังบันทึก…',
   'Minimal 6 karakter; gunakan kata sandi yang kuat.':
       'อย่างน้อย 6 ตัวอักษร ใช้รหัสผ่านที่คาดเดายาก',
+  'Minta sidik jari, wajah, atau PIN ponsel saat membuka Wargakas.':
+      'ขอลายนิ้วมือ ใบหน้า หรือ PIN ของเครื่องเมื่อเปิด Wargakas',
   'Muat ulang': 'โหลดใหม่',
   'Mulai': 'เริ่ม',
   'Mulai {date}': 'เริ่ม {date}',
@@ -342,6 +363,7 @@ const Map<String, String> th = {
   'Pembayaran {name} disimpan.': 'บันทึกการชำระเงินของ {name} แล้ว',
   'Pemuatan acara terlalu lama.': 'โหลดงานนานเกินไป',
   'Pemuatan akun sebelumnya dibatalkan.': 'ยกเลิกการโหลดบัญชีครั้งก่อนแล้ว',
+  'Pemulihan cadangan hanya tersedia di mode offline. Data online dipulihkan oleh bendahara melalui cadangan server.': 'การกู้คืนข้อมูลสำรองใช้ได้เฉพาะโหมดออฟไลน์ ข้อมูลออนไลน์จะถูกกู้คืนโดยเหรัญญิกจากข้อมูลสำรองบนเซิร์ฟเวอร์',
   'Pendaftaran atau masuk dengan email sedang dinonaktifkan. Hubungi pengelola Wargakas.': 'การสมัครหรือเข้าสู่ระบบด้วยอีเมลถูกปิดใช้งานอยู่ กรุณาติดต่อผู้ดูแลระบบ Wargakas',
   'Pengaturan': 'การตั้งค่า',
   'Pengeditan dihentikan agar perubahan dari dua perangkat tidak saling menimpa.':
@@ -390,6 +412,8 @@ const Map<String, String> th = {
   'Peserta belum diperbarui': 'ยังอัปเดตผู้เข้าร่วมไม่ได้',
   'Peserta belum ditambahkan': 'ยังเพิ่มผู้เข้าร่วมไม่ได้',
   'Peserta bisa membuka tautan ini di browser tanpa akun. Selalu menampilkan data terbaru. Nomor telepon dan foto nota tidak ditampilkan.': 'ผู้เข้าร่วมเปิดลิงก์นี้ในเบราว์เซอร์ได้โดยไม่ต้องมีบัญชี แสดงข้อมูลล่าสุดเสมอ เบอร์โทรศัพท์และรูปใบเสร็จจะไม่แสดง',
+  'Peserta dapat memindai kode ini dengan kamera ponsel.':
+      'ผู้เข้าร่วมสแกนโค้ดนี้ด้วยกล้องโทรศัพท์ได้',
   'Peserta pengganti harus menggantikan peserta yang dibatalkan.':
       'ผู้เข้าร่วมที่มาแทนต้องแทนผู้เข้าร่วมที่ถูกยกเลิก',
   'Peserta {state}': 'ผู้เข้าร่วม{state}',
@@ -404,6 +428,8 @@ const Map<String, String> th = {
   'Pilih tanggal {label}, {date}': 'เลือกวันที่{label} {date}',
   'Pilih versi data sebelum melanjutkan':
       'เลือกเวอร์ชันของข้อมูลก่อนดำเนินการต่อ',
+  'Ponsel ini belum mengatur kunci layar atau sidik jari.':
+      'เครื่องนี้ยังไม่ได้ตั้งค่าล็อกหน้าจอหรือลายนิ้วมือ',
   'Portofolio acara': 'ภาพรวมของงาน',
   'Portofolio acara lengkap (PDF)': 'ภาพรวมของงานฉบับเต็ม (PDF)',
   'Preview laporan': 'ตัวอย่างรายงาน',
@@ -411,6 +437,8 @@ const Map<String, String> th = {
   'Privasi: laporan ini tidak memuat nomor rekening, kredensial, nomor telepon, token, atau dokumen identitas. Periksa penerima sebelum membagikan laporan.': 'ความเป็นส่วนตัว: รายงานนี้ไม่มีเลขบัญชี ข้อมูลเข้าสู่ระบบ เบอร์โทรศัพท์ โทเค็น หรือเอกสารระบุตัวตน กรุณาตรวจสอบผู้รับก่อนแชร์รายงาน',
   'Privasi: laporan ini tidak memuat nomor rekening, kredensial, nomor telepon, token, atau dokumen identitas. Saldo pada daftar dihitung dari seluruh riwayat, bukan hanya baris yang difilter. Periksa penerima sebelum membagikan.': 'ความเป็นส่วนตัว: รายงานนี้ไม่มีเลขบัญชี ข้อมูลเข้าสู่ระบบ เบอร์โทรศัพท์ โทเค็น หรือเอกสารระบุตัวตน ยอดคงเหลือในรายการคำนวณจากประวัติทั้งหมด ไม่ใช่เฉพาะแถวที่กรอง กรุณาตรวจสอบผู้รับก่อนแชร์',
   'Pulihkan': 'กู้คืน',
+  'Pulihkan dari cadangan': 'กู้คืนจากข้อมูลสำรอง',
+  'Pulihkan dari cadangan?': 'กู้คืนจากข้อมูลสำรองหรือไม่',
   'Refund': 'คืนเงิน',
   'Refund dan pengeluaran': 'การคืนเงินและรายจ่าย',
   'Refund dan pengeluaran {amount}': 'การคืนเงินและรายจ่าย {amount}',
@@ -480,6 +508,7 @@ const Map<String, String> th = {
       'เซสชันหมดอายุแล้ว กรุณาเข้าสู่ระบบอีกครั้งเพื่อดำเนินการต่อ',
   'Setiap rupiah bisa ditelusuri': 'ทุกยอดเงินตรวจสอบย้อนหลังได้',
   'Simpan': 'บันทึก',
+  'Simpan cadangan (JSON)': 'บันทึกข้อมูลสำรอง (JSON)',
   'Simpan kata sandi': 'บันทึกรหัสผ่าน',
   'Simpan koreksi': 'บันทึกการแก้ไข',
   'Simpan pembatalan': 'บันทึกการยกเลิก',
@@ -597,8 +626,11 @@ const Map<String, String> th = {
   'Verifikasi ulang diperlukan. Minta link pemulihan baru sebelum mengganti kata sandi.':
       'ต้องยืนยันตัวตนอีกครั้ง กรุณาขอลิงก์กู้คืนใหม่ก่อนเปลี่ยนรหัสผ่าน',
   'Versi aplikasi': 'เวอร์ชันของแอป',
+  'Versi cadangan tidak didukung. Perbarui aplikasi lalu coba lagi.':
+      'ไม่รองรับข้อมูลสำรองเวอร์ชันนี้ กรุณาอัปเดตแอปแล้วลองอีกครั้ง',
   'Versi {version} oleh {actor} - {time}':
       'เวอร์ชัน {version} โดย {actor} - {time}',
+  'Wargakas terkunci': 'Wargakas ถูกล็อกอยู่',
   'Wargakas: {title}': 'Wargakas: {title}',
   'Warna utama': 'สีหลัก',
   'Warna {number}': 'สี {number}',

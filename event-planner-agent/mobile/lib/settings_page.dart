@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'app_lock.dart';
 import 'app_settings.dart';
 import 'l10n/l10n.dart';
 import 'money.dart';
@@ -224,6 +226,21 @@ class SettingsPage extends StatelessWidget {
                         }
                       },
                     ),
+                    if (!kIsWeb) ...[
+                      _Header(tr('Keamanan')),
+                      SwitchListTile(
+                        key: const Key('settings-app-lock'),
+                        secondary: const Icon(Icons.lock_outline),
+                        title: Text(tr('Kunci aplikasi')),
+                        subtitle: Text(
+                          tr(
+                            'Minta sidik jari, wajah, atau PIN ponsel saat membuka Wargakas.',
+                          ),
+                        ),
+                        value: settings.appLock,
+                        onChanged: (value) => _toggleAppLock(context, value),
+                      ),
+                    ],
                     _Header(tr('Tentang')),
                     ListTile(
                       leading: const Icon(Icons.privacy_tip_outlined),
@@ -262,6 +279,29 @@ class SettingsPage extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _toggleAppLock(BuildContext context, bool value) async {
+    if (!value) {
+      await settings.setAppLock(false);
+      return;
+    }
+    final messenger = ScaffoldMessenger.of(context);
+    final auth = AppLock.authenticator;
+    if (!await auth.isSupported()) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            tr('Ponsel ini belum mengatur kunci layar atau sidik jari.'),
+          ),
+        ),
+      );
+      return;
+    }
+    // Prove it works once, so nobody is locked out of their own records.
+    if (await auth.authenticate(tr('Buka Wargakas'))) {
+      await settings.setAppLock(true);
+    }
   }
 
   Future<void> _pickLanguage(BuildContext context) async {
