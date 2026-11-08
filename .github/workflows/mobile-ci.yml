@@ -15,6 +15,13 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+          # Keeps the Gradle distribution and dependencies between runs, so
+          # an outage of the Gradle download server does not break builds.
+          cache: gradle
+          cache-dependency-path: |
+            event-planner-agent/mobile/android/*.gradle*
+            event-planner-agent/mobile/android/app/*.gradle*
+            event-planner-agent/mobile/android/gradle/wrapper/gradle-wrapper.properties
       - uses: subosito/flutter-action@v2
         with:
           channel: stable

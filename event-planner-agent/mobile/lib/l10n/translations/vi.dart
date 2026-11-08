@@ -75,6 +75,10 @@ const Map<String, String> vi = {
       'Chưa kết nối. Thay đổi vẫn được lưu trên thiết bị.',
   'Bendahara': 'Thủ quỹ',
   'Berikan akses': 'Cấp quyền truy cập',
+  'Berkas cadangan belum dapat dibuka. Coba lagi.':
+      'Không thể mở tệp sao lưu. Vui lòng thử lại.',
+  'Berkas ini bukan cadangan Wargakas yang valid.':
+      'Tệp này không phải bản sao lưu Wargakas hợp lệ.',
   'Bersih': 'Ròng',
   'Boleh diubah kapan saja; perubahan tercatat di riwayat dan target per peserta dihitung ulang.': 'Có thể thay đổi bất cứ lúc nào; thay đổi được ghi vào lịch sử và mức đóng của từng người sẽ được tính lại.',
   'Buat / salin tautan': 'Tạo / sao chép liên kết',
@@ -86,9 +90,18 @@ const Map<String, String> vi = {
   'Buat kata sandi baru': 'Tạo mật khẩu mới',
   'Buat ulang kata sandi': 'Tạo lại mật khẩu',
   'Build ini belum terhubung ke Supabase. Gunakan build hosted dengan SUPABASE_URL dan SUPABASE_PUBLISHABLE_KEY.': 'Bản dựng này chưa kết nối với Supabase. Hãy dùng bản dựng hosted với SUPABASE_URL và SUPABASE_PUBLISHABLE_KEY.',
+  'Buka Wargakas': 'Mở khóa Wargakas',
+  'Buka kunci': 'Mở khóa',
+  'Buka kunci untuk melihat catatan kas.': 'Mở khóa để xem sổ quỹ.',
   'Buku kas bersama untuk acara komunitas: jujur, rapi, dan mudah dibagikan.': 'Sổ quỹ chung cho các sự kiện cộng đồng: trung thực, gọn gàng và dễ chia sẻ.',
   'Buku kas lengkap': 'Sổ quỹ đầy đủ',
   'Bulan': 'Tháng',
+  'Cadangan Wargakas - {name}': 'Bản sao lưu Wargakas - {name}',
+  'Cadangan acara "{name}" berisi {count} transaksi. Data yang ada di perangkat ini akan diganti dan tidak bisa dikembalikan.': 'Bản sao lưu của "{name}" có {count} giao dịch. Dữ liệu trên thiết bị này sẽ bị thay thế và không thể khôi phục.',
+  'Cadangan belum dapat dibuat atau dibagikan. Coba lagi.':
+      'Không thể tạo hoặc chia sẻ bản sao lưu. Vui lòng thử lại.',
+  'Cadangan belum dapat dipulihkan. Coba lagi.':
+      'Không thể khôi phục bản sao lưu. Vui lòng thử lại.',
   'Cari mata uang': 'Tìm loại tiền tệ',
   'Cari peserta': 'Tìm người tham gia',
   'Catat bayar': 'Ghi khoản đóng',
@@ -107,6 +120,8 @@ const Map<String, String> vi = {
   'Daftar acara belum dapat dimuat.': 'Chưa thể tải danh sách sự kiện.',
   'Daftar transaksi': 'Danh sách giao dịch',
   'Data acara tetap tersimpan di Supabase dan di perangkat ini untuk digunakan saat sinyal lemah.': 'Dữ liệu sự kiện vẫn được lưu trên Supabase và trên thiết bị này để dùng khi sóng yếu.',
+  'Data berhasil dipulihkan dari cadangan.':
+      'Đã khôi phục dữ liệu từ bản sao lưu.',
   'Data online': 'Dữ liệu trực tuyến',
   'Diarsipkan ({count})': 'Đã lưu trữ ({count})',
   'Dibatalkan': 'Đã hủy',
@@ -150,6 +165,7 @@ const Map<String, String> vi = {
   'Foto nota belum tersedia di perangkat ini. Sambungkan internet untuk mengunduhnya.': 'Ảnh biên nhận chưa có trên thiết bị này. Hãy kết nối internet để tải xuống.',
   'Foto nota terlampir': 'Đã đính kèm ảnh biên nhận',
   'Ganti acara': 'Đổi sự kiện',
+  'Ganti data': 'Thay thế dữ liệu',
   'Ganti foto nota': 'Đổi ảnh biên nhận',
   'Ganti nota': 'Đổi biên nhận',
   'Garis dan teks lebih tegas agar mudah dibaca.':
@@ -175,6 +191,8 @@ const Map<String, String> vi = {
   'Ikhtisar keuangan': 'Tổng quan tài chính',
   'Ikuti bahasa ponsel': 'Theo ngôn ngữ điện thoại',
   'Ikuti bahasa ponsel ({language})': 'Theo ngôn ngữ điện thoại ({language})',
+  'Isi cadangan rusak atau tidak lengkap.':
+      'Bản sao lưu bị hỏng hoặc không đầy đủ.',
   'Isi keterangan transaksi.': 'Hãy nhập mô tả giao dịch.',
   'Iuran per peserta': 'Mức đóng mỗi người',
   'Iuran peserta': 'Khoản đóng của người tham gia',
@@ -207,6 +225,7 @@ const Map<String, String> vi = {
   'Kata sandi minimal 6 karakter. Gunakan kata sandi yang sulit ditebak.':
       'Mật khẩu tối thiểu 6 ký tự. Hãy chọn mật khẩu khó đoán.',
   'Kategori': 'Danh mục',
+  'Keamanan': 'Bảo mật',
   'Kebijakan privasi': 'Chính sách quyền riêng tư',
   'Keluar': 'Đăng xuất',
   'Keterangan': 'Mô tả',
@@ -219,6 +238,7 @@ const Map<String, String> vi = {
   'Kirim link pemulihan': 'Gửi liên kết khôi phục',
   'Kirim pengingat': 'Gửi lời nhắc',
   'Kirim ulang email konfirmasi': 'Gửi lại email xác nhận',
+  'Kode QR tautan peserta': 'Mã QR liên kết cho người tham gia',
   'Komponen': 'Thành phần',
   'Koneksi terlalu lama. Hasil permintaan belum dapat dipastikan. Periksa email atau coba Masuk sebelum mengulangi permintaan.': 'Kết nối quá lâu. Chưa thể xác định kết quả yêu cầu. Hãy kiểm tra email hoặc thử Đăng nhập trước khi gửi lại yêu cầu.',
   'Konfirmasi pilihan': 'Xác nhận lựa chọn',
@@ -236,6 +256,7 @@ const Map<String, String> vi = {
   'Koreksi transaksi': 'Điều chỉnh giao dịch',
   'Koreksi: membatalkan transaksi lain': 'Điều chỉnh: hủy một giao dịch khác',
   'Koreksi: {name}': 'Điều chỉnh: {name}',
+  'Kunci aplikasi': 'Khóa ứng dụng',
   'Kurang {amount}': 'Thiếu {amount}',
   'Kurangi animasi': 'Giảm hiệu ứng chuyển động',
   'Lainnya': 'Khác',
@@ -304,6 +325,8 @@ const Map<String, String> vi = {
   'Menyimpan…': 'Đang lưu…',
   'Minimal 6 karakter; gunakan kata sandi yang kuat.':
       'Tối thiểu 6 ký tự; hãy dùng mật khẩu mạnh.',
+  'Minta sidik jari, wajah, atau PIN ponsel saat membuka Wargakas.':
+      'Yêu cầu vân tay, khuôn mặt hoặc mã PIN điện thoại khi mở Wargakas.',
   'Muat ulang': 'Tải lại',
   'Mulai': 'Bắt đầu',
   'Mulai {date}': 'Bắt đầu {date}',
@@ -344,6 +367,7 @@ const Map<String, String> vi = {
   'Pembayaran {name} disimpan.': 'Đã lưu khoản đóng của {name}.',
   'Pemuatan acara terlalu lama.': 'Tải sự kiện quá lâu.',
   'Pemuatan akun sebelumnya dibatalkan.': 'Lần tải tài khoản trước đã bị hủy.',
+  'Pemulihan cadangan hanya tersedia di mode offline. Data online dipulihkan oleh bendahara melalui cadangan server.': 'Chỉ có thể khôi phục bản sao lưu ở chế độ ngoại tuyến. Dữ liệu trực tuyến do thủ quỹ khôi phục từ bản sao lưu trên máy chủ.',
   'Pendaftaran atau masuk dengan email sedang dinonaktifkan. Hubungi pengelola Wargakas.': 'Đăng ký hoặc đăng nhập bằng email đang bị tắt. Hãy liên hệ quản trị viên Wargakas.',
   'Pengaturan': 'Cài đặt',
   'Pengeditan dihentikan agar perubahan dari dua perangkat tidak saling menimpa.':
@@ -392,6 +416,8 @@ const Map<String, String> vi = {
   'Peserta belum diperbarui': 'Chưa cập nhật được người tham gia',
   'Peserta belum ditambahkan': 'Chưa thêm được người tham gia',
   'Peserta bisa membuka tautan ini di browser tanpa akun. Selalu menampilkan data terbaru. Nomor telepon dan foto nota tidak ditampilkan.': 'Người tham gia có thể mở liên kết này trên trình duyệt mà không cần tài khoản. Luôn hiển thị dữ liệu mới nhất. Số điện thoại và ảnh biên nhận không được hiển thị.',
+  'Peserta dapat memindai kode ini dengan kamera ponsel.':
+      'Người tham gia có thể quét mã này bằng camera điện thoại.',
   'Peserta pengganti harus menggantikan peserta yang dibatalkan.':
       'Người tham gia thay thế phải thay cho người tham gia đã bị hủy.',
   'Peserta {state}': 'Người tham gia {state}',
@@ -407,6 +433,8 @@ const Map<String, String> vi = {
   'Pilih tanggal {label}, {date}': 'Chọn ngày {label}, {date}',
   'Pilih versi data sebelum melanjutkan':
       'Hãy chọn phiên bản dữ liệu trước khi tiếp tục',
+  'Ponsel ini belum mengatur kunci layar atau sidik jari.':
+      'Điện thoại này chưa cài khóa màn hình hoặc vân tay.',
   'Portofolio acara': 'Tổng hợp sự kiện',
   'Portofolio acara lengkap (PDF)': 'Tổng hợp sự kiện đầy đủ (PDF)',
   'Preview laporan': 'Xem trước báo cáo',
@@ -414,6 +442,8 @@ const Map<String, String> vi = {
   'Privasi: laporan ini tidak memuat nomor rekening, kredensial, nomor telepon, token, atau dokumen identitas. Periksa penerima sebelum membagikan laporan.': 'Quyền riêng tư: báo cáo này không chứa số tài khoản ngân hàng, thông tin đăng nhập, số điện thoại, mã token hay giấy tờ tùy thân. Hãy kiểm tra người nhận trước khi chia sẻ báo cáo.',
   'Privasi: laporan ini tidak memuat nomor rekening, kredensial, nomor telepon, token, atau dokumen identitas. Saldo pada daftar dihitung dari seluruh riwayat, bukan hanya baris yang difilter. Periksa penerima sebelum membagikan.': 'Quyền riêng tư: báo cáo này không chứa số tài khoản ngân hàng, thông tin đăng nhập, số điện thoại, mã token hay giấy tờ tùy thân. Số dư trong danh sách được tính từ toàn bộ lịch sử, không chỉ các dòng đã lọc. Hãy kiểm tra người nhận trước khi chia sẻ.',
   'Pulihkan': 'Khôi phục',
+  'Pulihkan dari cadangan': 'Khôi phục từ bản sao lưu',
+  'Pulihkan dari cadangan?': 'Khôi phục từ bản sao lưu?',
   'Refund': 'Hoàn tiền',
   'Refund dan pengeluaran': 'Hoàn tiền và chi tiêu',
   'Refund dan pengeluaran {amount}': 'Hoàn tiền và chi tiêu {amount}',
@@ -483,6 +513,7 @@ const Map<String, String> vi = {
       'Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại để tiếp tục.',
   'Setiap rupiah bisa ditelusuri': 'Mọi đồng tiền đều có thể truy vết',
   'Simpan': 'Lưu',
+  'Simpan cadangan (JSON)': 'Lưu bản sao lưu (JSON)',
   'Simpan kata sandi': 'Lưu mật khẩu',
   'Simpan koreksi': 'Lưu điều chỉnh',
   'Simpan pembatalan': 'Lưu việc hủy',
@@ -599,8 +630,10 @@ const Map<String, String> vi = {
   'Verifikasi keamanan belum berhasil. Coba lagi atau hubungi pengelola Wargakas.': 'Xác minh bảo mật chưa thành công. Hãy thử lại hoặc liên hệ quản trị viên Wargakas.',
   'Verifikasi ulang diperlukan. Minta link pemulihan baru sebelum mengganti kata sandi.': 'Cần xác minh lại. Hãy yêu cầu liên kết khôi phục mới trước khi đổi mật khẩu.',
   'Versi aplikasi': 'Phiên bản ứng dụng',
+  'Versi cadangan tidak didukung. Perbarui aplikasi lalu coba lagi.': 'Phiên bản sao lưu này không được hỗ trợ. Hãy cập nhật ứng dụng rồi thử lại.',
   'Versi {version} oleh {actor} - {time}':
       'Phiên bản {version} bởi {actor} - {time}',
+  'Wargakas terkunci': 'Wargakas đang khóa',
   'Wargakas: {title}': 'Wargakas: {title}',
   'Warna utama': 'Màu chủ đạo',
   'Warna {number}': 'Màu {number}',

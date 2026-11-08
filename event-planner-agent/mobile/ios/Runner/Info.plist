@@ -68,6 +68,8 @@
 	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>Take a photo of a receipt so the group can see proof of each expense.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Unlock Wargakas so only you can see your group's money records.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Attach an existing receipt photo to an expense.</string>
 	<key>CFBundleURLTypes</key>

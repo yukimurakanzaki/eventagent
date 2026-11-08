@@ -44,6 +44,71 @@ class _ReportPageState extends State<ReportPage> {
     }
   }
 
+  Future<void> _exportBackup() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await shareBackup(widget.controller.snapshot);
+    } catch (_) {
+      _snack(tr('Cadangan belum dapat dibuat atau dibagikan. Coba lagi.'));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _restoreBackup() async {
+    if (_busy) return;
+    final CashbookSnapshot backup;
+    try {
+      final file = await FilePicker.pickFile(
+        type: FileType.custom,
+        allowedExtensions: const ['json'],
+      );
+      if (file == null) return;
+      final bytes = await file.readAsBytes();
+      backup = parseBackupJson(utf8.decode(bytes));
+    } on FormatException catch (e) {
+      _snack(e.message);
+      return;
+    } catch (_) {
+      _snack(tr('Berkas cadangan belum dapat dibuka. Coba lagi.'));
+      return;
+    }
+    if (!mounted) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(tr('Pulihkan dari cadangan?')),
+        content: Text(
+          tr(
+            'Cadangan acara "{name}" berisi {count} transaksi. Data yang ada di perangkat ini akan diganti dan tidak bisa dikembalikan.',
+            {'name': backup.event.name, 'count': backup.transactions.length},
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(tr('Batal')),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(tr('Ganti data')),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _busy = true);
+    try {
+      final error = await widget.controller.restoreFromBackup(backup);
+      _snack(error ?? tr('Data berhasil dipulihkan dari cadangan.'));
+    } catch (_) {
+      _snack(tr('Cadangan belum dapat dipulihkan. Coba lagi.'));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   Future<String?> _ensureLink() async {
     final service = widget.shareLinkService;
     if (service == null) return null;
@@ -159,6 +224,32 @@ class _ReportPageState extends State<ReportPage> {
             if (_link != null) ...[
               const SizedBox(height: 8),
               SelectableText(_link!, style: theme.textTheme.bodyMedium),
+              const SizedBox(height: 12),
+              Center(
+                child: Semantics(
+                  label: tr('Kode QR tautan peserta'),
+                  image: true,
+                  child: ExcludeSemantics(
+                    child: Container(
+                      color: Colors.white,
+                      padding: const EdgeInsets.all(12),
+                      child: QrImageView(
+                        data: _link!,
+                        size: 200,
+                        backgroundColor: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                tr('Peserta dapat memindai kode ini dengan kamera ponsel.'),
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
             ],
             const SizedBox(height: 12),
             FilledButton.icon(
@@ -293,6 +384,20 @@ class _ReportPageState extends State<ReportPage> {
           icon: const Icon(Icons.table_chart_outlined),
           label: Text(tr('Ekspor CSV (Excel)')),
         ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: _busy ? null : _exportBackup,
+          icon: const Icon(Icons.save_alt),
+          label: Text(tr('Simpan cadangan (JSON)')),
+        ),
+        if (controller.canRestoreBackup) ...[
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: _busy ? null : _restoreBackup,
+            icon: const Icon(Icons.restore),
+            label: Text(tr('Pulihkan dari cadangan')),
+          ),
+        ],
         const SizedBox(height: 8),
         Text(
           tr('Periksa penerima sebelum mengirim.'),

@@ -75,6 +75,10 @@ const Map<String, String> ms = {
       'Tiada sambungan. Perubahan kekal disimpan dalam peranti.',
   'Bendahara': 'Bendahari',
   'Berikan akses': 'Beri akses',
+  'Berkas cadangan belum dapat dibuka. Coba lagi.':
+      'Fail sandaran tidak dapat dibuka. Sila cuba lagi.',
+  'Berkas ini bukan cadangan Wargakas yang valid.':
+      'Fail ini bukan sandaran Wargakas yang sah.',
   'Bersih': 'Bersih',
   'Boleh diubah kapan saja; perubahan tercatat di riwayat dan target per peserta dihitung ulang.': 'Boleh diubah pada bila-bila masa; perubahan direkodkan dalam sejarah dan sasaran setiap peserta dikira semula.',
   'Buat / salin tautan': 'Buat / salin pautan',
@@ -86,9 +90,19 @@ const Map<String, String> ms = {
   'Buat kata sandi baru': 'Buat kata laluan baharu',
   'Buat ulang kata sandi': 'Buat semula kata laluan',
   'Build ini belum terhubung ke Supabase. Gunakan build hosted dengan SUPABASE_URL dan SUPABASE_PUBLISHABLE_KEY.': 'Binaan ini belum disambungkan ke Supabase. Gunakan binaan yang dihoskan dengan SUPABASE_URL dan SUPABASE_PUBLISHABLE_KEY.',
+  'Buka Wargakas': 'Buka kunci Wargakas',
+  'Buka kunci': 'Buka kunci',
+  'Buka kunci untuk melihat catatan kas.':
+      'Buka kunci untuk melihat buku tunai.',
   'Buku kas bersama untuk acara komunitas: jujur, rapi, dan mudah dibagikan.': 'Buku tunai bersama untuk acara komuniti: jujur, kemas dan mudah dikongsi.',
   'Buku kas lengkap': 'Buku tunai lengkap',
   'Bulan': 'Bulan',
+  'Cadangan Wargakas - {name}': 'Sandaran Wargakas - {name}',
+  'Cadangan acara "{name}" berisi {count} transaksi. Data yang ada di perangkat ini akan diganti dan tidak bisa dikembalikan.': 'Sandaran "{name}" mengandungi {count} transaksi. Data pada peranti ini akan diganti dan tidak boleh dikembalikan.',
+  'Cadangan belum dapat dibuat atau dibagikan. Coba lagi.':
+      'Sandaran tidak dapat dibuat atau dikongsi. Sila cuba lagi.',
+  'Cadangan belum dapat dipulihkan. Coba lagi.':
+      'Sandaran tidak dapat dipulihkan. Sila cuba lagi.',
   'Cari mata uang': 'Cari mata wang',
   'Cari peserta': 'Cari peserta',
   'Catat bayar': 'Rekod bayaran',
@@ -107,6 +121,8 @@ const Map<String, String> ms = {
   'Daftar acara belum dapat dimuat.': 'Senarai acara belum dapat dimuatkan.',
   'Daftar transaksi': 'Senarai transaksi',
   'Data acara tetap tersimpan di Supabase dan di perangkat ini untuk digunakan saat sinyal lemah.': 'Data acara kekal disimpan di Supabase dan dalam peranti ini untuk digunakan apabila isyarat lemah.',
+  'Data berhasil dipulihkan dari cadangan.':
+      'Data berjaya dipulihkan daripada sandaran.',
   'Data online': 'Data dalam talian',
   'Diarsipkan ({count})': 'Diarkibkan ({count})',
   'Dibatalkan': 'Dibatalkan',
@@ -151,6 +167,7 @@ const Map<String, String> ms = {
   'Foto nota belum tersedia di perangkat ini. Sambungkan internet untuk mengunduhnya.': 'Gambar resit belum tersedia dalam peranti ini. Sambung ke internet untuk memuat turunnya.',
   'Foto nota terlampir': 'Gambar resit dilampirkan',
   'Ganti acara': 'Tukar acara',
+  'Ganti data': 'Ganti data',
   'Ganti foto nota': 'Tukar gambar resit',
   'Ganti nota': 'Tukar resit',
   'Garis dan teks lebih tegas agar mudah dibaca.':
@@ -176,6 +193,8 @@ const Map<String, String> ms = {
   'Ikhtisar keuangan': 'Gambaran kewangan',
   'Ikuti bahasa ponsel': 'Ikut bahasa telefon',
   'Ikuti bahasa ponsel ({language})': 'Ikut bahasa telefon ({language})',
+  'Isi cadangan rusak atau tidak lengkap.':
+      'Sandaran rosak atau tidak lengkap.',
   'Isi keterangan transaksi.': 'Isi keterangan transaksi.',
   'Iuran per peserta': 'Yuran setiap peserta',
   'Iuran peserta': 'Yuran peserta',
@@ -206,6 +225,7 @@ const Map<String, String> ms = {
   'Kata sandi berhasil diperbarui. Gunakan kata sandi baru saat masuk berikutnya.': 'Kata laluan berjaya dikemas kini. Gunakan kata laluan baharu semasa log masuk seterusnya.',
   'Kata sandi minimal 6 karakter. Gunakan kata sandi yang sulit ditebak.': 'Kata laluan sekurang-kurangnya 6 aksara. Gunakan kata laluan yang sukar diteka.',
   'Kategori': 'Kategori',
+  'Keamanan': 'Keselamatan',
   'Kebijakan privasi': 'Dasar privasi',
   'Keluar': 'Log keluar',
   'Keterangan': 'Keterangan',
@@ -218,6 +238,7 @@ const Map<String, String> ms = {
   'Kirim link pemulihan': 'Hantar pautan pemulihan',
   'Kirim pengingat': 'Hantar peringatan',
   'Kirim ulang email konfirmasi': 'Hantar semula e-mel pengesahan',
+  'Kode QR tautan peserta': 'Kod QR pautan peserta',
   'Komponen': 'Komponen',
   'Koneksi terlalu lama. Hasil permintaan belum dapat dipastikan. Periksa email atau coba Masuk sebelum mengulangi permintaan.': 'Sambungan mengambil masa terlalu lama. Hasil permintaan belum dapat dipastikan. Semak e-mel atau cuba Log masuk sebelum mengulangi permintaan.',
   'Konfirmasi pilihan': 'Sahkan pilihan',
@@ -235,6 +256,7 @@ const Map<String, String> ms = {
   'Koreksi: membatalkan transaksi lain':
       'Pembetulan: membatalkan transaksi lain',
   'Koreksi: {name}': 'Pembetulan: {name}',
+  'Kunci aplikasi': 'Kunci aplikasi',
   'Kurang {amount}': 'Kurang {amount}',
   'Kurangi animasi': 'Kurangkan animasi',
   'Lainnya': 'Lain-lain',
@@ -302,6 +324,8 @@ const Map<String, String> ms = {
   'Menyimpan…': 'Sedang menyimpan…',
   'Minimal 6 karakter; gunakan kata sandi yang kuat.':
       'Sekurang-kurangnya 6 aksara; gunakan kata laluan yang kukuh.',
+  'Minta sidik jari, wajah, atau PIN ponsel saat membuka Wargakas.':
+      'Minta cap jari, wajah atau PIN telefon semasa membuka Wargakas.',
   'Muat ulang': 'Muat semula',
   'Mulai': 'Mula',
   'Mulai {date}': 'Mula {date}',
@@ -344,6 +368,7 @@ const Map<String, String> ms = {
   'Pemuatan acara terlalu lama.': 'Pemuatan acara terlalu lama.',
   'Pemuatan akun sebelumnya dibatalkan.':
       'Pemuatan akaun sebelumnya dibatalkan.',
+  'Pemulihan cadangan hanya tersedia di mode offline. Data online dipulihkan oleh bendahara melalui cadangan server.': 'Pemulihan sandaran hanya tersedia dalam mod luar talian. Data dalam talian dipulihkan oleh bendahari melalui sandaran pelayan.',
   'Pendaftaran atau masuk dengan email sedang dinonaktifkan. Hubungi pengelola Wargakas.': 'Pendaftaran atau log masuk dengan e-mel sedang dinyahaktifkan. Hubungi pengurus Wargakas.',
   'Pengaturan': 'Tetapan',
   'Pengeditan dihentikan agar perubahan dari dua perangkat tidak saling menimpa.': 'Penyuntingan dihentikan supaya perubahan daripada dua peranti tidak menimpa satu sama lain.',
@@ -390,6 +415,8 @@ const Map<String, String> ms = {
   'Peserta belum diperbarui': 'Peserta belum dikemas kini',
   'Peserta belum ditambahkan': 'Peserta belum ditambah',
   'Peserta bisa membuka tautan ini di browser tanpa akun. Selalu menampilkan data terbaru. Nomor telepon dan foto nota tidak ditampilkan.': 'Peserta boleh membuka pautan ini dalam pelayar tanpa akaun. Sentiasa memaparkan data terkini. Nombor telefon dan gambar resit tidak dipaparkan.',
+  'Peserta dapat memindai kode ini dengan kamera ponsel.':
+      'Peserta boleh mengimbas kod ini dengan kamera telefon.',
   'Peserta pengganti harus menggantikan peserta yang dibatalkan.':
       'Peserta pengganti mesti menggantikan peserta yang dibatalkan.',
   'Peserta {state}': 'Peserta {state}',
@@ -404,6 +431,8 @@ const Map<String, String> ms = {
   'Pilih rentang tanggal': 'Pilih julat tarikh',
   'Pilih tanggal {label}, {date}': 'Pilih tarikh {label}, {date}',
   'Pilih versi data sebelum melanjutkan': 'Pilih versi data sebelum meneruskan',
+  'Ponsel ini belum mengatur kunci layar atau sidik jari.':
+      'Telefon ini belum menetapkan kunci skrin atau cap jari.',
   'Portofolio acara': 'Portfolio acara',
   'Portofolio acara lengkap (PDF)': 'Portfolio acara lengkap (PDF)',
   'Preview laporan': 'Pratonton laporan',
@@ -411,6 +440,8 @@ const Map<String, String> ms = {
   'Privasi: laporan ini tidak memuat nomor rekening, kredensial, nomor telepon, token, atau dokumen identitas. Periksa penerima sebelum membagikan laporan.': 'Privasi: laporan ini tidak mengandungi nombor akaun bank, butiran log masuk, nombor telefon, token atau dokumen pengenalan. Semak penerima sebelum berkongsi laporan.',
   'Privasi: laporan ini tidak memuat nomor rekening, kredensial, nomor telepon, token, atau dokumen identitas. Saldo pada daftar dihitung dari seluruh riwayat, bukan hanya baris yang difilter. Periksa penerima sebelum membagikan.': 'Privasi: laporan ini tidak mengandungi nombor akaun bank, butiran log masuk, nombor telefon, token atau dokumen pengenalan. Baki pada senarai dikira daripada seluruh sejarah, bukan hanya baris yang ditapis. Semak penerima sebelum berkongsi.',
   'Pulihkan': 'Pulihkan',
+  'Pulihkan dari cadangan': 'Pulihkan daripada sandaran',
+  'Pulihkan dari cadangan?': 'Pulihkan daripada sandaran?',
   'Refund': 'Bayaran balik',
   'Refund dan pengeluaran': 'Bayaran balik dan perbelanjaan',
   'Refund dan pengeluaran {amount}': 'Bayaran balik dan perbelanjaan {amount}',
@@ -483,6 +514,7 @@ const Map<String, String> ms = {
       'Sesi sudah tamat. Log masuk semula untuk meneruskan.',
   'Setiap rupiah bisa ditelusuri': 'Setiap sen boleh dijejaki',
   'Simpan': 'Simpan',
+  'Simpan cadangan (JSON)': 'Simpan sandaran (JSON)',
   'Simpan kata sandi': 'Simpan kata laluan',
   'Simpan koreksi': 'Simpan pembetulan',
   'Simpan pembatalan': 'Simpan pembatalan',
@@ -598,8 +630,11 @@ const Map<String, String> ms = {
   'Verifikasi keamanan belum berhasil. Coba lagi atau hubungi pengelola Wargakas.': 'Pengesahan keselamatan belum berjaya. Cuba lagi atau hubungi pengurus Wargakas.',
   'Verifikasi ulang diperlukan. Minta link pemulihan baru sebelum mengganti kata sandi.': 'Pengesahan semula diperlukan. Minta pautan pemulihan baharu sebelum menukar kata laluan.',
   'Versi aplikasi': 'Versi aplikasi',
+  'Versi cadangan tidak didukung. Perbarui aplikasi lalu coba lagi.':
+      'Versi sandaran ini tidak disokong. Kemas kini aplikasi dan cuba lagi.',
   'Versi {version} oleh {actor} - {time}':
       'Versi {version} oleh {actor} - {time}',
+  'Wargakas terkunci': 'Wargakas dikunci',
   'Wargakas: {title}': 'Wargakas: {title}',
   'Warna utama': 'Warna utama',
   'Warna {number}': 'Warna {number}',

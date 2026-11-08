@@ -75,6 +75,10 @@ const Map<String, String> ar = {
       'لا يوجد اتصال. تبقى التغييرات محفوظة على الجهاز.',
   'Bendahara': 'أمين الصندوق',
   'Berikan akses': 'منح الوصول',
+  'Berkas cadangan belum dapat dibuka. Coba lagi.':
+      'تعذّر فتح ملف النسخة الاحتياطية. يُرجى المحاولة مرة أخرى.',
+  'Berkas ini bukan cadangan Wargakas yang valid.':
+      'هذا الملف ليس نسخة احتياطية صالحة من Wargakas.',
   'Bersih': 'صافٍ',
   'Boleh diubah kapan saja; perubahan tercatat di riwayat dan target per peserta dihitung ulang.': 'يمكن تغييره في أي وقت؛ تُسجَّل التغييرات في السجل ويُعاد احتساب المبلغ المستهدف لكل مشارك.',
   'Buat / salin tautan': 'إنشاء / نسخ الرابط',
@@ -86,10 +90,19 @@ const Map<String, String> ar = {
   'Buat kata sandi baru': 'إنشاء كلمة مرور جديدة',
   'Buat ulang kata sandi': 'إعادة إنشاء كلمة المرور',
   'Build ini belum terhubung ke Supabase. Gunakan build hosted dengan SUPABASE_URL dan SUPABASE_PUBLISHABLE_KEY.': 'هذا الإصدار غير متصل بـ Supabase. استخدم الإصدار المستضاف مع SUPABASE_URL وSUPABASE_PUBLISHABLE_KEY.',
+  'Buka Wargakas': 'فتح قفل Wargakas',
+  'Buka kunci': 'فتح القفل',
+  'Buka kunci untuk melihat catatan kas.': 'افتح القفل لعرض دفتر الصندوق.',
   'Buku kas bersama untuk acara komunitas: jujur, rapi, dan mudah dibagikan.':
       'دفتر صندوق مشترك لفعاليات المجتمع: أمين، مرتّب، وسهل المشاركة.',
   'Buku kas lengkap': 'دفتر الصندوق الكامل',
   'Bulan': 'الشهر',
+  'Cadangan Wargakas - {name}': 'نسخة Wargakas الاحتياطية - {name}',
+  'Cadangan acara "{name}" berisi {count} transaksi. Data yang ada di perangkat ini akan diganti dan tidak bisa dikembalikan.': 'تحتوي النسخة الاحتياطية لـ "{name}" على {count} من المعاملات. ستُستبدل البيانات الموجودة على هذا الجهاز ولا يمكن استرجاعها.',
+  'Cadangan belum dapat dibuat atau dibagikan. Coba lagi.':
+      'تعذّر إنشاء النسخة الاحتياطية أو مشاركتها. يُرجى المحاولة مرة أخرى.',
+  'Cadangan belum dapat dipulihkan. Coba lagi.':
+      'تعذّرت استعادة النسخة الاحتياطية. يُرجى المحاولة مرة أخرى.',
   'Cari mata uang': 'البحث عن عملة',
   'Cari peserta': 'البحث عن مشارك',
   'Catat bayar': 'تسجيل دفعة',
@@ -108,6 +121,8 @@ const Map<String, String> ar = {
   'Daftar acara belum dapat dimuat.': 'تعذّر تحميل قائمة الفعاليات.',
   'Daftar transaksi': 'قائمة المعاملات',
   'Data acara tetap tersimpan di Supabase dan di perangkat ini untuk digunakan saat sinyal lemah.': 'بيانات الفعالية محفوظة في Supabase وعلى هذا الجهاز لاستخدامها عند ضعف الإشارة.',
+  'Data berhasil dipulihkan dari cadangan.':
+      'تمت استعادة البيانات من النسخة الاحتياطية.',
   'Data online': 'النسخة على الإنترنت',
   'Diarsipkan ({count})': 'المؤرشفة ({count})',
   'Dibatalkan': 'أُلغي',
@@ -153,6 +168,7 @@ const Map<String, String> ar = {
       'صورة الإيصال غير متوفرة على هذا الجهاز. اتصل بالإنترنت لتنزيلها.',
   'Foto nota terlampir': 'صورة الإيصال مرفقة',
   'Ganti acara': 'تغيير الفعالية',
+  'Ganti data': 'استبدال البيانات',
   'Ganti foto nota': 'تغيير صورة الإيصال',
   'Ganti nota': 'تغيير الإيصال',
   'Garis dan teks lebih tegas agar mudah dibaca.':
@@ -178,6 +194,8 @@ const Map<String, String> ar = {
   'Ikhtisar keuangan': 'نظرة مالية عامة',
   'Ikuti bahasa ponsel': 'اتباع لغة الهاتف',
   'Ikuti bahasa ponsel ({language})': 'اتباع لغة الهاتف ({language})',
+  'Isi cadangan rusak atau tidak lengkap.':
+      'النسخة الاحتياطية تالفة أو غير مكتملة.',
   'Isi keterangan transaksi.': 'اكتب وصف المعاملة.',
   'Iuran per peserta': 'المساهمة لكل مشارك',
   'Iuran peserta': 'مساهمات المشاركين',
@@ -209,6 +227,7 @@ const Map<String, String> ar = {
   'Kata sandi minimal 6 karakter. Gunakan kata sandi yang sulit ditebak.':
       'كلمة المرور 6 أحرف على الأقل. استخدم كلمة مرور يصعب تخمينها.',
   'Kategori': 'الفئة',
+  'Keamanan': 'الأمان',
   'Kebijakan privasi': 'سياسة الخصوصية',
   'Keluar': 'تسجيل الخروج',
   'Keterangan': 'البيان',
@@ -221,6 +240,7 @@ const Map<String, String> ar = {
   'Kirim link pemulihan': 'إرسال رابط الاستعادة',
   'Kirim pengingat': 'إرسال تذكير',
   'Kirim ulang email konfirmasi': 'إعادة إرسال رسالة التأكيد',
+  'Kode QR tautan peserta': 'رمز QR لرابط المشاركين',
   'Komponen': 'المكوّن',
   'Koneksi terlalu lama. Hasil permintaan belum dapat dipastikan. Periksa email atau coba Masuk sebelum mengulangi permintaan.': 'استغرق الاتصال وقتًا طويلًا. تعذّر التأكد من نتيجة الطلب. تحقق من بريدك الإلكتروني أو جرّب تسجيل الدخول قبل تكرار الطلب.',
   'Konfirmasi pilihan': 'تأكيد الاختيار',
@@ -236,6 +256,7 @@ const Map<String, String> ar = {
   'Koreksi transaksi': 'تصحيح المعاملة',
   'Koreksi: membatalkan transaksi lain': 'تصحيح: إلغاء معاملة أخرى',
   'Koreksi: {name}': 'تصحيح: {name}',
+  'Kunci aplikasi': 'قفل التطبيق',
   'Kurang {amount}': 'ينقص {amount}',
   'Kurangi animasi': 'تقليل الحركة',
   'Lainnya': 'أخرى',
@@ -302,6 +323,8 @@ const Map<String, String> ar = {
   'Menyimpan…': 'جارٍ الحفظ…',
   'Minimal 6 karakter; gunakan kata sandi yang kuat.':
       '6 أحرف على الأقل؛ استخدم كلمة مرور قوية.',
+  'Minta sidik jari, wajah, atau PIN ponsel saat membuka Wargakas.':
+      'طلب البصمة أو الوجه أو رمز PIN للهاتف عند فتح Wargakas.',
   'Muat ulang': 'إعادة التحميل',
   'Mulai': 'ابدأ',
   'Mulai {date}': 'يبدأ في {date}',
@@ -343,6 +366,7 @@ const Map<String, String> ar = {
   'Pembayaran {name} disimpan.': 'تم حفظ دفعة {name}.',
   'Pemuatan acara terlalu lama.': 'استغرق تحميل الفعالية وقتًا طويلًا.',
   'Pemuatan akun sebelumnya dibatalkan.': 'أُلغي تحميل الحساب السابق.',
+  'Pemulihan cadangan hanya tersedia di mode offline. Data online dipulihkan oleh bendahara melalui cadangan server.': 'استعادة النسخة الاحتياطية متاحة في وضع عدم الاتصال فقط. يستعيد أمين الصندوق البيانات عبر الإنترنت من نسخ الخادم الاحتياطية.',
   'Pendaftaran atau masuk dengan email sedang dinonaktifkan. Hubungi pengelola Wargakas.': 'التسجيل أو تسجيل الدخول بالبريد الإلكتروني متوقف حاليًا. تواصل مع مسؤول Wargakas.',
   'Pengaturan': 'الإعدادات',
   'Pengeditan dihentikan agar perubahan dari dua perangkat tidak saling menimpa.':
@@ -392,6 +416,8 @@ const Map<String, String> ar = {
   'Peserta belum diperbarui': 'لم يتم تحديث المشارك',
   'Peserta belum ditambahkan': 'لم تتم إضافة المشارك',
   'Peserta bisa membuka tautan ini di browser tanpa akun. Selalu menampilkan data terbaru. Nomor telepon dan foto nota tidak ditampilkan.': 'يمكن للمشاركين فتح هذا الرابط في المتصفح دون حساب. يعرض دائمًا أحدث البيانات. لا تُعرض أرقام الهواتف وصور الإيصالات.',
+  'Peserta dapat memindai kode ini dengan kamera ponsel.':
+      'يمكن للمشاركين مسح هذا الرمز بكاميرا الهاتف.',
   'Peserta pengganti harus menggantikan peserta yang dibatalkan.':
       'يجب أن يكون المشارك البديل بديلًا عن مشارك ملغى.',
   'Peserta {state}': 'المشاركون {state}',
@@ -405,6 +431,8 @@ const Map<String, String> ar = {
   'Pilih rentang tanggal': 'اختيار الفترة الزمنية',
   'Pilih tanggal {label}, {date}': 'اختيار تاريخ {label}، {date}',
   'Pilih versi data sebelum melanjutkan': 'اختر نسخة البيانات قبل المتابعة',
+  'Ponsel ini belum mengatur kunci layar atau sidik jari.':
+      'لم يتم إعداد قفل الشاشة أو البصمة على هذا الهاتف بعد.',
   'Portofolio acara': 'محفظة الفعاليات',
   'Portofolio acara lengkap (PDF)': 'محفظة الفعاليات الكاملة (PDF)',
   'Preview laporan': 'معاينة التقرير',
@@ -412,6 +440,8 @@ const Map<String, String> ar = {
   'Privasi: laporan ini tidak memuat nomor rekening, kredensial, nomor telepon, token, atau dokumen identitas. Periksa penerima sebelum membagikan laporan.': 'الخصوصية: لا يتضمن هذا التقرير أرقام حسابات مصرفية أو بيانات دخول أو أرقام هواتف أو رموز وصول أو وثائق هوية. تحقق من المستلمين قبل مشاركة التقرير.',
   'Privasi: laporan ini tidak memuat nomor rekening, kredensial, nomor telepon, token, atau dokumen identitas. Saldo pada daftar dihitung dari seluruh riwayat, bukan hanya baris yang difilter. Periksa penerima sebelum membagikan.': 'الخصوصية: لا يتضمن هذا التقرير أرقام حسابات مصرفية أو بيانات دخول أو أرقام هواتف أو رموز وصول أو وثائق هوية. الرصيد في القائمة محسوب من السجل بأكمله، وليس من الصفوف المصفّاة فقط. تحقق من المستلمين قبل المشاركة.',
   'Pulihkan': 'استعادة',
+  'Pulihkan dari cadangan': 'الاستعادة من نسخة احتياطية',
+  'Pulihkan dari cadangan?': 'الاستعادة من نسخة احتياطية؟',
   'Refund': 'استرداد',
   'Refund dan pengeluaran': 'الاسترداد والمصروفات',
   'Refund dan pengeluaran {amount}': 'الاسترداد والمصروفات {amount}',
@@ -483,6 +513,7 @@ const Map<String, String> ar = {
       'انتهت الجلسة. سجّل الدخول مرة أخرى للمتابعة.',
   'Setiap rupiah bisa ditelusuri': 'كل مبلغ يمكن تتبعه',
   'Simpan': 'حفظ',
+  'Simpan cadangan (JSON)': 'حفظ نسخة احتياطية (JSON)',
   'Simpan kata sandi': 'حفظ كلمة المرور',
   'Simpan koreksi': 'حفظ التصحيح',
   'Simpan pembatalan': 'حفظ الإلغاء',
@@ -598,8 +629,11 @@ const Map<String, String> ar = {
   'Verifikasi ulang diperlukan. Minta link pemulihan baru sebelum mengganti kata sandi.':
       'مطلوب تحقق جديد. اطلب رابط استعادة جديدًا قبل تغيير كلمة المرور.',
   'Versi aplikasi': 'إصدار التطبيق',
+  'Versi cadangan tidak didukung. Perbarui aplikasi lalu coba lagi.':
+      'إصدار النسخة الاحتياطية هذا غير مدعوم. حدّث التطبيق ثم حاول مرة أخرى.',
   'Versi {version} oleh {actor} - {time}':
       'الإصدار {version} بواسطة {actor} - {time}',
+  'Wargakas terkunci': 'Wargakas مقفل',
   'Wargakas: {title}': 'Wargakas: {title}',
   'Warna utama': 'اللون الرئيسي',
   'Warna {number}': 'اللون {number}',

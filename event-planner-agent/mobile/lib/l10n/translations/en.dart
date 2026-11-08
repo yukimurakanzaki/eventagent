@@ -77,6 +77,10 @@ const Map<String, String> en = {
       'Not connected. Changes are still saved on this device.',
   'Bendahara': 'Treasurer',
   'Berikan akses': 'Grant access',
+  'Berkas cadangan belum dapat dibuka. Coba lagi.':
+      'The backup file could not be opened. Please try again.',
+  'Berkas ini bukan cadangan Wargakas yang valid.':
+      'This file is not a valid Wargakas backup.',
   'Bersih': 'Net',
   'Boleh diubah kapan saja; perubahan tercatat di riwayat dan target per peserta dihitung ulang.': 'You can change this at any time; changes are recorded in the history and each participant\'s target is recalculated.',
   'Buat / salin tautan': 'Create / copy link',
@@ -88,9 +92,19 @@ const Map<String, String> en = {
   'Buat kata sandi baru': 'Create a new password',
   'Buat ulang kata sandi': 'Reset password',
   'Build ini belum terhubung ke Supabase. Gunakan build hosted dengan SUPABASE_URL dan SUPABASE_PUBLISHABLE_KEY.': 'This build is not connected to Supabase yet. Use a hosted build with SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY.',
+  'Buka Wargakas': 'Unlock Wargakas',
+  'Buka kunci': 'Unlock',
+  'Buka kunci untuk melihat catatan kas.': 'Unlock to see the cashbook.',
   'Buku kas bersama untuk acara komunitas: jujur, rapi, dan mudah dibagikan.': 'A shared cashbook for community events: honest, tidy, and easy to share.',
   'Buku kas lengkap': 'Full cashbook',
   'Bulan': 'Month',
+  'Cadangan Wargakas - {name}': 'Wargakas backup - {name}',
+  'Cadangan acara "{name}" berisi {count} transaksi. Data yang ada di perangkat ini akan diganti dan tidak bisa dikembalikan.': 'The backup of "{name}" contains {count} transactions. The data on this device will be replaced and cannot be recovered.',
+  'Cadangan acara "{name}" berisi {count} transaksi. Data yang ada di perangkat ini akan diganti dan tidak bisa dikembalikan.|one': 'The backup of "{name}" contains {count} transaction. The data on this device will be replaced and cannot be recovered.',
+  'Cadangan belum dapat dibuat atau dibagikan. Coba lagi.':
+      'The backup could not be created or shared. Please try again.',
+  'Cadangan belum dapat dipulihkan. Coba lagi.':
+      'The backup could not be restored. Please try again.',
   'Cari mata uang': 'Search currency',
   'Cari peserta': 'Search participant',
   'Catat bayar': 'Record payment',
@@ -109,6 +123,7 @@ const Map<String, String> en = {
   'Daftar acara belum dapat dimuat.': 'The event list could not be loaded.',
   'Daftar transaksi': 'Transaction list',
   'Data acara tetap tersimpan di Supabase dan di perangkat ini untuk digunakan saat sinyal lemah.': 'Event data stays saved in Supabase and on this device, so you can still use it when the signal is weak.',
+  'Data berhasil dipulihkan dari cadangan.': 'Data restored from the backup.',
   'Data online': 'Online version',
   'Diarsipkan ({count})': 'Archived ({count})',
   'Dibatalkan': 'Cancelled',
@@ -151,6 +166,7 @@ const Map<String, String> en = {
   'Foto nota belum tersedia di perangkat ini. Sambungkan internet untuk mengunduhnya.': 'The receipt photo is not available on this device yet. Connect to the internet to download it.',
   'Foto nota terlampir': 'Receipt photo attached',
   'Ganti acara': 'Switch event',
+  'Ganti data': 'Replace data',
   'Ganti foto nota': 'Replace receipt photo',
   'Ganti nota': 'Replace receipt',
   'Garis dan teks lebih tegas agar mudah dibaca.':
@@ -175,6 +191,8 @@ const Map<String, String> en = {
   'Ikhtisar keuangan': 'Financial overview',
   'Ikuti bahasa ponsel': 'Use phone language',
   'Ikuti bahasa ponsel ({language})': 'Use phone language ({language})',
+  'Isi cadangan rusak atau tidak lengkap.':
+      'The backup is damaged or incomplete.',
   'Isi keterangan transaksi.': 'Enter a description for the transaction.',
   'Iuran per peserta': 'Contribution per participant',
   'Iuran peserta': 'Participant contributions',
@@ -209,6 +227,7 @@ const Map<String, String> en = {
   'Kata sandi berhasil diperbarui. Gunakan kata sandi baru saat masuk berikutnya.': 'Password updated successfully. Use your new password the next time you sign in.',
   'Kata sandi minimal 6 karakter. Gunakan kata sandi yang sulit ditebak.': 'Password must be at least 6 characters. Use a password that is hard to guess.',
   'Kategori': 'Category',
+  'Keamanan': 'Security',
   'Kebijakan privasi': 'Privacy policy',
   'Keluar': 'Sign out',
   'Keterangan': 'Description',
@@ -221,6 +240,7 @@ const Map<String, String> en = {
   'Kirim link pemulihan': 'Send recovery link',
   'Kirim pengingat': 'Send reminder',
   'Kirim ulang email konfirmasi': 'Resend confirmation email',
+  'Kode QR tautan peserta': 'QR code for the participant link',
   'Komponen': 'Component',
   'Koneksi terlalu lama. Hasil permintaan belum dapat dipastikan. Periksa email atau coba Masuk sebelum mengulangi permintaan.': 'The connection took too long, so we could not confirm whether the request went through. Check your email or try Sign in before repeating the request.',
   'Konfirmasi pilihan': 'Confirm choice',
@@ -238,6 +258,7 @@ const Map<String, String> en = {
   'Koreksi: membatalkan transaksi lain':
       'Correction: cancels another transaction',
   'Koreksi: {name}': 'Correction: {name}',
+  'Kunci aplikasi': 'App lock',
   'Kurang {amount}': 'Short by {amount}',
   'Kurangi animasi': 'Reduce motion',
   'Lainnya': 'Other',
@@ -304,6 +325,8 @@ const Map<String, String> en = {
   'Menyimpan…': 'Saving…',
   'Minimal 6 karakter; gunakan kata sandi yang kuat.':
       'At least 6 characters; use a strong password.',
+  'Minta sidik jari, wajah, atau PIN ponsel saat membuka Wargakas.':
+      'Ask for your fingerprint, face or phone PIN when opening Wargakas.',
   'Muat ulang': 'Reload',
   'Mulai': 'Start',
   'Mulai {date}': 'Starts {date}',
@@ -347,6 +370,7 @@ const Map<String, String> en = {
   'Pemuatan acara terlalu lama.': 'Loading the event took too long.',
   'Pemuatan akun sebelumnya dibatalkan.':
       'Loading the previous account was cancelled.',
+  'Pemulihan cadangan hanya tersedia di mode offline. Data online dipulihkan oleh bendahara melalui cadangan server.': 'Restoring a backup is only available in offline mode. Online data is restored by the treasurer from server backups.',
   'Pendaftaran atau masuk dengan email sedang dinonaktifkan. Hubungi pengelola Wargakas.': 'Sign-up or sign-in with email is currently disabled. Contact the Wargakas administrator.',
   'Pengaturan': 'Settings',
   'Pengeditan dihentikan agar perubahan dari dua perangkat tidak saling menimpa.': 'Editing was stopped so that changes from two devices do not overwrite each other.',
@@ -392,6 +416,8 @@ const Map<String, String> en = {
   'Peserta belum diperbarui': 'Participant not updated',
   'Peserta belum ditambahkan': 'Participant not added',
   'Peserta bisa membuka tautan ini di browser tanpa akun. Selalu menampilkan data terbaru. Nomor telepon dan foto nota tidak ditampilkan.': 'Participants can open this link in a browser without an account. It always shows the latest data. Phone numbers and receipt photos are not shown.',
+  'Peserta dapat memindai kode ini dengan kamera ponsel.':
+      'Participants can scan this code with their phone camera.',
   'Peserta pengganti harus menggantikan peserta yang dibatalkan.':
       'The replacement participant must replace a cancelled participant.',
   'Peserta {state}': 'Participants {state}',
@@ -408,6 +434,8 @@ const Map<String, String> en = {
   'Pilih tanggal {label}, {date}': 'Choose {label} date, {date}',
   'Pilih versi data sebelum melanjutkan':
       'Choose a data version before continuing',
+  'Ponsel ini belum mengatur kunci layar atau sidik jari.':
+      'This phone has no screen lock or fingerprint set up yet.',
   'Portofolio acara': 'Event portfolio',
   'Portofolio acara lengkap (PDF)': 'Full event portfolio (PDF)',
   'Preview laporan': 'Report preview',
@@ -415,6 +443,8 @@ const Map<String, String> en = {
   'Privasi: laporan ini tidak memuat nomor rekening, kredensial, nomor telepon, token, atau dokumen identitas. Periksa penerima sebelum membagikan laporan.': 'Privacy: this report does not contain account numbers, credentials, phone numbers, tokens, or identity documents. Check the recipient before sharing the report.',
   'Privasi: laporan ini tidak memuat nomor rekening, kredensial, nomor telepon, token, atau dokumen identitas. Saldo pada daftar dihitung dari seluruh riwayat, bukan hanya baris yang difilter. Periksa penerima sebelum membagikan.': 'Privacy: this report does not contain account numbers, credentials, phone numbers, tokens, or identity documents. The balance in the list is calculated from the entire history, not just the filtered rows. Check the recipient before sharing.',
   'Pulihkan': 'Restore',
+  'Pulihkan dari cadangan': 'Restore from backup',
+  'Pulihkan dari cadangan?': 'Restore from backup?',
   'Refund': 'Refund',
   'Refund dan pengeluaran': 'Refunds and expenses',
   'Refund dan pengeluaran {amount}': 'Refunds and expenses {amount}',
@@ -484,6 +514,7 @@ const Map<String, String> en = {
       'The session has ended. Sign in again to continue.',
   'Setiap rupiah bisa ditelusuri': 'Every coin can be traced',
   'Simpan': 'Save',
+  'Simpan cadangan (JSON)': 'Save backup (JSON)',
   'Simpan kata sandi': 'Save password',
   'Simpan koreksi': 'Save correction',
   'Simpan pembatalan': 'Save cancellation',
@@ -602,8 +633,11 @@ const Map<String, String> en = {
   'Verifikasi keamanan belum berhasil. Coba lagi atau hubungi pengelola Wargakas.': 'Security verification was not successful. Try again or contact the Wargakas administrator.',
   'Verifikasi ulang diperlukan. Minta link pemulihan baru sebelum mengganti kata sandi.': 'Re-verification is required. Request a new recovery link before changing your password.',
   'Versi aplikasi': 'App version',
+  'Versi cadangan tidak didukung. Perbarui aplikasi lalu coba lagi.':
+      'This backup version is not supported. Update the app and try again.',
   'Versi {version} oleh {actor} - {time}':
       'Version {version} by {actor} - {time}',
+  'Wargakas terkunci': 'Wargakas is locked',
   'Wargakas: {title}': 'Wargakas: {title}',
   'Warna utama': 'Main color',
   'Warna {number}': 'Color {number}',

@@ -46,6 +46,7 @@ class AppSettings extends ChangeNotifier {
   String _defaultCurrency = defaultCurrencyCode;
   bool _onboardingDone = false;
   bool _currencyChosen = false;
+  bool _appLock = false;
 
   /// `null` follows the phone language.
   String? get languageCode => _languageCode;
@@ -58,6 +59,9 @@ class AppSettings extends ChangeNotifier {
   String get defaultCurrency => _defaultCurrency;
   bool get onboardingDone => _onboardingDone;
   bool get currencyChosen => _currencyChosen;
+
+  /// Ask for fingerprint, face, or phone PIN when opening the app.
+  bool get appLock => _appLock;
 
   /// The language actually shown, resolving "follow the phone".
   String effectiveLanguage(Locale deviceLocale) {
@@ -95,6 +99,7 @@ class AppSettings extends ChangeNotifier {
       ).code;
       settings._currencyChosen = p.getString('${_prefix}currency') != null;
       settings._onboardingDone = p.getBool('${_prefix}onboarded') ?? false;
+      settings._appLock = p.getBool('${_prefix}appLock') ?? false;
     }
     instance = settings;
     return settings;
@@ -152,6 +157,12 @@ class AppSettings extends ChangeNotifier {
     _defaultCurrency = currencySpec(code).code;
     _currencyChosen = true;
     await _preferences?.setString('${_prefix}currency', _defaultCurrency);
+    notifyListeners();
+  }
+
+  Future<void> setAppLock(bool value) async {
+    _appLock = value;
+    await _preferences?.setBool('${_prefix}appLock', value);
     notifyListeners();
   }
 

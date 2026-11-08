@@ -78,6 +78,8 @@ const Map<String, String> zh = {
       '尚未连接。更改仍保存在本设备上。',
   'Bendahara': '财务',
   'Berikan akses': '授予权限',
+  'Berkas cadangan belum dapat dibuka. Coba lagi.': '无法打开备份文件，请重试。',
+  'Berkas ini bukan cadangan Wargakas yang valid.': '此文件不是有效的 Wargakas 备份。',
   'Bersih': '净额',
   'Boleh diubah kapan saja; perubahan tercatat di riwayat dan target per peserta dihitung ulang.':
       '可随时修改；更改会记录在历史中，每位参与者的目标金额会重新计算。',
@@ -91,10 +93,18 @@ const Map<String, String> zh = {
   'Buat ulang kata sandi': '重设密码',
   'Build ini belum terhubung ke Supabase. Gunakan build hosted dengan SUPABASE_URL dan SUPABASE_PUBLISHABLE_KEY.':
       '此版本尚未连接到 Supabase。请使用配置了 SUPABASE_URL 和 SUPABASE_PUBLISHABLE_KEY 的托管版本。',
+  'Buka Wargakas': '解锁 Wargakas',
+  'Buka kunci': '解锁',
+  'Buka kunci untuk melihat catatan kas.': '解锁后查看账本。',
   'Buku kas bersama untuk acara komunitas: jujur, rapi, dan mudah dibagikan.':
       '为社区活动打造的共享账本：诚实、整洁、易于分享。',
   'Buku kas lengkap': '完整账本',
   'Bulan': '月份',
+  'Cadangan Wargakas - {name}': 'Wargakas 备份 - {name}',
+  'Cadangan acara "{name}" berisi {count} transaksi. Data yang ada di perangkat ini akan diganti dan tidak bisa dikembalikan.':
+      '“{name}”的备份包含 {count} 笔交易。此设备上的数据将被替换，且无法恢复。',
+  'Cadangan belum dapat dibuat atau dibagikan. Coba lagi.': '无法创建或分享备份，请重试。',
+  'Cadangan belum dapat dipulihkan. Coba lagi.': '无法恢复备份，请重试。',
   'Cari mata uang': '搜索货币',
   'Cari peserta': '搜索参与者',
   'Catat bayar': '记录缴费',
@@ -114,6 +124,7 @@ const Map<String, String> zh = {
   'Daftar transaksi': '交易列表',
   'Data acara tetap tersimpan di Supabase dan di perangkat ini untuk digunakan saat sinyal lemah.':
       '活动数据仍保存在 Supabase 和本设备上，信号弱时也可使用。',
+  'Data berhasil dipulihkan dari cadangan.': '已从备份恢复数据。',
   'Data online': '在线数据',
   'Diarsipkan ({count})': '已归档（{count}）',
   'Dibatalkan': '已取消',
@@ -163,6 +174,7 @@ const Map<String, String> zh = {
       '本设备上暂无收据照片。请连接互联网后下载。',
   'Foto nota terlampir': '已附收据照片',
   'Ganti acara': '更换活动',
+  'Ganti data': '替换数据',
   'Ganti foto nota': '更换收据照片',
   'Ganti nota': '更换收据',
   'Garis dan teks lebih tegas agar mudah dibaca.': '线条和文字更清晰，便于阅读。',
@@ -186,6 +198,7 @@ const Map<String, String> zh = {
   'Ikhtisar keuangan': '财务概览',
   'Ikuti bahasa ponsel': '跟随手机语言',
   'Ikuti bahasa ponsel ({language})': '跟随手机语言（{language}）',
+  'Isi cadangan rusak atau tidak lengkap.': '备份已损坏或不完整。',
   'Isi keterangan transaksi.': '请填写交易说明。',
   'Iuran per peserta': '每位参与者的会费',
   'Iuran peserta': '参与者会费',
@@ -217,6 +230,7 @@ const Map<String, String> zh = {
   'Kata sandi minimal 6 karakter. Gunakan kata sandi yang sulit ditebak.':
       '密码至少 6 个字符。请使用难以猜到的密码。',
   'Kategori': '类别',
+  'Keamanan': '安全',
   'Kebijakan privasi': '隐私政策',
   'Keluar': '退出登录',
   'Keterangan': '说明',
@@ -229,6 +243,7 @@ const Map<String, String> zh = {
   'Kirim link pemulihan': '发送恢复链接',
   'Kirim pengingat': '发送提醒',
   'Kirim ulang email konfirmasi': '重新发送确认邮件',
+  'Kode QR tautan peserta': '参与者链接二维码',
   'Komponen': '项目',
   'Koneksi terlalu lama. Hasil permintaan belum dapat dipastikan. Periksa email atau coba Masuk sebelum mengulangi permintaan.':
       '连接时间过长，无法确认请求结果。请先检查邮箱或尝试登录，再重复请求。',
@@ -245,6 +260,7 @@ const Map<String, String> zh = {
   'Koreksi transaksi': '更正交易',
   'Koreksi: membatalkan transaksi lain': '更正：作废另一笔交易',
   'Koreksi: {name}': '更正：{name}',
+  'Kunci aplikasi': '应用锁',
   'Kurang {amount}': '还差 {amount}',
   'Kurangi animasi': '减少动画',
   'Lainnya': '其他',
@@ -308,6 +324,8 @@ const Map<String, String> zh = {
   'Menyiapkan...': '准备中…',
   'Menyimpan…': '保存中…',
   'Minimal 6 karakter; gunakan kata sandi yang kuat.': '至少 6 个字符；请使用安全的密码。',
+  'Minta sidik jari, wajah, atau PIN ponsel saat membuka Wargakas.':
+      '打开 Wargakas 时要求指纹、面容或手机密码。',
   'Muat ulang': '重新加载',
   'Mulai': '开始',
   'Mulai {date}': '开始于 {date}',
@@ -345,6 +363,8 @@ const Map<String, String> zh = {
   'Pembayaran {name} disimpan.': '已保存 {name} 的缴费。',
   'Pemuatan acara terlalu lama.': '活动加载时间过长。',
   'Pemuatan akun sebelumnya dibatalkan.': '之前的账号加载已取消。',
+  'Pemulihan cadangan hanya tersedia di mode offline. Data online dipulihkan oleh bendahara melalui cadangan server.':
+      '仅离线模式可恢复备份。在线数据由财务从服务器备份恢复。',
   'Pendaftaran atau masuk dengan email sedang dinonaktifkan. Hubungi pengelola Wargakas.':
       '邮箱注册或登录目前已停用。请联系 Wargakas 管理员。',
   'Pengaturan': '设置',
@@ -398,6 +418,7 @@ const Map<String, String> zh = {
   'Peserta belum ditambahkan': '参与者尚未添加',
   'Peserta bisa membuka tautan ini di browser tanpa akun. Selalu menampilkan data terbaru. Nomor telepon dan foto nota tidak ditampilkan.':
       '参与者可以在浏览器中打开此链接，无需账号。始终显示最新数据。不显示电话号码和收据照片。',
+  'Peserta dapat memindai kode ini dengan kamera ponsel.': '参与者可用手机相机扫描此二维码。',
   'Peserta pengganti harus menggantikan peserta yang dibatalkan.':
       '替补参与者必须替换已取消的参与者。',
   'Peserta {state}': '参与者{state}',
@@ -410,6 +431,7 @@ const Map<String, String> zh = {
   'Pilih rentang tanggal': '选择日期范围',
   'Pilih tanggal {label}, {date}': '选择{label}日期，{date}',
   'Pilih versi data sebelum melanjutkan': '请先选择数据版本再继续',
+  'Ponsel ini belum mengatur kunci layar atau sidik jari.': '此手机尚未设置屏幕锁或指纹。',
   'Portofolio acara': '全部活动汇总',
   'Portofolio acara lengkap (PDF)': '全部活动汇总（PDF）',
   'Preview laporan': '报告预览',
@@ -420,6 +442,8 @@ const Map<String, String> zh = {
   'Privasi: laporan ini tidak memuat nomor rekening, kredensial, nomor telepon, token, atau dokumen identitas. Saldo pada daftar dihitung dari seluruh riwayat, bukan hanya baris yang difilter. Periksa penerima sebelum membagikan.':
       '隐私：此报告不含银行账号、登录凭据、电话号码、令牌或身份证件。列表中的余额按全部历史计算，而不只是筛选出的行。分享前请检查收件人。',
   'Pulihkan': '恢复',
+  'Pulihkan dari cadangan': '从备份恢复',
+  'Pulihkan dari cadangan?': '从备份恢复？',
   'Refund': '退款',
   'Refund dan pengeluaran': '退款与支出',
   'Refund dan pengeluaran {amount}': '退款与支出 {amount}',
@@ -482,6 +506,7 @@ const Map<String, String> zh = {
   'Sesi sudah berakhir. Masuk kembali untuk melanjutkan.': '登录已过期。请重新登录以继续。',
   'Setiap rupiah bisa ditelusuri': '每一分钱都可追溯',
   'Simpan': '保存',
+  'Simpan cadangan (JSON)': '保存备份（JSON）',
   'Simpan kata sandi': '保存密码',
   'Simpan koreksi': '保存更正',
   'Simpan pembatalan': '保存取消',
@@ -593,7 +618,10 @@ const Map<String, String> zh = {
   'Verifikasi ulang diperlukan. Minta link pemulihan baru sebelum mengganti kata sandi.':
       '需要重新验证。更改密码前请申请新的恢复链接。',
   'Versi aplikasi': '应用版本',
+  'Versi cadangan tidak didukung. Perbarui aplikasi lalu coba lagi.':
+      '不支持此备份版本。请更新应用后重试。',
   'Versi {version} oleh {actor} - {time}': '{actor} 于 {time} 创建版本 {version}',
+  'Wargakas terkunci': 'Wargakas 已锁定',
   'Wargakas: {title}': 'Wargakas：{title}',
   'Warna utama': '主题色',
   'Warna {number}': '颜色 {number}',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'app_lock.dart';
 import 'app_settings.dart';
 import 'l10n/l10n.dart';
 import 'main.dart' show wargakasTheme;
@@ -28,8 +29,43 @@ class WargakasMaterialApp extends StatefulWidget {
   State<WargakasMaterialApp> createState() => _WargakasMaterialAppState();
 }
 
-class _WargakasMaterialAppState extends State<WargakasMaterialApp> {
+class _WargakasMaterialAppState extends State<WargakasMaterialApp>
+    with WidgetsBindingObserver {
   String? _language;
+  bool _locked = false;
+  DateTime? _backgroundedAt;
+
+  AppSettings get _settings => widget.settings ?? AppSettings.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _locked = _settings.appLock;
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      _backgroundedAt ??= DateTime.now();
+    } else if (state == AppLifecycleState.resumed) {
+      final since = _backgroundedAt;
+      _backgroundedAt = null;
+      if (since != null &&
+          _settings.appLock &&
+          !_locked &&
+          DateTime.now().difference(since) > AppLock.gracePeriod) {
+        setState(() => _locked = true);
+      }
+    }
+  }
 
   /// tr() strings are not inherited-widget dependents, so a language switch
   /// marks every element dirty once. Unlike re-keying the app this keeps the
@@ -97,6 +133,7 @@ class _WargakasMaterialAppState extends State<WargakasMaterialApp> {
           builder: (context, child) {
             final media = MediaQuery.of(context);
             final systemScale = media.textScaler.scale(16) / 16;
+            final locked = _locked && settings.appLock;
             return MediaQuery(
               data: media.copyWith(
                 textScaler: TextScaler.linear(
@@ -105,7 +142,24 @@ class _WargakasMaterialAppState extends State<WargakasMaterialApp> {
                 disableAnimations:
                     media.disableAnimations || settings.reduceMotion,
               ),
-              child: child ?? const SizedBox.shrink(),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  ExcludeSemantics(
+                    excluding: locked,
+                    child: IgnorePointer(
+                      ignoring: locked,
+                      child: child ?? const SizedBox.shrink(),
+                    ),
+                  ),
+                  if (locked)
+                    Positioned.fill(
+                      child: AppLockScreen(
+                        onUnlocked: () => setState(() => _locked = false),
+                      ),
+                    ),
+                ],
+              ),
             );
           },
           home: widget.enableOnboarding && !settings.onboardingDone
